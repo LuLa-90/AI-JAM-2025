@@ -37,14 +37,14 @@ public class RobotMovement : MonoBehaviour
         ApplyTrackInput(leftWheels, leftWheelsAxis.ReadValue<float>());
         ApplyTrackInput(rightWheels, rightWheelsAxis.ReadValue<float>());
 
-        //if (armLiftAction.ReadValue<float>() == 1) {
-        //    Vector3 currentAngles = armComponent.localEulerAngles;
-        //    var armAngleFromLowered = currentAngles.x - loweredArmRotation.x;
-        //    if (armAngleFromLowered <= 90f) { 
-        //        currentAngles.x += -20f * Time.fixedDeltaTime;
-        //        armComponent.localEulerAngles = currentAngles;
-        //    }
-        //}
+        if (armLiftAction.ReadValue<float>() == 1) {
+            Vector3 currentAngles = armComponent.localEulerAngles;
+            var armAngleFromLowered = currentAngles.x - loweredArmRotation.x;
+            if (armAngleFromLowered <= 90f) {
+                currentAngles.x += -20f * Time.fixedDeltaTime;
+                armComponent.localEulerAngles = currentAngles;
+            }
+        }
         //else {
         //    armComponent.localEulerAngles = loweredArmRotation;
         //}
