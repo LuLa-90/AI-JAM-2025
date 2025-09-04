@@ -10,10 +10,9 @@ public class RobotMovement : MonoBehaviour
 
     [SerializeField] private WheelCollider[] rightWheels;
     [SerializeField] private WheelCollider[] leftWheels;
-    [SerializeField] private Transform armComponent;
+    [SerializeField] private ArmComponent armComponent;
 
-    private Vector3 loweredArmRotation;
-    private Vector3 raisedArmRotation;
+    private HingeJoint armJointControl;
 
     private void OnEnable() {
         var actionMap = inputActions.FindActionMap("Robot");
@@ -30,7 +29,9 @@ public class RobotMovement : MonoBehaviour
     }
 
     private void Start() {
-        loweredArmRotation = armComponent.localEulerAngles;
+        armJointControl = armComponent.GetComponent<HingeJoint>();
+        armJointControl.useMotor = false;
+        armJointControl.useSpring = false;
     }
 
     private void FixedUpdate() {
@@ -38,16 +39,14 @@ public class RobotMovement : MonoBehaviour
         ApplyTrackInput(rightWheels, rightWheelsAxis.ReadValue<float>());
 
         if (armLiftAction.ReadValue<float>() == 1) {
-            Vector3 currentAngles = armComponent.localEulerAngles;
-            var armAngleFromLowered = currentAngles.x - loweredArmRotation.x;
-            if (armAngleFromLowered <= 90f) {
-                currentAngles.x += -20f * Time.fixedDeltaTime;
-                armComponent.localEulerAngles = currentAngles;
+            if (!armJointControl.useSpring) {
+                armJointControl.useSpring = true;
             }
+            armJointControl.useMotor = true;
         }
-        //else {
-        //    armComponent.localEulerAngles = loweredArmRotation;
-        //}
+        else {
+            armJointControl.useMotor = false;
+        }
     }
 
     void ApplyTrackInput(WheelCollider[] wheels, float inputValue) {
