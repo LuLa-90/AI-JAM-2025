@@ -35,10 +35,14 @@ public class RobotMovement : MonoBehaviour
     }
 
     private void FixedUpdate() {
-        ApplyTrackInput(leftWheels, leftWheelsAxis.ReadValue<float>());
-        ApplyTrackInput(rightWheels, rightWheelsAxis.ReadValue<float>());
+        ApplyBothTrackInputs(leftWheelsAxis.ReadValue<float>(),
+                            rightWheelsAxis.ReadValue<float>());
 
-        if (armLiftAction.ReadValue<float>() == 1) {
+        ApplyArmInput((int)armLiftAction.ReadValue<float>());
+    }
+
+    public void ApplyArmInput(int inputValue) {
+        if (inputValue == 1) {
             if (!armJointControl.useSpring) {
                 armJointControl.useSpring = true;
             }
@@ -47,6 +51,11 @@ public class RobotMovement : MonoBehaviour
         else {
             armJointControl.useMotor = false;
         }
+    }
+
+    public void ApplyBothTrackInputs(float leftTrackValue, float rightTrackValue) {
+        ApplyTrackInput(leftWheels, leftTrackValue);
+        ApplyTrackInput(rightWheels, rightTrackValue);
     }
 
     void ApplyTrackInput(WheelCollider[] wheels, float inputValue) {
