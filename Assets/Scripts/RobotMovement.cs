@@ -34,12 +34,12 @@ public class RobotMovement : MonoBehaviour
         armJointControl.useSpring = false;
     }
 
-    private void FixedUpdate() {
-        ApplyBothTrackInputs(leftWheelsAxis.ReadValue<float>(),
-                            rightWheelsAxis.ReadValue<float>());
+    //private void FixedUpdate() {
+    //    ApplyBothTrackInputs(leftWheelsAxis.ReadValue<float>(),
+    //                        rightWheelsAxis.ReadValue<float>());
 
-        ApplyArmInput((int)armLiftAction.ReadValue<float>());
-    }
+    //    ApplyArmInput((int)armLiftAction.ReadValue<float>());
+    //}
 
     public void ApplyArmInput(int inputValue) {
         if (inputValue == 1) {
