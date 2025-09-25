@@ -1,3 +1,5 @@
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BodyComponent : MonoBehaviour
@@ -9,8 +11,14 @@ public class BodyComponent : MonoBehaviour
 
     private Rigidbody rb;
 
+    private RobotAgent thisRobot;
+    private RobotAgent enemyRobot;
+
     private void Start() {
         rb = GetComponentInParent<Rigidbody>();
+
+        thisRobot = GetComponentInParent<RobotAgent>();
+        enemyRobot = FindObjectsByType<RobotAgent>(FindObjectsSortMode.None).FirstOrDefault(r => r != thisRobot);
 
         var sensors = GetComponentsInChildren<SensorComponent>();
 
@@ -26,18 +34,44 @@ public class BodyComponent : MonoBehaviour
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.AzimuthToTarget) {
                 sensorEnemyAzimuth = sensor;
+                sensorEnemyAzimuth.SetRangeValues(-180f, 180f);
             }
         }
     }
 
     private void Update() {
+        SetVelocitySensorValues();
+        SetAzimuthSensorValues();
 
-        Debug.Log(rb.linearVelocity.x);
-        Debug.Log(rb.linearVelocity.z);
-
-        sensorVelocityForwards.SetSensorValue(rb.linearVelocity.x); // Placeholder for forwards velocity value
-        sensorVelocitySideways.SetSensorValue(rb.linearVelocity.z); // Placeholder for sideways velocity value
         sensorDamage.SetSensorValue(0f); // Placeholder for damage value
-        sensorEnemyAzimuth.SetSensorValue(0f); // Placeholder for azimuth value
+        
+    }
+
+    private void SetVelocitySensorValues() {
+        Vector3 localVelocity = transform.InverseTransformDirection(rb.linearVelocity);
+        sensorVelocityForwards.SetSensorValue(localVelocity.z);
+        sensorVelocitySideways.SetSensorValue(localVelocity.x);
+    }
+
+    private void SetAzimuthSensorValues() {
+        
+        if (enemyRobot != null) {
+            var vectorToEnemy = enemyRobot.transform.position - thisRobot.transform.position;
+            var angleToEnemy = Vector3.SignedAngle(thisRobot.transform.forward, vectorToEnemy, Vector3.up);
+
+            //Debug.Log("Angle to Enemy: " + angleToEnemy);
+
+            sensorEnemyAzimuth.SetSensorValue(angleToEnemy);
+        }
+
+        
+    }
+
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.black;
+
+        if (enemyRobot != null && thisRobot != null) {
+            Gizmos.DrawLine(thisRobot.transform.position, enemyRobot.transform.position);
+        }
     }
 }

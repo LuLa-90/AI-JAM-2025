@@ -4,8 +4,20 @@ using UnityEngine;
 public static class ExtensionMethod {
     public static float SetSensorValue(this SensorComponent sensor, float value) {
         if (sensor != null) {
+            if (sensor.normalized == true) {
+                value = Mathf.Clamp(value, sensor.minSensorValue, sensor.maxSensorValue);
+                value = Mathf.InverseLerp(sensor.minSensorValue, sensor.maxSensorValue, value) * 2f - 1f;
+            }
             sensor.SensorValue = value;
         }
         return value;
+    }
+
+    public static void SetRangeValues(this SensorComponent sensor, float minValue, float maxValue) {
+        if (sensor != null) {
+            sensor.normalized = true;
+            sensor.minSensorValue = minValue;
+            sensor.maxSensorValue = maxValue;
+        }
     }
 }

@@ -13,6 +13,7 @@ public class ArmComponent : MonoBehaviour
         foreach (var sensor in sensors) {
             if (sensor.GetSensorType == SensorComponent.SensorType.Angle) {
                 sensorAngle = sensor;
+                sensorAngle.SetRangeValues(-85f, 85f);
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.Damage) {
                 sensorDamage = sensor;

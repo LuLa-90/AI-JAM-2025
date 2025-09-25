@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -17,6 +16,9 @@ public class RobotAgent : Agent {
 
     private RobotMovement robotMovement;
     private Rigidbody rb;
+    private RobotAgent enemyRobot;
+
+    [SerializeField] private float tempAngleToEnemy;
 
 
     // --------------------------- INITIALIZATION METHODS ---------------------------
@@ -29,10 +31,11 @@ public class RobotAgent : Agent {
     private void Start() {
         robotMovement = gameObject.GetComponent<RobotMovement>();
         rb = gameObject.GetComponent<Rigidbody>();
+        enemyRobot = FindObjectsByType<RobotAgent>(FindObjectsSortMode.None).FirstOrDefault(r => r != this);
     }
 
     public override void OnEpisodeBegin() {
-        transform.position = new Vector3(0f, 0.026f, 0f);
+        transform.position = new Vector3(Random.Range(-3f, 3f), 0.026f, Random.Range(-3f, 3f));
         transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
         SetReward(0f);
@@ -43,33 +46,31 @@ public class RobotAgent : Agent {
     // ---------------------------- HANDLE REWARDS ----------------------------
 
     private void Update() {
-        AddReward(0.001f);
+        //AddReward(0.001f);
 
         if (transform.localPosition.y < -1f) {
             SetReward(-10f);
             EndEpisode();
         }
 
-        if (GetCumulativeReward() < -50f) {
-            EndEpisode();
-        }
+        //if (GetCumulativeReward() < -50f) {
+        //    EndEpisode();
+        //}
 
         // GET REWARDS:
 
         float movementRewards = GetRewards_Movement();
         AddReward(movementRewards * movementRF);
 
-        //float robotFacingRewards = GetRewards_FacingRobot();
-        //AddReward(robotFacingRewards);
+        float robotFacingRewards = GetRewards_FacingRobot();
+        AddReward(robotFacingRewards * facingRF);
 
         cumulativeReward = GetCumulativeReward();
     }
 
 
-    // ---------------------------- ACTIONS AND OBSERVATIONS ---------------------------
-
     private float GetRewards_Movement() {
-        Debug.Log("Velocity: " + rb.linearVelocity.magnitude);
+        //Debug.Log("Velocity: " + rb.linearVelocity.magnitude);
         if (rb.linearVelocity.magnitude < 0.2f) {
             return -1f; // Penalty for not moving
         }
@@ -77,6 +78,24 @@ public class RobotAgent : Agent {
             //if (rb.linearVelocity.magnitude < 0.2f) {
             return 1f; // Reward for high speeds
             //}
+        }
+        return 0f;
+    }
+
+    private float GetRewards_FacingRobot() {
+        if (enemyRobot != null) {
+            var vectorToEnemy = enemyRobot.transform.position - this.transform.position;
+            var angleToEnemy = Vector3.SignedAngle(this.transform.forward, vectorToEnemy, Vector3.up);
+
+            tempAngleToEnemy = angleToEnemy;
+
+            // relativna podla toho ako moc? alebo len ano/nie situacia
+            if (angleToEnemy >= -45f && angleToEnemy <= 45f) {
+                return 1f;
+            }
+            else if (angleToEnemy >= 100f || angleToEnemy <= -100f) {
+                return -1f;
+            }
         }
         return 0f;
     }

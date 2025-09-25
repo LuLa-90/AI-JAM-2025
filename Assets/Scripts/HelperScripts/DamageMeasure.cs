@@ -15,6 +15,6 @@ public class DamageMeasure : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision) {
         float collisionForce = collision.impulse.magnitude / Time.fixedDeltaTime;// / 100000f;
-        Debug.Log("Collision force: " + collisionForce);
+        //Debug.Log("Collision force: " + collisionForce);
     }
 }
