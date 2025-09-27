@@ -8,7 +8,7 @@ public class SensorComponent : MonoBehaviour
         VelocityForwards,
         VelocitySideways,
         AzimuthToTarget,
-        ProximityBool
+        Proximity
     }
 
     [SerializeField] private SensorType sensorType;

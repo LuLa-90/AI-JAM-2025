@@ -19,7 +19,7 @@ public class ProximitySensorRay : MonoBehaviour
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();
         foreach (var sensor in sensors) {
-            if (sensor.GetSensorType == SensorComponent.SensorType.ProximityBool) {
+            if (sensor.GetSensorType == SensorComponent.SensorType.Proximity) {
                 sensorProximity = sensor;
             }
         }
@@ -36,27 +36,46 @@ public class ProximitySensorRay : MonoBehaviour
             rayAngle = rayAngleLong;
         }
 
-        var sensorValue = 0f;
+        var sensorValue = rayDistance;
         for (int i = -3; i <= 3; i++) {
             var raycastDirection = Quaternion.AngleAxis(rayAngle * i, Vector3.up) * rayDirection;
             if (Physics.Raycast(transform.position, raycastDirection, out RaycastHit hit, rayDistance)) {
-                
-                if (hit.transform.parent == this.transform.parent) {
-                    //continue;
-                }
-                Debug.DrawRay(transform.position, raycastDirection * hit.distance, Color.red);
-                sensorValue = 1f;
+
+                // for now we wont ignore the arm hit, maybe in the future
+                //if (hit.transform.parent == this.transform.parent) {
+                //    //continue;
+                //}
+
+                //Debug.DrawRay(transform.position, raycastDirection * hit.distance, Color.red);
+                sensorValue = Mathf.Min(sensorValue, hit.distance);
                 //return;
             }
             else {
-                Debug.DrawRay(transform.position, raycastDirection * rayDistance, Color.white);
+                //Debug.DrawRay(transform.position, raycastDirection * rayDistance, Color.gray);
             }
         }
-        sensorProximity.SetSensorValue(sensorValue);
+        Debug.Log("Closest hit distance: " + sensorValue / rayDistance);
+        sensorProximity.SetSensorValue(sensorValue / rayDistance);
     }
 
     private void OnDrawGizmos() {
-        
-    }
+        var rayDistance = rayDistanceWide;
+        var rayAngle = rayAngleWide;
+        var rayDirection = transform.TransformDirection(Vector3.forward);
 
+        if (raySensorType == RaySensorType.Long) {
+            rayDistance = rayDistanceLong;
+            rayAngle = rayAngleLong;
+        }
+
+        for (int i = -3; i <= 3; i++) {
+            var raycastDirection = Quaternion.AngleAxis(rayAngle * i, Vector3.up) * rayDirection;
+            if (Physics.Raycast(transform.position, raycastDirection, out RaycastHit hit, rayDistance)) {
+                Debug.DrawRay(transform.position, raycastDirection * hit.distance, Color.red);
+            }
+            else {
+                Debug.DrawRay(transform.position, raycastDirection * rayDistance, Color.gray);
+            }
+        }
+    }
 }

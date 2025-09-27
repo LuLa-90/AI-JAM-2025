@@ -23,6 +23,7 @@ public class BodyComponent : MonoBehaviour
         var sensors = GetComponentsInChildren<SensorComponent>();
 
         foreach (var sensor in sensors) {
+            // TODO: znormalizovat
             if (sensor.GetSensorType == SensorComponent.SensorType.VelocityForwards) {
                 sensorVelocityForwards = sensor;
             }
