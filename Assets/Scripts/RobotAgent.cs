@@ -18,7 +18,7 @@ public class RobotAgent : Agent {
     private Rigidbody rb;
     private RobotAgent enemyRobot;
 
-    [SerializeField] private float tempAngleToEnemy;
+    //[SerializeField] private float tempAngleToEnemy;
 
 
     // --------------------------- INITIALIZATION METHODS ---------------------------
@@ -87,7 +87,7 @@ public class RobotAgent : Agent {
             var vectorToEnemy = enemyRobot.transform.position - this.transform.position;
             var angleToEnemy = Vector3.SignedAngle(this.transform.forward, vectorToEnemy, Vector3.up);
 
-            tempAngleToEnemy = angleToEnemy;
+            //tempAngleToEnemy = angleToEnemy;
 
             // relativna podla toho ako moc? alebo len ano/nie situacia
             if (angleToEnemy >= -45f && angleToEnemy <= 45f) {
