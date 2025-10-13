@@ -14,6 +14,8 @@ public class BodyComponent : MonoBehaviour
     private RobotAgent thisRobot;
     private RobotAgent enemyRobot;
 
+    private CollisionZoneBehaviour[] zoneComponents = null;
+
     private void Start() {
         rb = GetComponentInParent<Rigidbody>();
 
@@ -32,6 +34,8 @@ public class BodyComponent : MonoBehaviour
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.Damage) {
                 sensorDamage = sensor;
+
+                zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.AzimuthToTarget) {
                 sensorEnemyAzimuth = sensor;
@@ -44,7 +48,8 @@ public class BodyComponent : MonoBehaviour
         SetVelocitySensorValues();
         SetAzimuthSensorValues();
 
-        sensorDamage.SetSensorValue(0f); // Placeholder for damage value
+        float minCurrentHealth = zoneComponents?.Min(e => e.CurrentHealth) ?? 1f;
+        sensorDamage.SetSensorValue(minCurrentHealth); // Placeholder for damage value
         
     }
 

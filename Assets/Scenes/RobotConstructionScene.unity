@@ -205,6 +205,18 @@ PrefabInstance:
       propertyPath: m_ConnectedBody
       value: 
       objectReference: {fileID: 1799427639}
+    - target: {fileID: 5582517215772724902, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
+      propertyPath: damageMultiplier
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7790944682511653666, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
+      propertyPath: damageTaken
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7790944682511653666, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
+      propertyPath: damageMultiplier
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -910,6 +922,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1799427640}
     m_Modifications:
+    - target: {fileID: 2395352235558628635, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
+      propertyPath: damageTaken
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2395352235558628635, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
+      propertyPath: damageMultiplier
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5474942442113359277, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -954,6 +974,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Body_Shape1
       objectReference: {fileID: 0}
+    - target: {fileID: 8075798963630000879, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
+      propertyPath: damageTaken
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -967,6 +991,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 658793992}
     m_Modifications:
+    - target: {fileID: 301568164705735170, guid: ec4c1764d07078c4580fade1467ecc4e, type: 3}
+      propertyPath: damageTaken
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8602644496448642672, guid: ec4c1764d07078c4580fade1467ecc4e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2099,6 +2127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 721296522}
     m_Modifications:
+    - target: {fileID: 301568164705735170, guid: ec4c1764d07078c4580fade1467ecc4e, type: 3}
+      propertyPath: damageTaken
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8602644496448642672, guid: ec4c1764d07078c4580fade1467ecc4e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2271,6 +2303,10 @@ PrefabInstance:
     - target: {fileID: 2546206376055835302, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4569327621398811736, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
+      propertyPath: damageMultiplier
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4569327621398811736, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
       propertyPath: damagePerHitMultiplier

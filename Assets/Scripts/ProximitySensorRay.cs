@@ -54,7 +54,7 @@ public class ProximitySensorRay : MonoBehaviour
                 //Debug.DrawRay(transform.position, raycastDirection * rayDistance, Color.gray);
             }
         }
-        Debug.Log("Closest hit distance: " + sensorValue / rayDistance);
+        //Debug.Log("Closest hit distance: " + sensorValue / rayDistance);
         sensorProximity.SetSensorValue(sensorValue / rayDistance);
     }
 

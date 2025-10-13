@@ -7,23 +7,13 @@ using UnityEngine;
 /// </summary>
 public class CollisionForwarder : MonoBehaviour
 {
-
-    private void Start() {
-        //Debug.Log("CollisionForwarder initialized for: " + gameObject.name);
-    }
-
     void OnCollisionEnter(Collision collision) {
         foreach (var collider in collision.contacts) {
-            var collisionZoneBehaviour = collider.thisCollider.GetComponent<CollisionZoneBehaviour>();
-            collisionZoneBehaviour?.OnCollisionHit(collision);
+            var thisCollisionZone = collider.thisCollider.GetComponent<CollisionZoneBehaviour>();
+            var otherCollisionZone = collider.otherCollider.GetComponent<CollisionZoneBehaviour>();
+
+            thisCollisionZone?.OnCollisionHit(collision, otherCollisionZone);
+            otherCollisionZone?.OnCollisionHit(collision, thisCollisionZone);
         }
-
-        Debug.Log("Collision happened from: " + collision.contacts.First().thisCollider.name);
-        Debug.Log("Collision detected with: " + collision.gameObject.tag);
     }
-
-    //void OnTriggerEnter(Collider other) {
-    //    Debug.Log("Trigger detected with: " + other.gameObject.tag);
-    //    //parentHandler?.OnChildTriggerEnter(other);
-    //}
 }
