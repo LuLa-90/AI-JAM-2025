@@ -16,7 +16,7 @@ public class RobotAgent : Agent {
 
     private RobotMovement robotMovement;
     private Rigidbody rb;
-    private RobotAgent enemyRobot;
+    public RobotAgent enemyRobot;
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -31,12 +31,21 @@ public class RobotAgent : Agent {
     private void Start() {
         robotMovement = gameObject.GetComponent<RobotMovement>();
         rb = gameObject.GetComponent<Rigidbody>();
-        enemyRobot = FindObjectsByType<RobotAgent>(FindObjectsSortMode.None).FirstOrDefault(r => r != this);
+
+        var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
+        enemyRobot = robots.FirstOrDefault(r => r != this);
+
+        //Debug.Log("agents: " + enemyRobot.Count() + "with name: " + enemyRobot[0].name);
     }
 
+
     public override void OnEpisodeBegin() {
-        transform.position = new Vector3(Random.Range(-3f, 3f), 0.026f, Random.Range(-3f, 3f));
-        transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        rb.isKinematic = true;
+
+        transform.localPosition = new Vector3(Random.Range(-2.5f, 2.5f), 0.026f, Random.Range(-2.5f, 2.5f));
+        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+
+        rb.isKinematic = false;
 
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
@@ -132,5 +141,13 @@ public class RobotAgent : Agent {
         continuousActionsOut[0] = leftWheelsValue;
         continuousActionsOut[1] = rightWheelsValue;
         discreteActionsOut[0] = (int)armLiftValue;
+    }
+
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.black;
+
+        if (enemyRobot != null) {
+            Gizmos.DrawLine(transform.position, enemyRobot.transform.position);
+        }
     }
 }

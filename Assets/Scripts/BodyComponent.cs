@@ -12,7 +12,6 @@ public class BodyComponent : MonoBehaviour
     private Rigidbody rb;
 
     private RobotAgent thisRobot;
-    private RobotAgent enemyRobot;
 
     private CollisionZoneBehaviour[] zoneComponents = null;
 
@@ -20,7 +19,6 @@ public class BodyComponent : MonoBehaviour
         rb = GetComponentInParent<Rigidbody>();
 
         thisRobot = GetComponentInParent<RobotAgent>();
-        enemyRobot = FindObjectsByType<RobotAgent>(FindObjectsSortMode.None).FirstOrDefault(r => r != thisRobot);
 
         var sensors = GetComponentsInChildren<SensorComponent>();
 
@@ -61,8 +59,8 @@ public class BodyComponent : MonoBehaviour
 
     private void SetAzimuthSensorValues() {
         
-        if (enemyRobot != null) {
-            var vectorToEnemy = enemyRobot.transform.position - thisRobot.transform.position;
+        if (thisRobot.enemyRobot != null) {
+            var vectorToEnemy = thisRobot.enemyRobot.transform.position - thisRobot.transform.position;
             var angleToEnemy = Vector3.SignedAngle(thisRobot.transform.forward, vectorToEnemy, Vector3.up);
 
             //Debug.Log("Angle to Enemy: " + angleToEnemy);
@@ -71,13 +69,5 @@ public class BodyComponent : MonoBehaviour
         }
 
         
-    }
-
-    private void OnDrawGizmos() {
-        Gizmos.color = Color.black;
-
-        if (enemyRobot != null && thisRobot != null) {
-            Gizmos.DrawLine(thisRobot.transform.position, enemyRobot.transform.position);
-        }
     }
 }
