@@ -13,10 +13,13 @@ public class RobotAgent : Agent {
     [Header("Reward Factors")]
     [SerializeField, Range(0f, 1f)] private float movementRF = 0.8f;
     [SerializeField, Range(0f, 1f)] private float facingRF = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float armAngleRF = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float enemyDistanceRF = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float arenaPositionRF = 0.2f;
 
     private RobotMovement robotMovement;
     private Rigidbody rb;
-    public RobotAgent enemyRobot;
+    [HideInInspector] public RobotAgent enemyRobot;
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -42,8 +45,11 @@ public class RobotAgent : Agent {
     public override void OnEpisodeBegin() {
         rb.isKinematic = true;
 
+        //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = false;
         transform.localPosition = new Vector3(Random.Range(-2.5f, 2.5f), 0.026f, Random.Range(-2.5f, 2.5f));
         transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        //robotMovement.armComponent.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = true;
 
         rb.isKinematic = false;
 
@@ -58,7 +64,14 @@ public class RobotAgent : Agent {
         //AddReward(0.001f);
 
         if (transform.localPosition.y < -1f) {
+            Debug.Log("Robot fell out of arena!");
             SetReward(-10f);
+            EndEpisode();
+        }
+
+        float rotationUp = Vector3.Dot(transform.up, Vector3.up);
+        if (rotationUp < 0.2f) {
+            Debug.Log("Robot flipped over!");
             EndEpisode();
         }
 
@@ -74,19 +87,48 @@ public class RobotAgent : Agent {
         float robotFacingRewards = GetRewards_FacingRobot();
         AddReward(robotFacingRewards * facingRF);
 
+        float armReleaseReward = GetRewards_ArmRelease();
+        AddReward(armReleaseReward * armAngleRF * 10f);
+
+        float enemyDistanceReward = GetRewards_EnemyDistance();
+        AddReward(enemyDistanceReward * enemyDistanceRF);
+
+        float arenaPositionReward = GetRewards_ArenaPosition();
+        AddReward(arenaPositionReward * arenaPositionRF);
+
         cumulativeReward = GetCumulativeReward();
     }
 
+    private float GetRewards_ArenaPosition() {
+        float distanceToCenter = this.transform.localPosition.magnitude;
+        float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f) * -2f + 1f;
+        return distanceReward;
+    }
+
+    private float GetRewards_EnemyDistance() {
+        if (enemyRobot == null) return 0f;
+        float distanceToEnemy = (enemyRobot.transform.localPosition - this.transform.localPosition).magnitude;
+        //Debug.Log("Distance to enemy: " + distanceToEnemy);
+        float distanceReward = Mathf.Clamp(distanceToEnemy / 4.5f, 0f, 1f) * -2f + 1f;
+        return distanceReward;
+    }
+
+    private float GetRewards_ArmRelease() {
+        return robotMovement.armComponent.ArmDropReward;
+    }
 
     private float GetRewards_Movement() {
         //Debug.Log("Velocity: " + rb.linearVelocity.magnitude);
-        if (rb.linearVelocity.magnitude < 0.2f) {
-            return -1f; // Penalty for not moving
+
+        float forwardDot = Vector3.Dot(rb.linearVelocity.normalized, transform.forward);
+        if (forwardDot > 0.2f) // Threshold to ensure it's *mostly* forward
+        {
+            return Mathf.Clamp(rb.linearVelocity.magnitude / 1.7f, 0f, 1f) * 2f - 1f;
+            // Small bonus for moving forward
         }
-        else if (rb.linearVelocity.magnitude > 0.8f) {
-            //if (rb.linearVelocity.magnitude < 0.2f) {
-            return 1f; // Reward for high speeds
-            //}
+        else if (forwardDot < -0.2f) {
+            return Mathf.Clamp(rb.linearVelocity.magnitude / 1.7f, 0f, 1f) * 1.5f - 1f;
+            // Penalty for moving backward
         }
         return 0f;
     }

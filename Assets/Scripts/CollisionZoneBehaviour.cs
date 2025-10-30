@@ -43,7 +43,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
             damageRatio = (enemyCollisionZone.damageOfZone) / (resistanceOfZone);
         }
             
-        Debug.Log($"Damage ratio calculated as: {damageRatio}, {this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
+        //Debug.Log($"Damage ratio calculated as: {damageRatio}, {this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
         var damage = damageRatio * Math.Max(collisionForce, 0.0001f);
 
         CurrentHealth = Math.Max(CurrentHealth - damage, 0f);

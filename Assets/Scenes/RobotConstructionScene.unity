@@ -644,7 +644,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &382467022
 Transform:
   m_ObjectHideFlags: 0
@@ -956,6 +956,14 @@ PrefabInstance:
       value: -0.2351
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: facingRF
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: movementRF
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'
       value: 
       objectReference: {fileID: 1432095773}
@@ -988,9 +996,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: armComponent
       value: 
       objectReference: {fileID: 1845690187}
+    - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: stationaryRobot
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5931534517980305084, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.061
@@ -3507,6 +3523,18 @@ PrefabInstance:
     - target: {fileID: 111286797452933189, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -12.505
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: facingRF
+      value: 0.866
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: armAngleRF
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: movementRF
+      value: 0.543
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'

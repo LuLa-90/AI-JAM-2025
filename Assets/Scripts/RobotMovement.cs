@@ -1,8 +1,10 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class RobotMovement : MonoBehaviour
-{
+public class RobotMovement : MonoBehaviour {
+    [SerializeField] private bool stationaryRobot = false;
+
     [SerializeField] private InputActionAsset inputActions;
     public InputAction leftWheelsAxis;
     public InputAction rightWheelsAxis;
@@ -10,9 +12,12 @@ public class RobotMovement : MonoBehaviour
 
     [SerializeField] private WheelCollider[] rightWheels;
     [SerializeField] private WheelCollider[] leftWheels;
-    [SerializeField] private ArmComponent armComponent;
+    [SerializeField] public ArmComponent armComponent;
+
 
     private HingeJoint armJointControl;
+
+    float motorTorqueMax = 10f;
 
     private void OnEnable() {
         var actionMap = inputActions.FindActionMap("Robot");
@@ -34,14 +39,17 @@ public class RobotMovement : MonoBehaviour
         armJointControl.useSpring = false;
     }
 
-    //private void FixedUpdate() {
-    //    ApplyBothTrackInputs(leftWheelsAxis.ReadValue<float>(),
-    //                        rightWheelsAxis.ReadValue<float>());
-
-    //    ApplyArmInput((int)armLiftAction.ReadValue<float>());
-    //}
+    private void FixedUpdate() {
+        float slowdown = Time.fixedDeltaTime * motorTorqueMax;
+        foreach (var wheel in rightWheels.Concat(leftWheels)) {
+            wheel.motorTorque = Mathf.Clamp(wheel.motorTorque - (slowdown * Mathf.Sign(wheel.motorTorque)), -motorTorqueMax, motorTorqueMax);
+        }
+    }
 
     public void ApplyArmInput(int inputValue) {
+        if (stationaryRobot) {
+            return;
+        }
         if (inputValue == 1) {
             if (!armJointControl.useSpring) {
                 armJointControl.useSpring = true;
@@ -54,13 +62,24 @@ public class RobotMovement : MonoBehaviour
     }
 
     public void ApplyBothTrackInputs(float leftTrackValue, float rightTrackValue) {
+        //if (leftTrackValue < 0f || rightTrackValue < 0f) {
+        //    leftTrackValue *= 0.8f; // Reduce backward speed for left track
+        //    rightTrackValue *= 0.8f; // Reduce backward speed for right track
+        //}
+
+        if (stationaryRobot) {
+            return;
+        }
         ApplyTrackInput(leftWheels, leftTrackValue);
         ApplyTrackInput(rightWheels, rightTrackValue);
     }
 
     void ApplyTrackInput(WheelCollider[] wheels, float inputValue) {
+        float torqueStep = motorTorqueMax * 0.3f * inputValue;
+        float changedMotorTorque = Mathf.Clamp(wheels[0].motorTorque + torqueStep, -motorTorqueMax, motorTorqueMax);
+
         foreach (var wheel in wheels) {
-            wheel.motorTorque = inputValue * 10f;
+            wheel.motorTorque = changedMotorTorque;
         }
     }
 }

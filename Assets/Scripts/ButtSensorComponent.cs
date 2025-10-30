@@ -17,27 +17,37 @@ public class ButtSensorComponent : MonoBehaviour {
             if (sensor.GetSensorType == SensorComponent.SensorType.ButtSensor) {
                 buttSensor = sensor;
 
+                if (thisRobot.enemyRobot == null) return;
                 buttMarkerObject = thisRobot.enemyRobot.GetComponentInChildren<ButtMarker>();
-
-                //GameObject.FindGameObjectsWithTag("ButtTag")
-                //    .FirstOrDefault(o=>o == thisRobot.enemyRobot.gameObject); // .transform.position
-
-                
 
             }
         }
     }
 
     private void Update() {
-        if (Physics.Raycast(transform.position,
-            (buttMarkerObject.transform.position - transform.position).normalized,
-            out RaycastHit hitInfo)) {
-            Debug.Log("Butt Receiver Hit:" + hitInfo.collider.name);
+        if (buttSensor != null && buttMarkerObject != null) {
+            if (Physics.Raycast(transform.position,
+                (buttMarkerObject.transform.position - transform.position).normalized,
+                out RaycastHit hitInfo)) {
+
+                if (hitInfo.collider.tag == "ButtTag") {
+                    buttSensor.SensorValue = 1f;
+                    return;
+                }
+                //Debug.Log("Butt Receiver Hit:" + hitInfo.collider.name);
+
+            }
+            buttSensor.SensorValue = 0f;
         }
     }
 
     private void OnDrawGizmos() {
-        Gizmos.color = Color.yellow;
+        if (buttSensor?.SensorValue == 1f) {
+            Gizmos.color = Color.yellow;
+        }
+        else {
+            Gizmos.color = Color.gray;
+        }
 
         if (buttMarkerObject != null) {
             Gizmos.DrawLine(transform.position, buttMarkerObject.transform.position);

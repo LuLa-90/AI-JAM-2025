@@ -12,7 +12,7 @@ public class ProximitySensorRay : MonoBehaviour
     private SensorComponent sensorProximity = null;
 
     private float rayAngleLong = 45f / 6f;
-    private float rayDistanceLong = 1.7f;
+    private float rayDistanceLong = 2.5f;
     private float rayAngleWide = 140f / 6f;
     private float rayDistanceWide = 0.7f;
 

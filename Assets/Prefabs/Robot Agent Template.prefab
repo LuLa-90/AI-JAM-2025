@@ -363,6 +363,7 @@ MonoBehaviour:
   - {fileID: 6555806188052880367}
   - {fileID: 8002154439448019571}
   armComponent: {fileID: 0}
+  ArmAngleMax: -1
 --- !u!114 &395867838849753299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,7 +379,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 5000
   cumulativeReward: 0
   sensors:
   - {fileID: 0}
@@ -390,6 +391,7 @@ MonoBehaviour:
   - {fileID: 0}
   movementRF: 0.8
   facingRF: 0.5
+  armAngleRF: 0.5
   enemyRobot: {fileID: 0}
 --- !u!114 &5010629318851500838
 MonoBehaviour:
@@ -735,6 +737,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MarkerHitPoint
       objectReference: {fileID: 0}
+    - target: {fileID: 146686655972027685, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
+      propertyPath: m_TagString
+      value: ButtTag
+      objectReference: {fileID: 0}
     - target: {fileID: 6306454773753662735, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -781,7 +787,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8708950312143412897, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_TagString
-      value: ButtTag
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
