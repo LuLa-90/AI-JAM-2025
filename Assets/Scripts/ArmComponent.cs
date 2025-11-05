@@ -18,6 +18,8 @@ public class ArmComponent : MonoBehaviour {
     }
     private float armDropReward = 0f;
 
+    public float ArmRaisingReward { get; private set; }
+
 
     [SerializeField] private float armDropAngle = 0f;
     private float prevArmAngle = 0f;
@@ -57,13 +59,18 @@ public class ArmComponent : MonoBehaviour {
         //Debug.Log($"Arm collision detected! Arm drop angle: {armDropAngle}");
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         float minCurrentHealth = zoneComponents?.Min(e=> e.CurrentHealth) ?? 1f;
-        ArmAngle = Mathf.Round(90-transform.localEulerAngles.x);
+        ArmAngle = Mathf.Round(90f-transform.localEulerAngles.x);
 
+        // Is arm raising?
         if (prevArmAngle < ArmAngle) {
             armDropAngle = ArmAngle;
+            ArmRaisingReward = 1f;
         }
+        else
+            ArmRaisingReward = 0f;
+
 
         prevArmAngle = ArmAngle;
 

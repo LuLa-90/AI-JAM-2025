@@ -7,6 +7,11 @@ using UnityEngine;
 /// </summary>
 public class CollisionForwarder : MonoBehaviour
 {
+
+    private void Start() {
+        AssignDamageAndResistance();
+    }
+
     void OnCollisionEnter(Collision collision) {
         foreach (var collider in collision.contacts) {
             var thisCollisionZone = collider.thisCollider.GetComponent<CollisionZoneBehaviour>();
@@ -16,4 +21,40 @@ public class CollisionForwarder : MonoBehaviour
             otherCollisionZone?.OnCollisionHit(collision, thisCollisionZone);
         }
     }
+
+    private void AssignDamageAndResistance() {
+        var zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+
+        foreach (var zone in zoneComponents) {
+            if (zone.gameObject.name.Contains("body")) { 
+                zone.damageOfZone = 5f;
+                zone.resistanceOfZone = 10f;
+            }
+            else if (zone.gameObject.name.Contains("battery")) {
+                zone.damageOfZone = 1f;
+                zone.resistanceOfZone = 2f;
+            }
+            else if (zone.gameObject.name.Contains("armbase")) {
+                zone.damageOfZone = 5f;
+                zone.resistanceOfZone = 15f;
+            }
+            else if (zone.gameObject.name.Contains("weapon")) {
+                zone.damageOfZone = 20f;
+                zone.resistanceOfZone = 20f;
+            }
+            else if (zone.gameObject.name.Contains("bumper")) {
+                zone.damageOfZone = 1f;
+                zone.resistanceOfZone = 2f;
+            }
+            else if (zone.gameObject.name.Contains("wheels")) {
+                zone.damageOfZone = 1f;
+                zone.resistanceOfZone = 2f;
+            }
+            else {
+                zone.damageOfZone = 1f;
+                zone.resistanceOfZone = 10f;
+            }
+        }
+    }
+
 }

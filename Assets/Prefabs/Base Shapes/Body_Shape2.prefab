@@ -300,8 +300,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca735a7350f3454fa3517a9032058d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePerHitMultiplier: 1
   CurrentHealth: 0
+  resistanceOfZone: 1
+  damageOfZone: 1
 --- !u!1001 &8251298589967811640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -352,7 +353,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 60a0eab55843c8c4582f46a8dce2db73, type: 3}
       propertyPath: m_Name
-      value: body_shape2
+      value: body_shape
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -409,5 +410,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca735a7350f3454fa3517a9032058d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePerHitMultiplier: 1
   CurrentHealth: 0
+  resistanceOfZone: 1
+  damageOfZone: 1

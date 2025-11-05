@@ -1,13 +1,15 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CollisionZoneBehaviour : MonoBehaviour {
 
     private float totalHealth = 1f;
     [SerializeField] public float CurrentHealth;
+    public float RewardOfCollision { get; private set; }
 
     // Percentual value of how much damage is taken per hit based on collision force
-    [SerializeField, Range(1f, 20f)] private float resistanceOfZone = 1f;
+    [SerializeField, Range(1f, 20f)] public float resistanceOfZone = 1f;
     // Multiplier for damage to enemy based on collision force
     [SerializeField, Range(1f, 20f)] public float damageOfZone = 1f;
 
@@ -27,7 +29,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
     }
 
     private void Update() {
-        
+        RewardOfCollision = 0f;
     }
 
     internal void OnCollisionHit(Collision collision, CollisionZoneBehaviour enemyCollisionZone) {
@@ -42,6 +44,10 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         else {
             damageRatio = (enemyCollisionZone.damageOfZone) / (resistanceOfZone);
         }
+
+        // TODO: opravit reward calculation
+        RewardOfCollision = Mathf.InverseLerp(1f / 20f, 20f, damageRatio) * 2f - 1f;
+        Debug.Log(gameObject.name + " got reward: " + RewardOfCollision);
             
         //Debug.Log($"Damage ratio calculated as: {damageRatio}, {this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
         var damage = damageRatio * Math.Max(collisionForce, 0.0001f);

@@ -82,4 +82,24 @@ public class RobotMovement : MonoBehaviour {
             wheel.motorTorque = changedMotorTorque;
         }
     }
+
+    // ------------------------------- HEURISTIC -------------------------------
+    public void ApplyBothTrackInputsHeuristic(float leftTrackValue, float rightTrackValue) {
+        //if (leftTrackValue < 0f || rightTrackValue < 0f) {
+        //    leftTrackValue *= 0.8f; // Reduce backward speed for left track
+        //    rightTrackValue *= 0.8f; // Reduce backward speed for right track
+        //}
+
+        if (stationaryRobot) {
+            return;
+        }
+        ApplyTrackInputHeuristic(leftWheels, leftTrackValue);
+        ApplyTrackInputHeuristic(rightWheels, rightTrackValue);
+    }
+
+    void ApplyTrackInputHeuristic(WheelCollider[] wheels, float inputValue) {
+        foreach (var wheel in wheels) {
+            wheel.motorTorque = inputValue * motorTorqueMax;
+        }
+    }
 }

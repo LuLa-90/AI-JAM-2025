@@ -1,6 +1,7 @@
 using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -16,10 +17,14 @@ public class RobotAgent : Agent {
     [SerializeField, Range(0f, 1f)] private float armAngleRF = 0.5f;
     [SerializeField, Range(0f, 1f)] private float enemyDistanceRF = 0.2f;
     [SerializeField, Range(0f, 1f)] private float arenaPositionRF = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float collisionCombinationRF = 0.7f;
 
     private RobotMovement robotMovement;
     private Rigidbody rb;
+    private CollisionZoneBehaviour[] zoneComponents;
     [HideInInspector] public RobotAgent enemyRobot;
+
+    [SerializeField] private bool isHeuristic = false;
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -34,6 +39,7 @@ public class RobotAgent : Agent {
     private void Start() {
         robotMovement = gameObject.GetComponent<RobotMovement>();
         rb = gameObject.GetComponent<Rigidbody>();
+        zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
 
         var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
         enemyRobot = robots.FirstOrDefault(r => r != this);
@@ -96,13 +102,21 @@ public class RobotAgent : Agent {
         float arenaPositionReward = GetRewards_ArenaPosition();
         AddReward(arenaPositionReward * arenaPositionRF);
 
+        float collisionCombinationReward = GetRewards_collisionCombination();
+        AddReward(collisionCombinationReward * collisionCombinationRF);
+
         cumulativeReward = GetCumulativeReward();
+    }
+
+    private float GetRewards_collisionCombination() {
+        var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
+        return Mathf.Clamp(sumReward, -1f, 1f); 
     }
 
     private float GetRewards_ArenaPosition() {
         float distanceToCenter = this.transform.localPosition.magnitude;
         float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f) * -2f + 1f;
-        return distanceReward;
+        return distanceReward; 
     }
 
     private float GetRewards_EnemyDistance() {
@@ -114,7 +128,8 @@ public class RobotAgent : Agent {
     }
 
     private float GetRewards_ArmRelease() {
-        return robotMovement.armComponent.ArmDropReward;
+        var reward = (0.02f * robotMovement.armComponent.ArmRaisingReward) + robotMovement.armComponent.ArmDropReward;
+        return Mathf.Clamp(reward, 0f, 1f);
     }
 
     private float GetRewards_Movement() {
@@ -160,8 +175,14 @@ public class RobotAgent : Agent {
         float rightWheelsValue = actions.ContinuousActions[1];
         int armLiftValue = actions.DiscreteActions[0];
 
-        robotMovement.ApplyBothTrackInputs(leftWheelsValue, rightWheelsValue);
-        robotMovement.ApplyArmInput(armLiftValue);
+        if (isHeuristic) {
+            robotMovement.ApplyBothTrackInputsHeuristic(leftWheelsValue, rightWheelsValue);
+            robotMovement.ApplyArmInput(armLiftValue);
+        } else {
+            robotMovement.ApplyBothTrackInputs(leftWheelsValue, rightWheelsValue);
+            robotMovement.ApplyArmInput(armLiftValue);
+        }
+
     }
 
     public override void CollectObservations(VectorSensor observations) {
@@ -172,7 +193,10 @@ public class RobotAgent : Agent {
     }
 
     // ------------------------------- HEURISTIC -------------------------------
+
     public override void Heuristic(in ActionBuffers actionsOut) {
+        isHeuristic = true;
+
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -40,6 +41,7 @@ public class BodyComponent : MonoBehaviour
                 sensorEnemyAzimuth.SetRangeValues(-180f, 180f);
             }
         }
+
     }
 
     private void Update() {
@@ -67,7 +69,6 @@ public class BodyComponent : MonoBehaviour
 
             sensorEnemyAzimuth.SetSensorValue(angleToEnemy);
         }
-
-        
+ 
     }
 }
