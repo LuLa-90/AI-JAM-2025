@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Tento skript obsahuje všetku logiku spojenú so správaním ramena.
+/// Stará sa o výpoèet odmien, a hodnôt pre senzory.
+/// </summary>
 public class ArmComponent : MonoBehaviour {
 
-    /// <summary>
-    /// Uhol ramena v rozsahu <-1f, 1f>
-    /// </summary>
-    public float ArmAngle = 0f;
+    public float ArmRaisingReward { get; private set; }
     public float ArmDropReward { 
         get {
             var temp = armDropReward;
@@ -16,19 +17,19 @@ public class ArmComponent : MonoBehaviour {
             return temp; 
         }
     }
-    private float armDropReward = 0f;
-
-    public float ArmRaisingReward { get; private set; }
-
+    /// <summary>
+    /// Uhol ramena v rozsahu <-1f, 1f>
+    /// </summary>
+    public float ArmAngle = 0f;
 
     [SerializeField] private float armDropAngle = 0f;
+    private float armDropReward = 0f;
     private float prevArmAngle = 0f;
 
     private SensorComponent sensorAngle = null;
     private SensorComponent sensorDamage = null;
 
     private CollisionZoneBehaviour[] zoneComponents = null;
-
 
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();

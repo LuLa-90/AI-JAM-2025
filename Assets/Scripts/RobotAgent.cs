@@ -57,6 +57,11 @@ public class RobotAgent : Agent {
         //robotMovement.armComponent.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = true;
 
+        foreach (var zone in zoneComponents)
+        {
+            zone.ResetHealth();
+        }
+
         rb.isKinematic = false;
 
         SetReward(0f);

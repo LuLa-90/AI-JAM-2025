@@ -27,32 +27,32 @@ public class CollisionForwarder : MonoBehaviour
 
         foreach (var zone in zoneComponents) {
             if (zone.gameObject.name.Contains("body")) { 
-                zone.damageOfZone = 5f;
-                zone.resistanceOfZone = 10f;
-            }
-            else if (zone.gameObject.name.Contains("battery")) {
                 zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 2f;
+                zone.resistanceOfZone = 3f;
+            }
+            else if (zone.gameObject.name.Contains("battery")) { 
+                zone.damageOfZone = 1f;
+                zone.resistanceOfZone = 1f;
             }
             else if (zone.gameObject.name.Contains("armbase")) {
                 zone.damageOfZone = 5f;
-                zone.resistanceOfZone = 15f;
+                zone.resistanceOfZone = 5f;
             }
             else if (zone.gameObject.name.Contains("weapon")) {
                 zone.damageOfZone = 20f;
-                zone.resistanceOfZone = 20f;
+                zone.resistanceOfZone = 15f;
             }
             else if (zone.gameObject.name.Contains("bumper")) {
-                zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 2f;
+                zone.damageOfZone = 15f;
+                zone.resistanceOfZone = 10f;
             }
             else if (zone.gameObject.name.Contains("wheels")) {
-                zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 2f;
+                zone.damageOfZone = 5f;
+                zone.resistanceOfZone = 4f;
             }
             else {
                 zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 10f;
+                zone.resistanceOfZone = 5f;
             }
         }
     }

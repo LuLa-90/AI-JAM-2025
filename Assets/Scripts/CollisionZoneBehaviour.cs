@@ -46,10 +46,23 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         }
 
         // TODO: opravit reward calculation
-        RewardOfCollision = Mathf.InverseLerp(1f / 20f, 20f, damageRatio) * 2f - 1f;
-        Debug.Log(gameObject.name + " got reward: " + RewardOfCollision);
-            
-        //Debug.Log($"Damage ratio calculated as: {damageRatio}, {this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
+        //RewardOfCollision = Mathf.InverseLerp(0.05f, 10f, damageRatio) * 2f - 1f; 
+        
+        //Debug.Log($"{this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
+        if (enemyCollisionZone != null)
+        {
+            float resistanceRatio = damageOfZone / enemyCollisionZone.resistanceOfZone;
+            if (resistanceRatio > 1f)
+            {
+                RewardOfCollision = resistanceRatio - 1f;
+            }
+            else
+            {
+                RewardOfCollision = (1f - resistanceRatio) * -10f;
+            }
+
+            Debug.Log(gameObject.name + " (" + enemyCollisionZone.damageOfZone + ";" + resistanceOfZone + ") got reward: " + RewardOfCollision);
+        } 
         var damage = damageRatio * Math.Max(collisionForce, 0.0001f);
 
         CurrentHealth = Math.Max(CurrentHealth - damage, 0f);

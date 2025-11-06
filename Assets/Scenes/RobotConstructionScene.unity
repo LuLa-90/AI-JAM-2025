@@ -659,7 +659,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 681881325}
-  - {fileID: 676961569}
   - {fileID: 800265514}
   - {fileID: 1507770205}
   m_Father: {fileID: 0}
@@ -958,23 +957,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: facingRF
-      value: 0
+      value: 0.52
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: armAngleRF
-      value: 0
+      value: 0.68
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: movementRF
-      value: 0
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: arenaPositionRF
-      value: 0
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: enemyDistanceRF
-      value: 0
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'
@@ -1006,7 +1005,7 @@ PrefabInstance:
       objectReference: {fileID: 1750909497}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: collisionCombinationRF
-      value: 1
+      value: 0.85
       objectReference: {fileID: 0}
     - target: {fileID: 3802755395440445979, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
@@ -1622,7 +1621,7 @@ Transform:
   m_LocalScale: {x: 4.5, y: 0.00049999997, z: 4.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 382467022}
+  m_Father: {fileID: 681881325}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &676961570
 MeshRenderer:
@@ -1715,6 +1714,7 @@ Transform:
   - {fileID: 1231160676}
   - {fileID: 2090750008}
   - {fileID: 736491943}
+  - {fileID: 676961569}
   m_Father: {fileID: 382467022}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &695212026
@@ -2403,6 +2403,26 @@ PrefabInstance:
       value: -0.2351
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: facingRF
+      value: 0.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: armAngleRF
+      value: 0.68
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: movementRF
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: arenaPositionRF
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: enemyDistanceRF
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'
       value: 
       objectReference: {fileID: 1084749919}
@@ -2430,6 +2450,10 @@ PrefabInstance:
       propertyPath: 'sensors.Array.data[6]'
       value: 
       objectReference: {fileID: 871400055}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: collisionCombinationRF
+      value: 0.85
+      objectReference: {fileID: 0}
     - target: {fileID: 3802755395440445979, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -3638,23 +3662,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: facingRF
-      value: 0
+      value: 0.52
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: armAngleRF
-      value: 0
+      value: 0.68
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: movementRF
-      value: 0
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: arenaPositionRF
-      value: 0
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: enemyDistanceRF
-      value: 0
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'
@@ -3684,6 +3708,10 @@ PrefabInstance:
       propertyPath: 'sensors.Array.data[6]'
       value: 
       objectReference: {fileID: 1804586803}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: collisionCombinationRF
+      value: 0.85
+      objectReference: {fileID: 0}
     - target: {fileID: 3802755395440445979, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -3694,7 +3722,7 @@ PrefabInstance:
       objectReference: {fileID: 1395400299}
     - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: stationaryRobot
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5931534517980305084, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5628,6 +5656,26 @@ PrefabInstance:
       value: -12.505
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: facingRF
+      value: 0.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: armAngleRF
+      value: 0.68
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: movementRF
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: arenaPositionRF
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: enemyDistanceRF
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: 'sensors.Array.data[0]'
       value: 
       objectReference: {fileID: 1037911725}
@@ -5655,6 +5703,10 @@ PrefabInstance:
       propertyPath: 'sensors.Array.data[6]'
       value: 
       objectReference: {fileID: 1407967692}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: collisionCombinationRF
+      value: 0.85
+      objectReference: {fileID: 0}
     - target: {fileID: 3802755395440445979, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
       value: 0
