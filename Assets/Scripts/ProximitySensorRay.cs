@@ -10,6 +10,7 @@ public class ProximitySensorRay : MonoBehaviour
     [SerializeField] private RaySensorType raySensorType = RaySensorType.Long;
 
     private SensorComponent sensorProximity = null;
+    private SensorComponent sensorRayinfo = null;
 
     private float rayAngleLong = 45f / 6f;
     private float rayDistanceLong = 2.5f;
@@ -21,6 +22,9 @@ public class ProximitySensorRay : MonoBehaviour
         foreach (var sensor in sensors) {
             if (sensor.GetSensorType == SensorComponent.SensorType.Proximity) {
                 sensorProximity = sensor;
+            }
+            if (sensor.GetSensorType == SensorComponent.SensorType.Rayinfo) {
+                sensorRayinfo = sensor;
             }
         }
     }
@@ -37,6 +41,7 @@ public class ProximitySensorRay : MonoBehaviour
         }
 
         var sensorValue = rayDistance;
+        int objectHitType = 0;
         for (int i = -3; i <= 3; i++) {
             var raycastDirection = Quaternion.AngleAxis(rayAngle * i, Vector3.up) * rayDirection;
             if (Physics.Raycast(transform.position, raycastDirection, out RaycastHit hit, rayDistance)) {
@@ -47,7 +52,21 @@ public class ProximitySensorRay : MonoBehaviour
                 //}
 
                 //Debug.DrawRay(transform.position, raycastDirection * hit.distance, Color.red);
-                sensorValue = Mathf.Min(sensorValue, hit.distance);
+                if (sensorValue > hit.distance) {
+                    sensorValue = hit.distance;
+                    switch (hit.transform.gameObject.tag) {
+                        case "Arena":
+                            objectHitType = 1;
+                            break;
+                        case "Robot":
+                            objectHitType = 2;
+                            break;
+                        case "Bonus":
+                            objectHitType = 3;
+                            break;
+                    }
+                }
+
                 //return;
             }
             else {
@@ -55,7 +74,9 @@ public class ProximitySensorRay : MonoBehaviour
             }
         }
         //Debug.Log("Closest hit distance: " + sensorValue / rayDistance);
+        Debug.Log("Closest object hit type: " + objectHitType);
         sensorProximity.SetSensorValue(sensorValue / rayDistance);
+        sensorRayinfo.SetSensorValue(objectHitType);
     }
 
     private void OnDrawGizmos() {

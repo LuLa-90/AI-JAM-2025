@@ -9,7 +9,8 @@ public class SensorComponent : MonoBehaviour
         VelocitySideways,
         AzimuthToTarget,
         Proximity,
-        ButtSensor
+        ButtSensor,
+        Rayinfo
     }
 
     [SerializeField] private SensorType sensorType;

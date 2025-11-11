@@ -180,6 +180,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -340,11 +344,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 190de1c3ab0af73488af0e74b0fba841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!54 &293194993 stripped
-Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 555180725870024943, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
-  m_PrefabInstance: {fileID: 445751440}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &293194994 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7448320230423460939, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
@@ -558,6 +557,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -677,7 +680,7 @@ GameObject:
   - component: {fileID: 385547892}
   m_Layer: 0
   m_Name: Cube (3)
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1018,7 +1021,7 @@ PrefabInstance:
     - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: armComponent
       value: 
-      objectReference: {fileID: 1845690187}
+      objectReference: {fileID: 0}
     - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: stationaryRobot
       value: 0
@@ -1042,6 +1045,10 @@ PrefabInstance:
     - target: {fileID: 6428795192209815909, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6428795192209815909, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 7448320230423460939, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1266,11 +1273,11 @@ GameObject:
   - component: {fileID: 513663214}
   m_Layer: 0
   m_Name: Debuff
-  m_TagString: Untagged
+  m_TagString: Bonus
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &513663213
 Transform:
   m_ObjectHideFlags: 0
@@ -1433,6 +1440,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1458,11 +1469,11 @@ GameObject:
   - component: {fileID: 637853074}
   m_Layer: 0
   m_Name: Bonus
-  m_TagString: Untagged
+  m_TagString: Bonus
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &637853070
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2723,6 +2734,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2860,6 +2875,10 @@ PrefabInstance:
     - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
       propertyPath: m_Name
       value: ProximityRays
+      objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3473,11 +3492,11 @@ GameObject:
   - component: {fileID: 1280960329}
   m_Layer: 0
   m_Name: Debuff (1)
-  m_TagString: Untagged
+  m_TagString: Bonus
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1280960328
 Transform:
   m_ObjectHideFlags: 0
@@ -3590,7 +3609,7 @@ GameObject:
   - component: {fileID: 1284656206}
   m_Layer: 0
   m_Name: Arena
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4044,6 +4063,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4136,7 +4159,7 @@ GameObject:
   - component: {fileID: 1380014642}
   m_Layer: 0
   m_Name: Cube (2)
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4298,7 +4321,7 @@ GameObject:
   - component: {fileID: 1434667370}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4479,6 +4502,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProximityRays
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4593,11 +4620,11 @@ GameObject:
   - component: {fileID: 1663890219}
   m_Layer: 0
   m_Name: Bonus (1)
-  m_TagString: Untagged
+  m_TagString: Bonus
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1663890218
 Transform:
   m_ObjectHideFlags: 0
@@ -4909,7 +4936,7 @@ GameObject:
   - component: {fileID: 1687886912}
   m_Layer: 0
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5148,7 +5175,7 @@ PrefabInstance:
     - target: {fileID: 4575091080373296994, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
       propertyPath: m_ConnectedBody
       value: 
-      objectReference: {fileID: 293194993}
+      objectReference: {fileID: 0}
     - target: {fileID: 5582517215772724902, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
       propertyPath: damageMultiplier
       value: 10
@@ -5207,17 +5234,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 14038866966395142, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
   m_PrefabInstance: {fileID: 1784405895}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1845690187 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3784171124427417666, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
-  m_PrefabInstance: {fileID: 1784405895}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 190de1c3ab0af73488af0e74b0fba841, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1846969747
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5310,7 +5326,7 @@ GameObject:
   - component: {fileID: 1918596389}
   m_Layer: 0
   m_Name: Plane
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5542,7 +5558,7 @@ GameObject:
   - component: {fileID: 1963628358}
   m_Layer: 0
   m_Name: Cylinder
-  m_TagString: Untagged
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

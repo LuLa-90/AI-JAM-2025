@@ -34,7 +34,10 @@ public class RobotMovement : MonoBehaviour {
     }
 
     private void Start() {
+        armComponent = GetComponentInChildren<ArmComponent>();
         armJointControl = armComponent.GetComponent<HingeJoint>();
+        armJointControl.connectedBody = gameObject.GetComponent<Rigidbody>();
+
         armJointControl.useMotor = false;
         armJointControl.useSpring = false;
     }

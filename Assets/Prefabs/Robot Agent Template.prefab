@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 9145765142121165188}
   m_Layer: 0
   m_Name: Robot Agent Template
-  m_TagString: Untagged
+  m_TagString: Robot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -328,6 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668fb9e121a5ad148ab3dd7a4c223b4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stationaryRobot: 0
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   leftWheelsAxis:
     m_Name: Left Wheels Axis
@@ -363,7 +364,6 @@ MonoBehaviour:
   - {fileID: 6555806188052880367}
   - {fileID: 8002154439448019571}
   armComponent: {fileID: 0}
-  ArmAngleMax: -1
 --- !u!114 &395867838849753299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -392,7 +392,11 @@ MonoBehaviour:
   movementRF: 0.8
   facingRF: 0.5
   armAngleRF: 0.5
+  enemyDistanceRF: 0.2
+  arenaPositionRF: 0.2
+  collisionCombinationRF: 0.7
   enemyRobot: {fileID: 0}
+  isHeuristic: 0
 --- !u!114 &5010629318851500838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -632,6 +636,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RobotCameraSensor
       objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: bbfecff0a76d3f24ea507772c328b30d, type: 3}
+      propertyPath: m_TagString
+      value: RobotCamera
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -739,7 +747,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 146686655972027685, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_TagString
-      value: ButtTag
+      value: Robot
       objectReference: {fileID: 0}
     - target: {fileID: 6306454773753662735, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_LocalPosition.x
@@ -780,6 +788,10 @@ PrefabInstance:
     - target: {fileID: 6306454773753662735, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7330391876111661268, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
+      propertyPath: m_TagString
+      value: Robot
       objectReference: {fileID: 0}
     - target: {fileID: 8708950312143412897, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_Name

@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 3
   tags:
   - ButtTag
+  - Arena
+  - Robot
+  - Bonus
+  - RobotCamera
+  - RobotArm
   layers:
   - Default
   - TransparentFX
