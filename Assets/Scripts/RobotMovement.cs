@@ -17,7 +17,7 @@ public class RobotMovement : MonoBehaviour {
 
     private HingeJoint armJointControl;
 
-    float motorTorqueMax = 10f;
+    float motorTorqueMax = 25f;
 
     private void OnEnable() {
         var actionMap = inputActions.FindActionMap("Robot");

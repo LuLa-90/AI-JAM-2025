@@ -37,12 +37,12 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         float collisionForce = collision.impulse.magnitude / Time.fixedDeltaTime / 100000f;
         //Debug.Log($"Collision detected with force: {collisionForce}");
 
-        float damageRatio = 0f;
+        float damageTaken = 0f;
         if (enemyCollisionZone == null) {
-            damageRatio = 1f / (resistanceOfZone);
+            damageTaken = 1f / (resistanceOfZone);
         }
         else {
-            damageRatio = (enemyCollisionZone.damageOfZone) / (resistanceOfZone);
+            damageTaken = (enemyCollisionZone.damageOfZone) / (resistanceOfZone);
         }
 
         // TODO: opravit reward calculation
@@ -51,19 +51,16 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         //Debug.Log($"{this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
         if (enemyCollisionZone != null)
         {
-            float resistanceRatio = damageOfZone / enemyCollisionZone.resistanceOfZone;
-            if (resistanceRatio > 1f)
-            {
-                RewardOfCollision = resistanceRatio - 1f;
-            }
-            else
-            {
-                RewardOfCollision = (1f - resistanceRatio) * -10f;
-            }
+            // Calculate damage dealt to the enemy zone, normalize it by logarithm with base 20,
+            // because our damage values range from 1 to 20
+            float damageDealt = damageOfZone / enemyCollisionZone.resistanceOfZone;
+            float damageDealtNormalized = Mathf.Clamp(Mathf.Log(damageDealt, 20), -1, 1);
 
-            Debug.Log(gameObject.name + " (" + enemyCollisionZone.damageOfZone + ";" + resistanceOfZone + ") got reward: " + RewardOfCollision);
+            RewardOfCollision = damageDealtNormalized;
+
+            //Debug.Log(gameObject.name + " (" + enemyCollisionZone.damageOfZone + ";" + resistanceOfZone + ") got reward: " + RewardOfCollision);
         } 
-        var damage = damageRatio * Math.Max(collisionForce, 0.0001f);
+        var damage = damageTaken * Math.Max(collisionForce, 0.0001f);
 
         CurrentHealth = Math.Max(CurrentHealth - damage, 0f);
 

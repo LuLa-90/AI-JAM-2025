@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -7,24 +8,26 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 public class RobotAgent : Agent {
+
     [SerializeField] private float cumulativeReward = 0f;
 
-    [SerializeField] private SensorComponent[] sensors = new SensorComponent[7];
+    [Header("Reward Info (separate)")]
+    [SerializeField] private float movementRwd;
+    [SerializeField] private float robotFacingRwd;
+    [SerializeField] private float armReleaseRwd;
+    [SerializeField] private float enemyDistanceRwd;
+    [SerializeField] private float arenaPositionRwd;
+    [SerializeField] private float collisionCombinationRwd;
 
-    [Header("Reward Factors")]
-    [SerializeField, Range(0f, 1f)] private float movementRF = 0.8f;
-    [SerializeField, Range(0f, 1f)] private float facingRF = 0.5f;
-    [SerializeField, Range(0f, 1f)] private float armAngleRF = 0.5f;
-    [SerializeField, Range(0f, 1f)] private float enemyDistanceRF = 0.2f;
-    [SerializeField, Range(0f, 1f)] private float arenaPositionRF = 0.2f;
-    [SerializeField, Range(0f, 1f)] private float collisionCombinationRF = 0.7f;
+    [SerializeField] private SensorComponent[] sensors = new SensorComponent[7]; 
 
-    private RobotMovement robotMovement;
     private Rigidbody rb;
+    private RewardEditor rewardEditor;
+    private RobotMovement robotMovement;
     private CollisionZoneBehaviour[] zoneComponents;
     [HideInInspector] public RobotAgent enemyRobot;
-
     [SerializeField] private bool isHeuristic = false;
+
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -43,6 +46,8 @@ public class RobotAgent : Agent {
 
         var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
         enemyRobot = robots.FirstOrDefault(r => r != this);
+
+        rewardEditor = FindAnyObjectByType<RewardEditor>();
 
         //Debug.Log("agents: " + enemyRobot.Count() + "with name: " + enemyRobot[0].name);
     }
@@ -63,6 +68,13 @@ public class RobotAgent : Agent {
         }
 
         rb.isKinematic = false;
+
+        movementRwd = 0f;
+        robotFacingRwd = 0f;
+        armReleaseRwd = 0f;
+        enemyDistanceRwd = 0f;
+        arenaPositionRwd = 0f;
+        collisionCombinationRwd = 0f; 
 
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
@@ -92,23 +104,29 @@ public class RobotAgent : Agent {
 
         // GET REWARDS:
 
-        float movementRewards = GetRewards_Movement();
-        AddReward(movementRewards * movementRF);
+        float movementRewards = GetRewards_Movement() * 0.5f;
+        AddReward(movementRewards * rewardEditor.movementRF);
+        movementRwd += (float)System.Math.Round(movementRewards, 2);
 
-        float robotFacingRewards = GetRewards_FacingRobot();
-        AddReward(robotFacingRewards * facingRF);
+        float robotFacingRewards = GetRewards_FacingRobot() * 0.5f;
+        AddReward(robotFacingRewards * rewardEditor.facingRF);
+        robotFacingRwd += (float)System.Math.Round(robotFacingRewards, 2);
 
-        float armReleaseReward = GetRewards_ArmRelease();
-        AddReward(armReleaseReward * armAngleRF * 10f);
+        float armReleaseReward = GetRewards_ArmRelease() * 10f;
+        AddReward(armReleaseReward * rewardEditor.armAngleRF);
+        armReleaseRwd += (float)System.Math.Round(armReleaseReward, 2);
 
         float enemyDistanceReward = GetRewards_EnemyDistance();
-        AddReward(enemyDistanceReward * enemyDistanceRF);
+        AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
+        enemyDistanceRwd += (float)System.Math.Round(enemyDistanceReward, 2);
 
         float arenaPositionReward = GetRewards_ArenaPosition();
-        AddReward(arenaPositionReward * arenaPositionRF);
+        AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
+        arenaPositionRwd += (float)System.Math.Round(arenaPositionReward, 2);
 
-        float collisionCombinationReward = GetRewards_collisionCombination();
-        AddReward(collisionCombinationReward * collisionCombinationRF);
+        float collisionCombinationReward = GetRewards_collisionCombination() * 100f;
+        AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
+        collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
 
         cumulativeReward = GetCumulativeReward();
     }
@@ -128,7 +146,7 @@ public class RobotAgent : Agent {
         if (enemyRobot == null) return 0f;
         float distanceToEnemy = (enemyRobot.transform.localPosition - this.transform.localPosition).magnitude;
         //Debug.Log("Distance to enemy: " + distanceToEnemy);
-        float distanceReward = Mathf.Clamp(distanceToEnemy / 4.5f, 0f, 1f) * -2f + 1f;
+        float distanceReward = Mathf.Clamp(distanceToEnemy / 6f, 0f, 1f) * -2f + 1f;
         return distanceReward;
     }
 

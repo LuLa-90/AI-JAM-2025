@@ -38,6 +38,10 @@ public class CollisionForwarder : MonoBehaviour
                 zone.damageOfZone = 5f;
                 zone.resistanceOfZone = 5f;
             }
+            else if (zone.gameObject.name.Contains("wheels")) {
+                zone.damageOfZone = 5f;
+                zone.resistanceOfZone = 4f;
+            }
             else if (zone.gameObject.name.Contains("weapon")) {
                 zone.damageOfZone = 20f;
                 zone.resistanceOfZone = 15f;
@@ -45,10 +49,6 @@ public class CollisionForwarder : MonoBehaviour
             else if (zone.gameObject.name.Contains("bumper")) {
                 zone.damageOfZone = 15f;
                 zone.resistanceOfZone = 10f;
-            }
-            else if (zone.gameObject.name.Contains("wheels")) {
-                zone.damageOfZone = 5f;
-                zone.resistanceOfZone = 4f;
             }
             else {
                 zone.damageOfZone = 1f;
