@@ -1,11 +1,12 @@
-using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
+using static CollisionZoneBehaviour;
 
 public class RobotAgent : Agent {
 
@@ -28,6 +29,7 @@ public class RobotAgent : Agent {
     [HideInInspector] public RobotAgent enemyRobot;
     [SerializeField] private bool isHeuristic = false;
 
+    public event System.EventHandler OnNewEpisode;
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -56,9 +58,9 @@ public class RobotAgent : Agent {
     public override void OnEpisodeBegin() {
         rb.isKinematic = true;
 
+        OnNewEpisode?.Invoke(this, System.EventArgs.Empty);
+
         //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = false;
-        transform.localPosition = new Vector3(Random.Range(-2.5f, 2.5f), 0.026f, Random.Range(-2.5f, 2.5f));
-        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         //robotMovement.armComponent.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = true;
 
