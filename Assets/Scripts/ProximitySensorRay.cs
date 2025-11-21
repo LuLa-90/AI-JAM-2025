@@ -74,7 +74,7 @@ public class ProximitySensorRay : MonoBehaviour
             }
         }
         //Debug.Log("Closest hit distance: " + sensorValue / rayDistance);
-        Debug.Log("Closest object hit type: " + objectHitType);
+        //Debug.Log("Closest object hit type: " + objectHitType);
         sensorProximity.SetSensorValue(sensorValue / rayDistance);
         sensorRayinfo.SetSensorValue(objectHitType);
     }

@@ -284,6 +284,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TournamentArea
       objectReference: {fileID: 0}
+    - target: {fileID: 3583285237904400010, guid: 2669f4d63884c884489dc98fc6057534, type: 3}
+      propertyPath: m_TagString
+      value: Environment
+      objectReference: {fileID: 0}
     - target: {fileID: 7628906658132135300, guid: 2669f4d63884c884489dc98fc6057534, type: 3}
       propertyPath: m_LocalRotation.w
       value: -0.38268325

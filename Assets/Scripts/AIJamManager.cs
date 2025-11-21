@@ -1,3 +1,5 @@
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -5,35 +7,43 @@ public class AIJamManager : MonoBehaviour
 {
     [SerializeField] RobotAgent robotPrefabA;
     [SerializeField] RobotAgent robotPrefabB;
-    private RobotAgent robotA;
-    private RobotAgent robotB;
 
-    [SerializeField] Transform environment;
+    private enum numArenas {
+        One = 1,
+        Three = 3,
+        Five = 5
+    }
+    [SerializeField] numArenas numOfArenas = numArenas.Three;
+
+    private GameObject[] environments;
 
     private void Start() {
+        environments = GameObject.FindGameObjectsWithTag("Environment");
+
         if (robotPrefabA == null || robotPrefabB == null) {
             Debug.LogError("AIJamManager: One or both RobotAgent references are not set.");
             return;
         }
 
-        robotA = Instantiate(robotPrefabA, environment);
-        robotB = Instantiate(robotPrefabB, environment);
+        foreach (var env in environments.Take((int)numOfArenas)) {
+            var robotA = Instantiate(robotPrefabA, env.transform);
+            var robotB = Instantiate(robotPrefabB, env.transform);
 
-        robotA.OnNewEpisode += Robot_OnNewEpisode;
-        robotB.OnNewEpisode += Robot_OnNewEpisode;
+            robotA.OnNewEpisode += (s, e) => MoveRobot(s as RobotAgent, 0);
+            robotB.OnNewEpisode += (s, e) => MoveRobot(s as RobotAgent, 1);
+
+            var statsGUI = env.GetComponentInChildren<StatisticsGUI>();
+            statsGUI.SetRobots(robotA, robotB);
+        }
     }
 
-    private void Robot_OnNewEpisode(object sender, System.EventArgs e) {
-        MoveRobot(sender as RobotAgent);
-    }
-
-    private void MoveRobot(RobotAgent robot) {
+    private void MoveRobot(RobotAgent robot, int robotIdx) {
         // TODO: premiestnit respawn do RobotAgent skriptu a zavolat z OnEpisodeBegin
 
         float angle = 0f;
-        if (robot == robotA) {
+        if (robotIdx == 0) {
             angle = Random.Range(-25f, -155f);
-        } else if (robot == robotB) {
+        } else if (robotIdx == 1) {
             angle = Random.Range(25f, 155f);
         }
 

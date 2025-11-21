@@ -10,6 +10,7 @@ TagManager:
   - Bonus
   - RobotCamera
   - RobotArm
+  - Environment
   layers:
   - Default
   - TransparentFX

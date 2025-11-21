@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -24,7 +24,7 @@ public class BodyComponent : MonoBehaviour
         var sensors = GetComponentsInChildren<SensorComponent>();
 
         foreach (var sensor in sensors) {
-            // TODO: znormalizovat
+            // TODO: znormalizovatť
             if (sensor.GetSensorType == SensorComponent.SensorType.VelocityForwards) {
                 sensorVelocityForwards = sensor;
             }

@@ -1,11 +1,11 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// Tento skript obsahuje všetku logiku spojenú so správaním ramena.
-/// Stará sa o vıpoèet odmien, a hodnôt pre senzory.
+/// Tento skript obsahuje vÅ¡etku logiku spojenÃº so sprÃ¡vanÃ­m ramena.
+/// StarÃ¡ sa o vÃ½poÄet odmien, a hodnÃ´t pre senzory.
 /// </summary>
 public class ArmComponent : MonoBehaviour {
 

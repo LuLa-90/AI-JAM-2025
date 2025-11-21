@@ -24,12 +24,14 @@ public class RobotAgent : Agent {
 
     private Rigidbody rb;
     private RewardEditor rewardEditor;
+    private BehaviorParameters behavior;
     private RobotMovement robotMovement;
     private CollisionZoneBehaviour[] zoneComponents;
     [HideInInspector] public RobotAgent enemyRobot;
-    [SerializeField] private bool isHeuristic = false;
+    private bool isHeuristic = false;
 
     public event System.EventHandler OnNewEpisode;
+    private bool isStarted = false;
 
     //[SerializeField] private float tempAngleToEnemy;
 
@@ -38,25 +40,34 @@ public class RobotAgent : Agent {
 
     public override void Initialize() {
         cumulativeReward = 0f;
+        MaxStep = 5000;
     }
-
 
     private void Start() {
         robotMovement = gameObject.GetComponent<RobotMovement>();
-        rb = gameObject.GetComponent<Rigidbody>();
         zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+        rb = gameObject.GetComponent<Rigidbody>();
 
         var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
         enemyRobot = robots.FirstOrDefault(r => r != this);
 
         rewardEditor = FindAnyObjectByType<RewardEditor>();
+        behavior = GetComponent<BehaviorParameters>();
 
-        //Debug.Log("agents: " + enemyRobot.Count() + "with name: " + enemyRobot[0].name);
+        isStarted = true;
     }
 
 
     public override void OnEpisodeBegin() {
-        rb.isKinematic = true;
+        movementRwd = 0f;
+        robotFacingRwd = 0f;
+        armReleaseRwd = 0f;
+        enemyDistanceRwd = 0f;
+        arenaPositionRwd = 0f;
+        collisionCombinationRwd = 0f;
+
+        SetReward(0f);
+        cumulativeReward = GetCumulativeReward();
 
         OnNewEpisode?.Invoke(this, System.EventArgs.Empty);
 
@@ -64,23 +75,22 @@ public class RobotAgent : Agent {
         //robotMovement.armComponent.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = true;
 
-        foreach (var zone in zoneComponents)
-        {
-            zone.ResetHealth();
+        if (!isStarted) {
+            return;
         }
 
-        rb.isKinematic = false;
-
-        movementRwd = 0f;
-        robotFacingRwd = 0f;
-        armReleaseRwd = 0f;
-        enemyDistanceRwd = 0f;
-        arenaPositionRwd = 0f;
-        collisionCombinationRwd = 0f; 
-
-        SetReward(0f);
-        cumulativeReward = GetCumulativeReward();
+        foreach (var zone in zoneComponents) {
+            zone.ResetHealth();
+        }
     }
+
+    //public bool IsTraining() {
+    //    // BehaviorParameters controls whether we're using trainer or ONNX
+    //    var behavior = GetComponent<BehaviorParameters>();
+
+    //    // This is true ONLY when Python is connected (training)
+    //    return behavior;
+    //}
 
 
     // ---------------------------- HANDLE REWARDS ----------------------------
@@ -100,37 +110,35 @@ public class RobotAgent : Agent {
             EndEpisode();
         }
 
-        //if (GetCumulativeReward() < -50f) {
-        //    EndEpisode();
-        //}
+        if (rewardEditor != null) { 
+        
+            float movementRewards = GetRewards_Movement() * 0.5f;
+            AddReward(movementRewards * rewardEditor.movementRF);
+            movementRwd += (float)System.Math.Round(movementRewards, 2);
 
-        // GET REWARDS:
+            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f;
+            AddReward(robotFacingRewards * rewardEditor.facingRF);
+            robotFacingRwd += (float)System.Math.Round(robotFacingRewards, 2);
 
-        float movementRewards = GetRewards_Movement() * 0.5f;
-        AddReward(movementRewards * rewardEditor.movementRF);
-        movementRwd += (float)System.Math.Round(movementRewards, 2);
+            float armReleaseReward = GetRewards_ArmRelease() * 10f;
+            AddReward(armReleaseReward * rewardEditor.armAngleRF);
+            armReleaseRwd += (float)System.Math.Round(armReleaseReward, 2);
 
-        float robotFacingRewards = GetRewards_FacingRobot() * 0.5f;
-        AddReward(robotFacingRewards * rewardEditor.facingRF);
-        robotFacingRwd += (float)System.Math.Round(robotFacingRewards, 2);
+            float enemyDistanceReward = GetRewards_EnemyDistance();
+            AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
+            enemyDistanceRwd += (float)System.Math.Round(enemyDistanceReward, 2);
 
-        float armReleaseReward = GetRewards_ArmRelease() * 10f;
-        AddReward(armReleaseReward * rewardEditor.armAngleRF);
-        armReleaseRwd += (float)System.Math.Round(armReleaseReward, 2);
+            float arenaPositionReward = GetRewards_ArenaPosition();
+            AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
+            arenaPositionRwd += (float)System.Math.Round(arenaPositionReward, 2);
 
-        float enemyDistanceReward = GetRewards_EnemyDistance();
-        AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
-        enemyDistanceRwd += (float)System.Math.Round(enemyDistanceReward, 2);
+            float collisionCombinationReward = GetRewards_collisionCombination() * 100f;
+            AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
+            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
 
-        float arenaPositionReward = GetRewards_ArenaPosition();
-        AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
-        arenaPositionRwd += (float)System.Math.Round(arenaPositionReward, 2);
+            cumulativeReward = GetCumulativeReward();
 
-        float collisionCombinationReward = GetRewards_collisionCombination() * 100f;
-        AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
-        collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
-
-        cumulativeReward = GetCumulativeReward();
+        }
     }
 
     private float GetRewards_collisionCombination() {
@@ -195,11 +203,15 @@ public class RobotAgent : Agent {
     // ---------------------------- ACTIONS AND OBSERVATIONS ---------------------------
 
     public override void OnActionReceived(ActionBuffers actions) {
+        if (!isStarted) {
+            return;
+        }
+
         // Process the actions received from the neural network
         float leftWheelsValue = actions.ContinuousActions[0];
         float rightWheelsValue = actions.ContinuousActions[1];
         int armLiftValue = actions.DiscreteActions[0];
-
+        
         if (isHeuristic) {
             robotMovement.ApplyBothTrackInputsHeuristic(leftWheelsValue, rightWheelsValue);
             robotMovement.ApplyArmInput(armLiftValue);
@@ -212,7 +224,7 @@ public class RobotAgent : Agent {
 
     public override void CollectObservations(VectorSensor observations) {
         for (int i = 0; i < observations.ObservationSize(); i++) {
-            var observationValue = sensors.ElementAtOrDefault(i)?.SensorValue ?? 0f;
+            var observationValue = sensors?.ElementAtOrDefault(i)?.SensorValue ?? 0f;
             observations.AddObservation(observationValue);
         }
     }
@@ -221,6 +233,11 @@ public class RobotAgent : Agent {
 
     public override void Heuristic(in ActionBuffers actionsOut) {
         isHeuristic = true;
+        MaxStep = 0; // Disable max step limit for heuristic mode
+
+        if (!isStarted) {
+            return;
+        }
 
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
