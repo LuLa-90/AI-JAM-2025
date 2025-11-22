@@ -1,18 +1,23 @@
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StatsBarGUI : MonoBehaviour
 {
-    public string Name => gameObject.name;
+    private Image healthBar;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        healthBar = transform.Find("ZoneBar/BarVisual").GetComponent<Image>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public string Name => gameObject.name;
+
+    internal void UpdateStatBar(IHealth healthComponent) {
+        if (healthComponent == null) {
+            return;
+        }
+        healthBar.fillAmount = Mathf.Clamp(healthComponent.CurrentHealth, 0f, 1f);
     }
 }

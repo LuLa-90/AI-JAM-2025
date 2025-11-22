@@ -1,11 +1,13 @@
 using System.Linq;
 using UnityEngine;
 
-public class WheelComponent : MonoBehaviour {
-    
+public class WheelComponent : MonoBehaviour, IHealth {
+
     private SensorComponent sensorDamage = null;
 
     private CollisionZoneBehaviour[] zoneComponents = null;
+
+    float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
 
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();
@@ -13,8 +15,12 @@ public class WheelComponent : MonoBehaviour {
         foreach (var sensor in sensors) {
             if (sensor.GetSensorType == SensorComponent.SensorType.Damage) {
                 sensorDamage = sensor;
+                sensorDamage.SetSensorValue(1f);
 
                 zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+                foreach (var zone in zoneComponents) {
+                    zone.SetZoneType("wheel");
+                }
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BodyComponent : MonoBehaviour
+public class BodyComponent : MonoBehaviour, IHealth
 {
     private SensorComponent sensorVelocityForwards = null;
     private SensorComponent sensorVelocitySideways = null;
@@ -15,6 +15,8 @@ public class BodyComponent : MonoBehaviour
     private RobotAgent thisRobot;
 
     private CollisionZoneBehaviour[] zoneComponents = null;
+
+    float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
 
     private void Start() {
         rb = GetComponentInParent<Rigidbody>();
@@ -33,8 +35,12 @@ public class BodyComponent : MonoBehaviour
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.Damage) {
                 sensorDamage = sensor;
+                sensorDamage.SetSensorValue(1f);
 
                 zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+                foreach (var zone in zoneComponents) {
+                    zone.SetZoneType("body");
+                }
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.AzimuthToTarget) {
                 sensorEnemyAzimuth = sensor;

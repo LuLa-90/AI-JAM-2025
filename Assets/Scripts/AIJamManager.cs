@@ -25,12 +25,14 @@ public class AIJamManager : MonoBehaviour
             return;
         }
 
-        foreach (var env in environments.Take((int)numOfArenas)) {
+        foreach (var env in environments.OrderBy(e => e.name).Take((int)numOfArenas)) {
             var robotA = Instantiate(robotPrefabA, env.transform);
             var robotB = Instantiate(robotPrefabB, env.transform);
+            robotA.gameObject.name = robotPrefabA.gameObject.name;
+            robotB.gameObject.name = robotPrefabB.gameObject.name;
 
-            robotA.OnNewEpisode += (s, e) => MoveRobot(s as RobotAgent, 0);
-            robotB.OnNewEpisode += (s, e) => MoveRobot(s as RobotAgent, 1);
+            robotA.OnRobotRespawn += (s, e) => MoveRobot(s as RobotAgent, 0);
+            robotB.OnRobotRespawn += (s, e) => MoveRobot(s as RobotAgent, 1);
 
             var statsGUI = env.GetComponentInChildren<StatisticsGUI>();
             statsGUI.SetRobots(robotA, robotB);

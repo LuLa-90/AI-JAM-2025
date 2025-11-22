@@ -7,7 +7,8 @@ using UnityEngine;
 /// Tento skript obsahuje všetku logiku spojenú so správaním ramena.
 /// Stará sa o výpočet odmien, a hodnôt pre senzory.
 /// </summary>
-public class ArmComponent : MonoBehaviour {
+public class ArmComponent : MonoBehaviour, IHealth
+{
 
     public float ArmRaisingReward { get; private set; }
     public float ArmDropReward { 
@@ -31,6 +32,8 @@ public class ArmComponent : MonoBehaviour {
 
     private CollisionZoneBehaviour[] zoneComponents = null;
 
+    float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
+
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();
 
@@ -41,8 +44,14 @@ public class ArmComponent : MonoBehaviour {
             }
             if (sensor.GetSensorType == SensorComponent.SensorType.Damage) {
                 sensorDamage = sensor;
+                sensorDamage.SetSensorValue(1f);
 
                 zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+                foreach (var zone in zoneComponents) {
+                    zone.SetZoneType("arm");
+                }
+
+                //Debug.Log($"Arm found {zoneComponents.Length} collision zones.");
 
                 foreach (var zone in zoneComponents) {
                     zone.OnCollision += ArmCollisionDetection;

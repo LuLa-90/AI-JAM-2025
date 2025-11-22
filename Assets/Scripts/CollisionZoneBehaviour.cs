@@ -5,13 +5,15 @@ using UnityEngine;
 public class CollisionZoneBehaviour : MonoBehaviour {
 
     private float totalHealth = 1f;
-    [SerializeField] public float CurrentHealth;
+    [SerializeField] public float CurrentHealth = 1f;
     public float RewardOfCollision { get; private set; }
 
     // Percentual value of how much damage is taken per hit based on collision force
     [SerializeField, Range(1f, 20f)] public float resistanceOfZone = 1f;
     // Multiplier for damage to enemy based on collision force
     [SerializeField, Range(1f, 20f)] public float damageOfZone = 1f;
+
+    private string zoneType = "default";
 
     public event EventHandler<CollisionEventArgs> OnCollision;
     public class CollisionEventArgs : EventArgs {
@@ -67,5 +69,17 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
     public void ResetHealth() {
         CurrentHealth = totalHealth;
+    }
+
+    public void ChangeHealth(float value) {
+        CurrentHealth = Math.Clamp(CurrentHealth + value, 0f, totalHealth);
+    }
+
+    internal void SetZoneType(string type) {
+        zoneType = type;
+    }
+
+    public string GetZoneType() {
+        return zoneType;
     }
 }

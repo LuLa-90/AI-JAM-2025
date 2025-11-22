@@ -45,7 +45,12 @@ public class RobotMovement : MonoBehaviour {
     private void FixedUpdate() {
         float slowdown = Time.fixedDeltaTime * motorTorqueMax;
         foreach (var wheel in rightWheels.Concat(leftWheels)) {
-            wheel.motorTorque = Mathf.Clamp(wheel.motorTorque - (slowdown * Mathf.Sign(wheel.motorTorque)), -motorTorqueMax, motorTorqueMax);
+            if (Mathf.Abs(wheel.motorTorque) < slowdown) {
+                wheel.motorTorque = 0f;
+            }
+            else {
+                wheel.motorTorque = Mathf.Clamp(wheel.motorTorque - (slowdown * Mathf.Sign(wheel.motorTorque)), -motorTorqueMax, motorTorqueMax);
+            }
         }
     }
 

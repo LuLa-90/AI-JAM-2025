@@ -34,13 +34,13 @@ public class CollisionForwarder : MonoBehaviour
                 zone.damageOfZone = 1f;
                 zone.resistanceOfZone = 1f;
             }
-            else if (zone.gameObject.name.Contains("armbase")) {
-                zone.damageOfZone = 5f;
-                zone.resistanceOfZone = 5f;
-            }
             else if (zone.gameObject.name.Contains("wheels")) {
                 zone.damageOfZone = 5f;
                 zone.resistanceOfZone = 4f;
+            }
+            else if (zone.gameObject.name.Contains("armbase")) {
+                zone.damageOfZone = 2f;
+                zone.resistanceOfZone = 3f;
             }
             else if (zone.gameObject.name.Contains("weapon")) {
                 zone.damageOfZone = 20f;

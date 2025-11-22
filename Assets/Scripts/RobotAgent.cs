@@ -1,4 +1,5 @@
 using System.Linq;
+using TMPro;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
@@ -20,17 +21,18 @@ public class RobotAgent : Agent {
     [SerializeField] private float arenaPositionRwd;
     [SerializeField] private float collisionCombinationRwd;
 
-    [SerializeField] private SensorComponent[] sensors = new SensorComponent[7]; 
+    [SerializeField] private SensorComponent[] sensors = new SensorComponent[7];
 
     private Rigidbody rb;
-    private RewardEditor rewardEditor;
+    [SerializeField] private RewardEditor rewardEditor;
     private BehaviorParameters behavior;
     private RobotMovement robotMovement;
     private CollisionZoneBehaviour[] zoneComponents;
+    private IHealth[] healthComponents;
     [HideInInspector] public RobotAgent enemyRobot;
     private bool isHeuristic = false;
 
-    public event System.EventHandler OnNewEpisode;
+    public event System.EventHandler OnRobotRespawn;
     private bool isStarted = false;
 
     //[SerializeField] private float tempAngleToEnemy;
@@ -46,6 +48,9 @@ public class RobotAgent : Agent {
     private void Start() {
         robotMovement = gameObject.GetComponent<RobotMovement>();
         zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+        healthComponents = GetComponentsInChildren<IHealth>();
+        //Debug.Log($"RobotAgent found {zoneComponents.Length} collision zones and {healthComponents.Length} health components.");
+
         rb = gameObject.GetComponent<Rigidbody>();
 
         var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
@@ -69,7 +74,7 @@ public class RobotAgent : Agent {
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
 
-        OnNewEpisode?.Invoke(this, System.EventArgs.Empty);
+        OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
 
         //robotMovement.armComponent.GetComponent<HingeJoint>().enableCollision = false;
         //robotMovement.armComponent.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
@@ -100,18 +105,29 @@ public class RobotAgent : Agent {
 
         if (transform.localPosition.y < -1f) {
             Debug.Log("Robot fell out of arena!");
-            SetReward(-10f);
-            EndEpisode();
+
+            foreach (var zone in zoneComponents) {
+                zone.ChangeHealth(-0.25f);
+            }
+
+            OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
 
         float rotationUp = Vector3.Dot(transform.up, Vector3.up);
         if (rotationUp < 0.2f) {
             Debug.Log("Robot flipped over!");
-            EndEpisode();
+
+            foreach (var zone in zoneComponents) {
+                zone.ChangeHealth(-0.2f);
+            }
+
+            OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
 
-        if (rewardEditor != null) { 
-        
+        DieCases();
+
+        if (rewardEditor != null) {
+
             float movementRewards = GetRewards_Movement() * 0.5f;
             AddReward(movementRewards * rewardEditor.movementRF);
             movementRwd += (float)System.Math.Round(movementRewards, 2);
@@ -136,20 +152,59 @@ public class RobotAgent : Agent {
             AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
             collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
 
+            // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)
+
             cumulativeReward = GetCumulativeReward();
 
         }
     }
 
+    private void DieCases() {
+
+        if (healthComponents.Count() == 0) {
+            return;
+        }
+
+        foreach (var healthComp in healthComponents) {
+            switch (healthComp) {
+                case BodyComponent bodyComp:
+                    //Debug.Log($"Body health: {healthComp.CurrentHealth}");
+
+                    if (healthComp.CurrentHealth <= 0.1f) {
+                        Debug.Log("Robot body destroyed!");
+                        // TODO: Method for robot dying, losing/winning logic
+                        AddReward(-1500f);
+                        EndEpisode();
+                    }
+                    break;
+                case WheelComponent wheelComp:
+                    //Debug.Log($"Wheel health: {healthComp.CurrentHealth}");
+                    break;
+                case BumperComponent bumperComp:
+                    //Debug.Log($"Bumper health: {healthComp.CurrentHealth}");
+                    break;
+                case ArmComponent armComp:
+                    //Debug.Log($"Arm health: {healthComp.CurrentHealth}");
+                    break;
+            }
+        }
+
+        if (healthComponents.Average(e => e.CurrentHealth) <= 0.3f) {
+            Debug.Log("Robot beyond repair!");
+            AddReward(-1000f);
+            EndEpisode();
+        }
+    }
+
     private float GetRewards_collisionCombination() {
         var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
-        return Mathf.Clamp(sumReward, -1f, 1f); 
+        return Mathf.Clamp(sumReward, -1f, 1f);
     }
 
     private float GetRewards_ArenaPosition() {
         float distanceToCenter = this.transform.localPosition.magnitude;
         float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f) * -2f + 1f;
-        return distanceReward; 
+        return distanceReward;
     }
 
     private float GetRewards_EnemyDistance() {
@@ -211,11 +266,12 @@ public class RobotAgent : Agent {
         float leftWheelsValue = actions.ContinuousActions[0];
         float rightWheelsValue = actions.ContinuousActions[1];
         int armLiftValue = actions.DiscreteActions[0];
-        
+
         if (isHeuristic) {
             robotMovement.ApplyBothTrackInputsHeuristic(leftWheelsValue, rightWheelsValue);
             robotMovement.ApplyArmInput(armLiftValue);
-        } else {
+        }
+        else {
             robotMovement.ApplyBothTrackInputs(leftWheelsValue, rightWheelsValue);
             robotMovement.ApplyArmInput(armLiftValue);
         }

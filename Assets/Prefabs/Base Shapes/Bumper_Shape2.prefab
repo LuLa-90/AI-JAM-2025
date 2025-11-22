@@ -57,6 +57,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3605481103489385880}
+  - component: {fileID: 3622305028882867693}
   m_Layer: 0
   m_Name: Bumper_Shape2
   m_TagString: Untagged
@@ -81,6 +82,18 @@ Transform:
   - {fileID: 4913254802017103717}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3622305028882867693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7061015942067492306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d3d4844ce78b3147b33da11a63eaaa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3634744217412810394
 PrefabInstance:
   m_ObjectHideFlags: 0
