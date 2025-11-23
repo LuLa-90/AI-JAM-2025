@@ -1,13 +1,20 @@
-using System.Linq;
+﻿using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Manažuje logiku najvyššej úrovne pre AI Jam. Stará sa o spawnovanie robotov vo viacerých arénach
+/// pre účely trénovania alebo turnaja, riadi, začína a končí zápasy.
+/// </summary>
 public class AIJamManager : MonoBehaviour
 {
+    // Prefaby robotov pre tréning alebo turnaj. Môžu to byť rovnaké alebo rôzne roboty.
     [SerializeField] RobotAgent robotPrefabA;
     [SerializeField] RobotAgent robotPrefabB;
 
+
+    // Počet arén pre tréning. Je potrebné otestovať výkon pri rôznych počtoch.
     private enum numArenas {
         One = 1,
         Three = 3,
@@ -15,9 +22,12 @@ public class AIJamManager : MonoBehaviour
     }
     [SerializeField] numArenas numOfArenas = numArenas.Three;
 
+
+    // Pole všetkých trénovacích prostredí - určené počtom arén zvoleným v inšpektore.
     private GameObject[] environments;
 
     private void Start() {
+
         environments = GameObject.FindGameObjectsWithTag("Environment");
 
         if (robotPrefabA == null || robotPrefabB == null) {

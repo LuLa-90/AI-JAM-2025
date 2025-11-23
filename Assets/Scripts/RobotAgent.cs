@@ -107,7 +107,7 @@ public class RobotAgent : Agent {
             Debug.Log("Robot fell out of arena!");
 
             foreach (var zone in zoneComponents) {
-                zone.ChangeHealth(-0.25f);
+                zone.ChangeHealth(-0.3f);
             }
 
             OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
