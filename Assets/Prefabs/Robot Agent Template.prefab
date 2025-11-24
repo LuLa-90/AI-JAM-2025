@@ -381,6 +381,12 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
   cumulativeReward: 0
+  movementRwd: 0
+  robotFacingRwd: 0
+  armReleaseRwd: 0
+  enemyDistanceRwd: 0
+  arenaPositionRwd: 0
+  collisionCombinationRwd: 0
   sensors:
   - {fileID: 0}
   - {fileID: 0}
@@ -389,14 +395,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  movementRF: 0.8
-  facingRF: 0.5
-  armAngleRF: 0.5
-  enemyDistanceRF: 0.2
-  arenaPositionRF: 0.2
-  collisionCombinationRF: 0.7
+  rewardEditor: {fileID: 0}
   enemyRobot: {fileID: 0}
-  isHeuristic: 0
 --- !u!114 &5010629318851500838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,8 +457,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 7381588358242463818}
   m_SensorName: CameraSensor
-  m_Width: 64
-  m_Height: 64
+  m_Width: 32
+  m_Height: 32
   m_Grayscale: 0
   m_ObservationType: 0
   m_RuntimeCameraEnable: 0
