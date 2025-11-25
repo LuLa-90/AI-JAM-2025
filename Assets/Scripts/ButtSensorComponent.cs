@@ -43,10 +43,10 @@ public class ButtSensorComponent : MonoBehaviour {
 
     private void OnDrawGizmos() {
         if (buttSensor?.SensorValue == 1f) {
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color.green;
         }
         else {
-            Gizmos.color = Color.gray;
+            Gizmos.color = Color.blue;
         }
 
         if (buttMarkerObject != null) {

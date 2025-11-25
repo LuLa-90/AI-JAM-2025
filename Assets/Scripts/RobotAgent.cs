@@ -114,7 +114,7 @@ public class RobotAgent : Agent {
         }
 
         float rotationUp = Vector3.Dot(transform.up, Vector3.up);
-        if (rotationUp < 0.2f) {
+        if (rotationUp < 0.75f) { // origin 0.2f
             Debug.Log("Robot flipped over!");
 
             foreach (var zone in zoneComponents) {
@@ -126,29 +126,30 @@ public class RobotAgent : Agent {
 
         DieCases();
 
-        if (rewardEditor != null) {
+        if (rewardEditor != null)
+        {
 
-            float movementRewards = GetRewards_Movement() * 0.5f;
+            float movementRewards = GetRewards_Movement() * 0.5f * Time.deltaTime;
             AddReward(movementRewards * rewardEditor.movementRF);
             movementRwd += (float)System.Math.Round(movementRewards, 2);
 
-            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f;
+            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f * Time.deltaTime;
             AddReward(robotFacingRewards * rewardEditor.facingRF);
             robotFacingRwd += (float)System.Math.Round(robotFacingRewards, 2);
 
-            float armReleaseReward = GetRewards_ArmRelease() * 10f;
+            float armReleaseReward = GetRewards_ArmRelease() * 10f * Time.deltaTime;
             AddReward(armReleaseReward * rewardEditor.armAngleRF);
             armReleaseRwd += (float)System.Math.Round(armReleaseReward, 2);
 
-            float enemyDistanceReward = GetRewards_EnemyDistance();
+            float enemyDistanceReward = GetRewards_EnemyDistance() * Time.deltaTime;
             AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
             enemyDistanceRwd += (float)System.Math.Round(enemyDistanceReward, 2);
 
-            float arenaPositionReward = GetRewards_ArenaPosition();
+            float arenaPositionReward = GetRewards_ArenaPosition() * Time.deltaTime;
             AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
             arenaPositionRwd += (float)System.Math.Round(arenaPositionReward, 2);
 
-            float collisionCombinationReward = GetRewards_collisionCombination() * 100f;
+            float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
             AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
             collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
 
@@ -157,6 +158,7 @@ public class RobotAgent : Agent {
             cumulativeReward = GetCumulativeReward();
 
         }
+
     }
 
     private void DieCases() {
@@ -203,7 +205,7 @@ public class RobotAgent : Agent {
 
     private float GetRewards_ArenaPosition() {
         float distanceToCenter = this.transform.localPosition.magnitude;
-        float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f) * -2f + 1f;
+        float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f);// * -2f + 1f;
         return distanceReward;
     }
 
@@ -211,7 +213,7 @@ public class RobotAgent : Agent {
         if (enemyRobot == null) return 0f;
         float distanceToEnemy = (enemyRobot.transform.localPosition - this.transform.localPosition).magnitude;
         //Debug.Log("Distance to enemy: " + distanceToEnemy);
-        float distanceReward = Mathf.Clamp(distanceToEnemy / 6f, 0f, 1f) * -2f + 1f;
+        float distanceReward = Mathf.Clamp(distanceToEnemy / 6f, 0f, 1f);// * -2f + 1f;
         return distanceReward;
     }
 

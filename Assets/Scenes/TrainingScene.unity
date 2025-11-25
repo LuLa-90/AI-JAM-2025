@@ -2752,8 +2752,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57513dd360039b04fa4adcb4e325cb8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  robotPrefabA: {fileID: 6661878484707341622, guid: be8629ce3e0ef024db3ad5b8646648ef, type: 3}
-  robotPrefabB: {fileID: 6661878484707341622, guid: 76459fbdbf6637f4889e89874ac7fb5f, type: 3}
+  robotPrefabA: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
+  robotPrefabB: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
   numOfArenas: 3
 --- !u!4 &1416550321
 Transform:

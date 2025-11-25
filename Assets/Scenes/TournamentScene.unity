@@ -1188,8 +1188,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1529374242}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.27140284, y: -0, z: -0, w: 0.9624659}
-  m_LocalPosition: {x: 0, y: 2.8, z: -5.62}
+  m_LocalRotation: {x: 0.31890082, y: 0.014839618, z: -0.0048887483, w: 0.9476594}
+  m_LocalPosition: {x: -0.1773367, y: 3.8480713, z: -4.2853017}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1295,9 +1295,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57513dd360039b04fa4adcb4e325cb8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  robotPrefabA: {fileID: 6661878484707341622, guid: be8629ce3e0ef024db3ad5b8646648ef, type: 3}
-  robotPrefabB: {fileID: 6661878484707341622, guid: be8629ce3e0ef024db3ad5b8646648ef, type: 3}
-  numOfArenas: 3
+  robotPrefabA: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
+  robotPrefabB: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
+  numOfArenas: 1
 --- !u!4 &1854428816
 Transform:
   m_ObjectHideFlags: 0
