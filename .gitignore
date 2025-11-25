@@ -103,3 +103,6 @@ InitTestScene*.unity*
 /Assets/TextMesh Pro
 /Assets/TextMesh Pro.meta
 /Assets/Prefabs/Backups
+/Assets/ML-Agents/Timers
+/Assets/results
+/Assets/ML-Agents/Timers.meta
