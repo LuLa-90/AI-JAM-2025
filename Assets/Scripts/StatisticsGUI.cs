@@ -64,8 +64,8 @@ public class StatisticsGUI : MonoBehaviour {
                 case "StatItemRWheels":
                     statBar.UpdateStatBar(wheelComponents[1]);
                     break;
-                case "StatItemArm":
-                    statBar.UpdateStatBar(robot.GetComponentInChildren<ArmComponent>());
+                case "StatItemAverage":
+                    statBar.UpdateStatBar(robot.weightedAverageHealth, 0.2f, 1f);
                     break;
                 default:
                     Debug.LogWarning("Unknown stat name: " + statBar.Name);

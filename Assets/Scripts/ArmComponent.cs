@@ -33,6 +33,7 @@ public class ArmComponent : MonoBehaviour, IHealth
     private CollisionZoneBehaviour[] zoneComponents = null;
 
     float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
+    float IHealth.influenceOnTotalHealth => 0.1f;
 
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();

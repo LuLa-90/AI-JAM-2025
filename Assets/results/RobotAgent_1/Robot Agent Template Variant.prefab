@@ -314,6 +314,10 @@ PrefabInstance:
       value: -0.254
       objectReference: {fileID: 0}
     - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: MaxStep
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 395867838849753299, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: robotFacingRwd
       value: 0
       objectReference: {fileID: 0}

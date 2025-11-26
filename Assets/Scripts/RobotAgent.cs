@@ -32,8 +32,10 @@ public class RobotAgent : Agent {
     private IHealth[] healthComponents;
     [HideInInspector] public RobotAgent enemyRobot;
     private bool isHeuristic = false;
+    [HideInInspector] public float weightedAverageHealth = 1f;
 
     public event System.EventHandler OnRobotRespawn;
+    public event System.EventHandler OnRobotDie;
     private bool isStarted = false;
 
     //[SerializeField] private float tempAngleToEnemy;
@@ -43,7 +45,7 @@ public class RobotAgent : Agent {
 
     public override void Initialize() {
         cumulativeReward = 0f;
-        MaxStep = 5000;
+        MaxStep = 0; //TODO: 5000; - disable for now
     }
 
     private void Start() {
@@ -90,7 +92,7 @@ public class RobotAgent : Agent {
         // Scale
         zoneReward *= 10000f;
         // apply
-        Debug.Log(zoneReward);
+        //Debug.Log(zoneReward);
         AddReward(zoneReward);
     }
 
@@ -157,48 +159,71 @@ public class RobotAgent : Agent {
             OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
 
-        DieCases();
+        // Check if robot has died
+        if (CheckIfDied()) {
+            // Raise event for robot's death
+            OnRobotDie?.Invoke(this, System.EventArgs.Empty);
+
+            // End the episode with negative reward (lose)
+            AddReward(-1000f);
+            EndEpisode();
+
+            // Give positive reward to enemy robot (win)
+            enemyRobot?.AddReward(1000f);
+            enemyRobot?.EndEpisode();
+        }
 
         /// origin position ***AAA***
         
 
     }
 
-    private void DieCases() {
+    /// <summary>
+    /// Checks if a robot has died based on the weighted average health of its components.
+    /// </summary>
+    /// <returns>Returns true if the robot is considered dead, otherwise false.</returns>
+    private bool CheckIfDied() {
 
         if (healthComponents.Count() == 0) {
-            return;
+            return false;
         }
 
-        foreach (var healthComp in healthComponents) {
-            switch (healthComp) {
-                case BodyComponent bodyComp:
-                    //Debug.Log($"Body health: {healthComp.CurrentHealth}");
 
-                    if (healthComp.CurrentHealth <= 0.1f) {
-                        Debug.Log("Robot body destroyed!");
-                        // TODO: Method for robot dying, losing/winning logic
-                        AddReward(-1500f);
-                        EndEpisode();
-                    }
-                    break;
-                case WheelComponent wheelComp:
-                    //Debug.Log($"Wheel health: {healthComp.CurrentHealth}");
-                    break;
-                case BumperComponent bumperComp:
-                    //Debug.Log($"Bumper health: {healthComp.CurrentHealth}");
-                    break;
-                case ArmComponent armComp:
-                    //Debug.Log($"Arm health: {healthComp.CurrentHealth}");
-                    break;
-            }
-        }
+        // Probably not needed, because of the new weighted average method of average health
 
-        if (healthComponents.Average(e => e.CurrentHealth) <= 0.3f) {
+        //foreach (var healthComp in healthComponents) {
+        //    switch (healthComp) {
+        //        case BodyComponent bodyComp:
+        //            //Debug.Log($"Body health: {healthComp.CurrentHealth}");
+
+        //            if (healthComp.CurrentHealth <= 0.1f) {
+        //                Debug.Log("Robot body destroyed!");
+        //                // TODO: Method for robot dying, losing/winning logic
+        //                return true;
+        //            }
+        //            break;
+        //        case WheelComponent wheelComp:
+        //            //Debug.Log($"Wheel health: {healthComp.CurrentHealth}");
+        //            break;
+        //        case BumperComponent bumperComp:
+        //            //Debug.Log($"Bumper health: {healthComp.CurrentHealth}");
+        //            break;
+        //        case ArmComponent armComp:
+        //            //Debug.Log($"Arm health: {healthComp.CurrentHealth}");
+        //            break;
+        //    }
+        //}
+
+        var sumHealth = healthComponents.Sum(e => e.CurrentHealth * e.influenceOnTotalHealth);
+        var weightsHealth = healthComponents.Sum(e => e.influenceOnTotalHealth);
+        weightedAverageHealth = sumHealth / weightsHealth;
+
+        if (weightedAverageHealth <= 0.2f) {
             Debug.Log("Robot beyond repair!");
-            AddReward(-1000f);
-            EndEpisode();
+            return true;
         }
+
+        return false;
     }
 
     float lastDamageOrHitTime;
@@ -227,7 +252,7 @@ public class RobotAgent : Agent {
             float distanceToEnemy = (enemyRobot.transform.position - transform.position).magnitude;
 
             bool veryClose = distanceToEnemy < 1.0f;           // tune threshold
-            bool noRecentHit = Time.time - lastDamageOrHitTime > 0.3f; // no impact for 0.3s
+            bool noRecentHit = (Time.time - lastDamageOrHitTime) > 0.3f; // no impact for 0.3s
 
             // optional: check relative speed to detect "just sliding"
             var myVel = rb != null ? rb.linearVelocity : Vector3.zero;

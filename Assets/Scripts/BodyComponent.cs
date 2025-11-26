@@ -17,6 +17,7 @@ public class BodyComponent : MonoBehaviour, IHealth
     private CollisionZoneBehaviour[] zoneComponents = null;
 
     float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
+    float IHealth.influenceOnTotalHealth => 1.0f;
 
     private void Start() {
         rb = GetComponentInParent<Rigidbody>();

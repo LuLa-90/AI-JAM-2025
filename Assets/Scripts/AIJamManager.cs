@@ -26,6 +26,7 @@ public class AIJamManager : MonoBehaviour
     // Pole všetkých trénovacích prostredí - určené počtom arén zvoleným v inšpektore.
     private GameObject[] environments;
 
+
     private void Start() {
 
         environments = GameObject.FindGameObjectsWithTag("Environment");
@@ -42,10 +43,14 @@ public class AIJamManager : MonoBehaviour
             robotB.gameObject.name = robotPrefabB.gameObject.name;
 
             robotA.OnRobotRespawn += (s, e) => MoveRobot(s as RobotAgent, 0);
-            robotB.OnRobotRespawn += (s, e) => MoveRobot(s as RobotAgent, 1);
+            robotB.OnRobotRespawn += (s, e) => MoveRobot(s as RobotAgent, 1); 
 
             var statsGUI = env.GetComponentInChildren<StatisticsGUI>();
             statsGUI.SetRobots(robotA, robotB);
+
+            var scoreGUI = env.GetComponentInChildren<ScoreGUI>();
+            scoreGUI.SetRobots(robotA, robotB);
+
         }
     }
 

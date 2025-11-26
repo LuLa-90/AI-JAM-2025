@@ -1,10 +1,6 @@
 using System.Linq;
 using UnityEngine;
 
-public interface IHealth {
-    public float CurrentHealth { get; }
-}
-
 public class BumperComponent : MonoBehaviour, IHealth
 {
     private SensorComponent sensorDamage = null;
@@ -12,6 +8,7 @@ public class BumperComponent : MonoBehaviour, IHealth
     private CollisionZoneBehaviour[] zoneComponents = null;
 
     float IHealth.CurrentHealth => sensorDamage?.SensorValue ?? 1f;
+    float IHealth.influenceOnTotalHealth => 0.5f;
 
     private void Start() {
         var sensors = GetComponentsInChildren<SensorComponent>();
