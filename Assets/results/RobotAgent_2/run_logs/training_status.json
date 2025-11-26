@@ -1,0 +1,65 @@
+{
+    "RobotAgent": {
+        "checkpoints": [
+            {
+                "steps": 499991,
+                "file_path": "results\\RobotAgent_2\\RobotAgent\\RobotAgent-499991.onnx",
+                "reward": null,
+                "creation_time": 1764077336.3836977,
+                "auxillary_file_paths": [
+                    "results\\RobotAgent_2\\RobotAgent\\RobotAgent-499991.pt"
+                ]
+            },
+            {
+                "steps": 999992,
+                "file_path": "results\\RobotAgent_2\\RobotAgent\\RobotAgent-999992.onnx",
+                "reward": -70.00506422349385,
+                "creation_time": 1764079352.7153747,
+                "auxillary_file_paths": [
+                    "results\\RobotAgent_2\\RobotAgent\\RobotAgent-999992.pt"
+                ]
+            },
+            {
+                "steps": 1357820,
+                "file_path": "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1357820.onnx",
+                "reward": 27.62782856822014,
+                "creation_time": 1764080846.869675,
+                "auxillary_file_paths": [
+                    "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1357820.pt"
+                ]
+            },
+            {
+                "steps": 1499956,
+                "file_path": "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1499956.onnx",
+                "reward": 2387.590943084823,
+                "creation_time": 1764093166.9624913,
+                "auxillary_file_paths": [
+                    "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1499956.pt"
+                ]
+            },
+            {
+                "steps": 1826028,
+                "file_path": "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1826028.onnx",
+                "reward": 1244.8310314759613,
+                "creation_time": 1764094510.198001,
+                "auxillary_file_paths": [
+                    "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1826028.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1826028,
+            "file_path": "results\\RobotAgent_2\\RobotAgent.onnx",
+            "reward": 1244.8310314759613,
+            "creation_time": 1764094510.198001,
+            "auxillary_file_paths": [
+                "results\\RobotAgent_2\\RobotAgent\\RobotAgent-1826028.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
