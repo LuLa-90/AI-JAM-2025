@@ -2754,7 +2754,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   robotPrefabA: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
   robotPrefabB: {fileID: 4561580512663870113, guid: da63a55927d91524f89110fd50da0d09, type: 3}
-  numOfArenas: 3
+  numOfArenas: 5
 --- !u!4 &1416550321
 Transform:
   m_ObjectHideFlags: 0
@@ -2848,12 +2848,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a4217dd11159074e9293c1d77437f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementRF: 0.8
-  facingRF: 0.2
-  armAngleRF: 0.5
-  enemyDistanceRF: 0.3
-  arenaPositionRF: 0.1
-  collisionCombinationRF: 0.9
+  movementRF: 0
+  facingRF: 0.389
+  armAngleRF: 0.167
+  enemyDistanceRF: 0.533
+  arenaPositionRF: 0.111
+  collisionCombinationRF: 0.644
 --- !u!4 &1701397034
 Transform:
   m_ObjectHideFlags: 0

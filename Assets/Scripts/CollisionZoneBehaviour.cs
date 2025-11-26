@@ -9,9 +9,11 @@ public class CollisionZoneBehaviour : MonoBehaviour {
     public float RewardOfCollision { get; private set; }
 
     // Percentual value of how much damage is taken per hit based on collision force
-    [SerializeField, Range(1f, 20f)] public float resistanceOfZone = 1f;
+    // [SerializeField, Range(1f, 20f)]
+    [HideInInspector] public float resistanceOfZone = 1f;
     // Multiplier for damage to enemy based on collision force
-    [SerializeField, Range(1f, 20f)] public float damageOfZone = 1f;
+    //[SerializeField, Range(1f, 20f)]
+    [HideInInspector] public float damageOfZone = 1f;
 
     private string zoneType = "default";
 
@@ -33,7 +35,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
     private void Update() {
         RewardOfCollision = 0f;
     }
-
+    
     internal void OnCollisionHit(Collision collision, CollisionZoneBehaviour enemyCollisionZone) {
         // normalised collision force
         float collisionForce = collision.impulse.magnitude / Time.fixedDeltaTime / 100000f;

@@ -43,11 +43,11 @@ public class CollisionForwarder : MonoBehaviour
                 zone.resistanceOfZone = 3f;
             }
             else if (zone.gameObject.name.Contains("weapon")) {
-                zone.damageOfZone = 20f;
+                zone.damageOfZone = 200f;
                 zone.resistanceOfZone = 15f;
             }
             else if (zone.gameObject.name.Contains("bumper")) {
-                zone.damageOfZone = 15f;
+                zone.damageOfZone = 150f;
                 zone.resistanceOfZone = 10f;
             }
             else {

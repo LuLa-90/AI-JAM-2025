@@ -6,6 +6,7 @@ using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using static CollisionZoneBehaviour;
 
@@ -60,7 +61,39 @@ public class RobotAgent : Agent {
         behavior = GetComponent<BehaviorParameters>();
 
         isStarted = true;
+
+
+
+        foreach (var zone in zoneComponents)            // pre kazdy kolider ...
+        {   
+            zone.OnCollision += HandleZoneCollision;    // prihlad funkciu na event aby sme v okamziku dali velku odmenu za zasah nepriatela
+        }
+   
     }
+
+    public void HandleZoneCollision(object sender, CollisionZoneBehaviour.CollisionEventArgs e)
+    {
+        // You can check what we hit using e.colliderHitName (it's the tag)
+        bool hitEnemy = e.colliderHitName == "Robot"; // or whatever tag you use for enemy tank
+
+        if (!hitEnemy)
+        {
+            // Maybe no reward for walls or non-enemy objects
+            return;
+        }
+
+        float zoneReward = 0;
+        // Option 1: Use the per-zone reward that CollisionZoneBehaviour already computed
+        //zoneReward = zone.RewardOfCollision; // This was set in OnCollisionHit
+        // Option 2: You could also use e.Damage if you want to scale by actual damage taken
+        zoneReward = e.Damage;
+        // Scale
+        zoneReward *= 10000f;
+        // apply
+        Debug.Log(zoneReward);
+        AddReward(zoneReward);
+    }
+
 
 
     public override void OnEpisodeBegin() {
@@ -126,38 +159,8 @@ public class RobotAgent : Agent {
 
         DieCases();
 
-        if (rewardEditor != null)
-        {
-
-            float movementRewards = GetRewards_Movement() * 0.5f * Time.deltaTime;
-            AddReward(movementRewards * rewardEditor.movementRF);
-            movementRwd += (float)System.Math.Round(movementRewards, 2);
-
-            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f * Time.deltaTime;
-            AddReward(robotFacingRewards * rewardEditor.facingRF);
-            robotFacingRwd += (float)System.Math.Round(robotFacingRewards, 2);
-
-            float armReleaseReward = GetRewards_ArmRelease() * 10f * Time.deltaTime;
-            AddReward(armReleaseReward * rewardEditor.armAngleRF);
-            armReleaseRwd += (float)System.Math.Round(armReleaseReward, 2);
-
-            float enemyDistanceReward = GetRewards_EnemyDistance() * Time.deltaTime;
-            AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
-            enemyDistanceRwd += (float)System.Math.Round(enemyDistanceReward, 2);
-
-            float arenaPositionReward = GetRewards_ArenaPosition() * Time.deltaTime;
-            AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
-            arenaPositionRwd += (float)System.Math.Round(arenaPositionReward, 2);
-
-            float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
-            AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
-            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
-
-            // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)
-
-            cumulativeReward = GetCumulativeReward();
-
-        }
+        /// origin position ***AAA***
+        
 
     }
 
@@ -198,14 +201,54 @@ public class RobotAgent : Agent {
         }
     }
 
+    float lastDamageOrHitTime;
     private float GetRewards_collisionCombination() {
-        var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
-        return Mathf.Clamp(sumReward, -1f, 1f);
+        // original
+        //var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
+        //return Mathf.Clamp(sumReward, -1f, 1f);
+
+        // NEW
+        // average of zone rewards for this frame
+        var avgReward = zoneComponents.Average(z => z.RewardOfCollision);
+
+        // If we actually got some reward this frame (positive or negative),
+        // consider that as "impact happened"
+        if (Mathf.Abs(avgReward) > 0.001f)
+        {
+            lastDamageOrHitTime = Time.time;
+        }
+
+        // Start with the normal collision reward
+        float reward = avgReward;
+
+        // Now add "hugging" penalty if we are just stuck together
+        if (enemyRobot != null)
+        {
+            float distanceToEnemy = (enemyRobot.transform.position - transform.position).magnitude;
+
+            bool veryClose = distanceToEnemy < 1.0f;           // tune threshold
+            bool noRecentHit = Time.time - lastDamageOrHitTime > 0.3f; // no impact for 0.3s
+
+            // optional: check relative speed to detect "just sliding"
+            var myVel = rb != null ? rb.linearVelocity : Vector3.zero;
+            var enemyRb = enemyRobot.GetComponent<Rigidbody>();
+            var enemyVel = enemyRb != null ? enemyRb.linearVelocity : Vector3.zero;
+            float relativeSpeed = (myVel - enemyVel).magnitude;
+            bool slowRelativeMotion = relativeSpeed < 0.5f;    // tuning value
+
+            if (veryClose && noRecentHit && slowRelativeMotion)
+            {
+                // Small continuous penalty while hugging
+                reward -= 0.02f;   // tune this; not too big per step
+            }
+        }
+
+        return Mathf.Clamp(reward, -10f, 1f);
     }
 
     private float GetRewards_ArenaPosition() {
         float distanceToCenter = this.transform.localPosition.magnitude;
-        float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f);// * -2f + 1f;
+        float distanceReward = Mathf.Clamp(distanceToCenter / 2f, 0f, 1f) * -2f + 1f;
         return distanceReward;
     }
 
@@ -213,7 +256,7 @@ public class RobotAgent : Agent {
         if (enemyRobot == null) return 0f;
         float distanceToEnemy = (enemyRobot.transform.localPosition - this.transform.localPosition).magnitude;
         //Debug.Log("Distance to enemy: " + distanceToEnemy);
-        float distanceReward = Mathf.Clamp(distanceToEnemy / 6f, 0f, 1f);// * -2f + 1f;
+        float distanceReward = Mathf.Clamp(distanceToEnemy / 4f, 0f, 1f) * -2f + 1f;
         return distanceReward;
     }
 
@@ -278,10 +321,75 @@ public class RobotAgent : Agent {
             robotMovement.ApplyArmInput(armLiftValue);
         }
 
+        if (rewardEditor != null)
+        {
+
+            float movementRewards = GetRewards_Movement() * 0.5f * Time.deltaTime;
+            movementRwd = (float)System.Math.Round(movementRewards, 2) * rewardEditor.movementRF;
+            AddReward(movementRwd);
+
+            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f * Time.deltaTime;
+            //AddReward(robotFacingRewards * rewardEditor.facingRF);
+            robotFacingRwd = (float)System.Math.Round(robotFacingRewards, 2) * rewardEditor.facingRF;
+            AddReward(robotFacingRwd);
+
+            float armReleaseReward = GetRewards_ArmRelease() * 10f * Time.deltaTime;
+            //AddReward(armReleaseReward * rewardEditor.armAngleRF);
+            armReleaseRwd = (float)System.Math.Round(armReleaseReward, 2) * rewardEditor.armAngleRF;
+            AddReward(armReleaseRwd);
+
+            float enemyDistanceReward = GetRewards_EnemyDistance() * Time.deltaTime;
+            //AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
+            enemyDistanceRwd = (float)System.Math.Round(enemyDistanceReward, 2) * rewardEditor.enemyDistanceRF;
+            AddReward(enemyDistanceRwd);
+
+            float arenaPositionReward = GetRewards_ArenaPosition() * Time.deltaTime;
+            //AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
+            arenaPositionRwd = (float)System.Math.Round(arenaPositionReward, 2) * rewardEditor.arenaPositionRF;
+            AddReward(arenaPositionRwd);
+
+            float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
+            //AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
+            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
+            AddReward(collisionCombinationRwd);
+
+            // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)
+
+            cumulativeReward = GetCumulativeReward();
+
+        }
     }
 
+    [SerializeField] private float maxEnemyDistance = 4f;   
+    [SerializeField] private float maxArenaRadius = 4f;
     public override void CollectObservations(VectorSensor observations) {
-        for (int i = 0; i < observations.ObservationSize(); i++) {
+        // 1) PASSIVE SENSORS (always present, not user-configurable)
+
+        // a) Distance to enemy
+        float enemyDistanceNorm = 0f;
+        Vector3 relEnemyLocal = Vector3.zero;
+
+        if (enemyRobot != null)
+        {
+            Vector3 toEnemy = enemyRobot.transform.position - transform.position;
+            float distance = toEnemy.magnitude;
+            enemyDistanceNorm = Mathf.Clamp01(distance / maxEnemyDistance);
+
+            // enemy position in *your local space* (x,z)
+            relEnemyLocal = transform.InverseTransformPoint(enemyRobot.transform.position);
+        }
+
+        // Normalize local enemy position by arena size (roughly)
+        float relEnemyX = Mathf.Clamp(relEnemyLocal.x / maxArenaRadius, -1f, 1f);
+        float relEnemyZ = Mathf.Clamp(relEnemyLocal.z / maxArenaRadius, -1f, 1f);
+
+        // Add passive observations
+        observations.AddObservation(enemyDistanceNorm); // 1
+        observations.AddObservation(relEnemyX);         // 2
+        observations.AddObservation(relEnemyZ);         // 3
+
+        // 2) USER-CHOSEN SENSORS (up to 7 slots)
+        for (int i = 0; i < observations.ObservationSize()-3; i++) {
             var observationValue = sensors?.ElementAtOrDefault(i)?.SensorValue ?? 0f;
             observations.AddObservation(observationValue);
         }
