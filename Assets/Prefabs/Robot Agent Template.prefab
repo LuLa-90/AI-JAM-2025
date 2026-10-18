@@ -397,6 +397,9 @@ MonoBehaviour:
   - {fileID: 0}
   rewardEditor: {fileID: 0}
   enemyRobot: {fileID: 0}
+  weightedAverageHealth: 1
+  maxEnemyDistance: 4
+  maxArenaRadius: 4
 --- !u!114 &5010629318851500838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -637,6 +640,10 @@ PrefabInstance:
       value: RobotCameraSensor
       objectReference: {fileID: 0}
     - target: {fileID: 8708950312143412897, guid: bbfecff0a76d3f24ea507772c328b30d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: bbfecff0a76d3f24ea507772c328b30d, type: 3}
       propertyPath: m_TagString
       value: RobotCamera
       objectReference: {fileID: 0}
@@ -796,6 +803,10 @@ PrefabInstance:
     - target: {fileID: 8708950312143412897, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_Name
       value: ButtMarker
+      objectReference: {fileID: 0}
+    - target: {fileID: 8708950312143412897, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8708950312143412897, guid: 18657ebc7f14a114083ffe3a026b3e33, type: 3}
       propertyPath: m_TagString
