@@ -106,3 +106,13 @@ InitTestScene*.unity*
 /Assets/Prefabs/Backups
 /Assets/ML-Agents/Timers
 /Assets/ML-Agents/Timers.meta
+
+# ML-Agents training logs
+/Assets/results/
+/Assets/Training Results/**/run_logs/
+/Assets/Training Results/**/events.out.tfevents*
+/Assets/Training Results/**/events.out.tfevents*.meta
+/Assets/Training Results/**/timers.json
+/Assets/Training Results/**/timers.json.meta
+/Assets/Training Results/**/training_status.json
+/Assets/Training Results/**/training_status.json.meta
