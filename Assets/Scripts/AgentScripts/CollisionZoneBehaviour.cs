@@ -6,7 +6,6 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
     private float totalHealth = 1f;
     [SerializeField] public float CurrentHealth = 1f;
-    [field: SerializeField]
     public float RewardOfCollision { get; private set; }
 
     // Percentual value of how much damage is taken per hit based on collision force
@@ -65,7 +64,15 @@ public class CollisionZoneBehaviour : MonoBehaviour {
             RewardOfCollision = damageDealtNormalized;
 
             //Debug.Log(gameObject.name + " (" + enemyCollisionZone.damageOfZone + ";" + resistanceOfZone + ") got reward: " + RewardOfCollision);
-        } 
+        }
+         Debug.Log(
+            $"[ZONE COLLISION] " +
+            $"Zone={gameObject.name} | " +
+            $"OtherZone={enemyCollisionZone?.name ?? "Environment"} | " +
+            $"DamageTaken={damage:F6} | " +
+            $"RewardOfCollision={RewardOfCollision:F6} | " +
+            $"HitTag={collision.gameObject.tag}"
+            );
 
         OnCollision?.Invoke(this, new CollisionEventArgs(damage, collision.gameObject.tag));
     }

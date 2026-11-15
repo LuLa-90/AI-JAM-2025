@@ -21,7 +21,7 @@ public class RobotAgent : Agent {
     [SerializeField] private float enemyDistanceRwd;
     [SerializeField] private float arenaPositionRwd;
     [SerializeField] private float collisionCombinationRwd;
-    // Upgrade
+    //Upgrade
     [SerializeField] private float collisionHitRwd;
 
     [SerializeField] private SensorComponent[] sensors = new SensorComponent[7];
@@ -79,6 +79,13 @@ public class RobotAgent : Agent {
     {
         // You can check what we hit using e.colliderHitName (it's the tag)
         bool hitEnemy = e.colliderHitName == "Robot"; // or whatever tag you use for enemy tank
+        
+        Debug.Log(
+            $"[HANDLE COLLISION] " +
+            $"Agent={gameObject.name} | " +
+            $"HitTag={e.colliderHitName} | " +
+            $"Damage={e.Damage:F6}"
+        );
 
         if (!hitEnemy)
         {
@@ -86,7 +93,7 @@ public class RobotAgent : Agent {
             return;
         }
 
-        /*float zoneReward = 0;
+        float zoneReward = 0;
         // Option 1: Use the per-zone reward that CollisionZoneBehaviour already computed
         //zoneReward = zone.RewardOfCollision; // This was set in OnCollisionHit
         // Option 2: You could also use e.Damage if you want to scale by actual damage taken
@@ -95,24 +102,17 @@ public class RobotAgent : Agent {
         zoneReward *= 10000f;
         // apply
         //Debug.Log(zoneReward);
-        AddReward(zoneReward);*/
-        if (sender is CollisionZoneBehaviour zone)
-        {
-            //Upgrade - záznam úspešného collision eventu
-            lastDamageOrHitTime = Time.time;
+        /*Upgrade*/float rewardBefore = GetCumulativeReward();
 
-            float zoneReward = zone.RewardOfCollision;
-           
-            //Upgrade
-            float rewardMultiplier = rewardEditor != null
-                ? rewardEditor.collisionCombinationRF
-                : 1f;
-            // Upgrade
-            collisionHitRwd = zoneReward * 10f * rewardMultiplier;
+        AddReward(zoneReward);
 
-            AddReward(collisionHitRwd);
-            /*Old*///AddReward(zoneReward * 10f * rewardMultiplier);
-        }
+        Debug.Log(
+            $"[DIRECT REWARD] " +
+            $"Agent={gameObject.name} | " +
+            $"AddedReward={zoneReward:F6} | " +
+            $"CumulativeBefore={rewardBefore:F6} | " +
+            $"CumulativeAfter={GetCumulativeReward():F6}"
+        );
     }
 
 
@@ -124,7 +124,6 @@ public class RobotAgent : Agent {
         enemyDistanceRwd = 0f;
         arenaPositionRwd = 0f;
         collisionCombinationRwd = 0f;
-        collisionHitRwd = 0f;
 
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
@@ -248,7 +247,6 @@ public class RobotAgent : Agent {
 
     float lastDamageOrHitTime;
     private float GetRewards_collisionCombination() {
-        /*
         // original
         //var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
         //return Mathf.Clamp(sumReward, -1f, 1f);
@@ -268,11 +266,6 @@ public class RobotAgent : Agent {
         float reward = avgReward;
 
         // Now add "hugging" penalty if we are just stuck together
-        */
-        //Upgrade - aby sa duplicitne nepripočítavali odmeny +
-        // keď robot príjme poškodenie, nedostane kladnú odmenu
-        float reward = 0f;
-
         if (enemyRobot != null)
         {
             float distanceToEnemy = (enemyRobot.transform.position - transform.position).magnitude;
@@ -295,8 +288,19 @@ public class RobotAgent : Agent {
         }
 
         //return Mathf.Clamp(reward, -10f, 1f);
-        //Upgrade
-        return reward;
+        float finalReward = Mathf.Clamp(reward, -10f, 1f);
+
+        if (Mathf.Abs(finalReward) > 0.0001f)
+        {
+            Debug.Log(
+                $"[COLLISION COMBINATION] " +
+                $"Agent={gameObject.name} | " +
+                $"AverageReward={avgReward:F6} | " +
+                $"FinalReward={finalReward:F6}"
+            );
+}
+
+return finalReward;
     }
 
     private float GetRewards_ArenaPosition() {
@@ -403,9 +407,7 @@ public class RobotAgent : Agent {
 
             float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
             //AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
-            /*Old*///collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
-            //Upgrade
-            collisionCombinationRwd = collisionCombinationReward * rewardEditor.collisionCombinationRF;
+            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
             AddReward(collisionCombinationRwd);
 
             // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)
@@ -466,8 +468,7 @@ public class RobotAgent : Agent {
         float leftWheelsValue = robotMovement.leftWheelsAxis.ReadValue<float>();
         float rightWheelsValue = robotMovement.rightWheelsAxis.ReadValue<float>();
         float armLiftValue = robotMovement.armLiftAction.ReadValue<float>();
-        Debug.Log("Arm Lift Input: " + armLiftValue);
-        
+
         continuousActionsOut[0] = leftWheelsValue;
         continuousActionsOut[1] = rightWheelsValue;
         discreteActionsOut[0] = (int)armLiftValue;

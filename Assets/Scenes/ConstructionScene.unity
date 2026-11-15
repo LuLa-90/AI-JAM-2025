@@ -1347,7 +1347,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentHealth: 0
-  <RewardOfCollision>k__BackingField: 0
   resistanceOfZone: 1
   damageOfZone: 1
 --- !u!64 &1055423484
@@ -2085,7 +2084,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentHealth: 0
-  <RewardOfCollision>k__BackingField: 0
   resistanceOfZone: 1
   damageOfZone: 1
 --- !u!64 &1337604153
@@ -2534,6 +2532,10 @@ PrefabInstance:
     - target: {fileID: 3802755395440445979, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3857644404252730747, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+      propertyPath: stationaryRobot
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5931534517980305084, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
       propertyPath: m_LocalPosition.x
