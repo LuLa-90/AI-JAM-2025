@@ -21,6 +21,8 @@ public class RobotAgent : Agent {
     [SerializeField] private float enemyDistanceRwd;
     [SerializeField] private float arenaPositionRwd;
     [SerializeField] private float collisionCombinationRwd;
+    // Upgrade
+    [SerializeField] private float collisionHitRwd;
 
     [SerializeField] private SensorComponent[] sensors = new SensorComponent[7];
 
@@ -84,7 +86,7 @@ public class RobotAgent : Agent {
             return;
         }
 
-        float zoneReward = 0;
+        /*float zoneReward = 0;
         // Option 1: Use the per-zone reward that CollisionZoneBehaviour already computed
         //zoneReward = zone.RewardOfCollision; // This was set in OnCollisionHit
         // Option 2: You could also use e.Damage if you want to scale by actual damage taken
@@ -93,7 +95,24 @@ public class RobotAgent : Agent {
         zoneReward *= 10000f;
         // apply
         //Debug.Log(zoneReward);
-        AddReward(zoneReward);
+        AddReward(zoneReward);*/
+        if (sender is CollisionZoneBehaviour zone)
+        {
+            //Upgrade - záznam úspešného collision eventu
+            lastDamageOrHitTime = Time.time;
+
+            float zoneReward = zone.RewardOfCollision;
+           
+            //Upgrade
+            float rewardMultiplier = rewardEditor != null
+                ? rewardEditor.collisionCombinationRF
+                : 1f;
+            // Upgrade
+            collisionHitRwd = zoneReward * 10f * rewardMultiplier;
+
+            AddReward(collisionHitRwd);
+            /*Old*///AddReward(zoneReward * 10f * rewardMultiplier);
+        }
     }
 
 
@@ -105,6 +124,7 @@ public class RobotAgent : Agent {
         enemyDistanceRwd = 0f;
         arenaPositionRwd = 0f;
         collisionCombinationRwd = 0f;
+        collisionHitRwd = 0f;
 
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
@@ -228,6 +248,7 @@ public class RobotAgent : Agent {
 
     float lastDamageOrHitTime;
     private float GetRewards_collisionCombination() {
+        /*
         // original
         //var sumReward = zoneComponents.Average(z => z.RewardOfCollision);
         //return Mathf.Clamp(sumReward, -1f, 1f);
@@ -247,6 +268,11 @@ public class RobotAgent : Agent {
         float reward = avgReward;
 
         // Now add "hugging" penalty if we are just stuck together
+        */
+        //Upgrade - aby sa duplicitne nepripočítavali odmeny +
+        // keď robot príjme poškodenie, nedostane kladnú odmenu
+        float reward = 0f;
+
         if (enemyRobot != null)
         {
             float distanceToEnemy = (enemyRobot.transform.position - transform.position).magnitude;
@@ -268,7 +294,9 @@ public class RobotAgent : Agent {
             }
         }
 
-        return Mathf.Clamp(reward, -10f, 1f);
+        //return Mathf.Clamp(reward, -10f, 1f);
+        //Upgrade
+        return reward;
     }
 
     private float GetRewards_ArenaPosition() {
@@ -375,7 +403,9 @@ public class RobotAgent : Agent {
 
             float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
             //AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
-            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
+            /*Old*///collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
+            //Upgrade
+            collisionCombinationRwd = collisionCombinationReward * rewardEditor.collisionCombinationRF;
             AddReward(collisionCombinationRwd);
 
             // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)
@@ -436,7 +466,8 @@ public class RobotAgent : Agent {
         float leftWheelsValue = robotMovement.leftWheelsAxis.ReadValue<float>();
         float rightWheelsValue = robotMovement.rightWheelsAxis.ReadValue<float>();
         float armLiftValue = robotMovement.armLiftAction.ReadValue<float>();
-
+        Debug.Log("Arm Lift Input: " + armLiftValue);
+        
         continuousActionsOut[0] = leftWheelsValue;
         continuousActionsOut[1] = rightWheelsValue;
         discreteActionsOut[0] = (int)armLiftValue;

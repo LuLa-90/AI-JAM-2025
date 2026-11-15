@@ -6,6 +6,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
     private float totalHealth = 1f;
     [SerializeField] public float CurrentHealth = 1f;
+    [field: SerializeField]
     public float RewardOfCollision { get; private set; }
 
     // Percentual value of how much damage is taken per hit based on collision force

@@ -29,6 +29,173 @@ MonoBehaviour:
     checkMaximum: 1
   bumperRule:
     componentName: BumperComponent
-    minCount: 0
-    maxCount: 0
-    checkMaximum: 0
+    minCount: 2
+    maxCount: 2
+    checkMaximum: 1
+  additionalComponentLimits:
+  - componentType: 0
+    minCount: 4
+    maxCount: 4
+    checkMinimum: 1
+    checkMaximum: 1
+  placementRules:
+  - componentName: BodyComponent
+    parentMustBeRobotRoot: 1
+    expectedParentName: 
+    expectedCount: 1
+  - componentName: ArmComponent
+    parentMustBeRobotRoot: 1
+    expectedParentName: 
+    expectedCount: 1
+  - componentName: WheelComponent
+    parentMustBeRobotRoot: 0
+    expectedParentName: Wheels Left
+    expectedCount: 1
+  - componentName: WheelComponent
+    parentMustBeRobotRoot: 0
+    expectedParentName: Wheels Right
+    expectedCount: 1
+  bodyChildRules:
+  - expectedParentName: Body_Shape3
+    childObjectName: body_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Body_Shape3
+    childObjectName: body_shape (1)
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Body_Shape3
+    childObjectName: battery_shape
+    requiredComponent: 0
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Body_Shape3
+    childObjectName: ForwardSpeedSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 2
+  - expectedParentName: Body_Shape3
+    childObjectName: SidewaysSpeedSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 3
+  - expectedParentName: Body_Shape3
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  - expectedParentName: Arm_Shape2
+    childObjectName: arm_armbase_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Arm_Shape2
+    childObjectName: arm_weapon_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Arm_Shape2
+    childObjectName: AngleSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 0
+  - expectedParentName: Arm_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  - expectedParentName: Bumper_Shape2
+    childObjectName: bumper_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Bumper_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  - expectedParentName: Bumper_Shape2
+    childObjectName: bumper_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Bumper_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  wheelChildRules:
+  - expectedParentName: Wheels Left
+    childObjectName: Wheel Coll Front
+    requiredComponent: 4
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels Left
+    childObjectName: Wheel Coll Back
+    requiredComponent: 4
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels Left
+    childObjectName: Wheels_Shape2
+    requiredComponent: 3
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels_Shape2
+    childObjectName: wheels_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  - expectedParentName: Wheels Right
+    childObjectName: Wheel Coll Front
+    requiredComponent: 4
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels Right
+    childObjectName: Wheel Coll Back
+    requiredComponent: 4
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels Right
+    childObjectName: Wheels_Shape2
+    requiredComponent: 3
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels_Shape2
+    childObjectName: wheels_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Wheels_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  armChildRules: []
+  bumperChildRules:
+  - expectedParentName: Bumper_Shape2
+    childObjectName: bumper_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Bumper_Shape2
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1
+  - expectedParentName: Bumper_Shape2 (1)
+    childObjectName: bumper_shape
+    requiredComponent: 1
+    checkSensorType: 0
+    expectedSensorType: 0
+  - expectedParentName: Bumper_Shape2 (1)
+    childObjectName: DamageSensor
+    requiredComponent: 2
+    checkSensorType: 1
+    expectedSensorType: 1

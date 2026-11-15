@@ -296,10 +296,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6428795192209815909}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 10
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -339,6 +339,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   rightWheelsAxis:
     m_Name: Right Wheels Axis
     m_Type: 0
@@ -348,6 +349,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   armLiftAction:
     m_Name: Arm Lift
     m_Type: 0
@@ -357,6 +359,7 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+    m_Priority: 0
   rightWheels:
   - {fileID: 1698693027546458575}
   - {fileID: 2145656517183493520}
@@ -387,6 +390,7 @@ MonoBehaviour:
   enemyDistanceRwd: 0
   arenaPositionRwd: 0
   collisionCombinationRwd: 0
+  collisionHitRwd: 0
   sensors:
   - {fileID: 0}
   - {fileID: 0}
@@ -417,7 +421,7 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
-      BranchSizes: 02000000
+      BranchSizes: 02000000i
     VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
