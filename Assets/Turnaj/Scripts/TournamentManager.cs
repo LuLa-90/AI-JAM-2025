@@ -37,6 +37,25 @@ namespace Turnaj {
         [Tooltip("Arena for the final round. Same rules as team arenas (Home + Guest SpawnPoints).")]
         public GameObject NeutralArenaPrefab;
 
+        [Header("Validation")]
+        [Tooltip("Rules used for the full robot/arena check before the match (Assets/Validation/ValidationRules).")]
+        public AIJam.Validation.ValidationRules Rules;
+        [Tooltip("Match day only: start even if the full rule check finds errors (after a manual decision).")]
+        public bool IgnoreValidation;
+
+        /// <summary>Full rule check of both teams (errors block, warnings are only logged). Empty when ignored.</summary>
+        public List<string> RuleProblems() {
+            var problems = new List<string>();
+            if (IgnoreValidation || Rules == null || TeamA == null || TeamB == null) return problems;
+            foreach (var team in new[] { TeamA, TeamB }.Distinct()) {
+                foreach (var f in TeamValidation.FullCheck(team, Rules)) {
+                    if (f.Severity == AIJam.Validation.Severity.Error) problems.Add($"{team.DisplayName}: {f}");
+                    else if (f.Severity == AIJam.Validation.Severity.Warning) Debug.LogWarning($"[Turnaj] {team.DisplayName}: {f}");
+                }
+            }
+            return problems;
+        }
+
         [Header("Rules")]
         public float RoundDuration = 90f;
         public float DoubleTapWindow = 0.4f;
@@ -124,6 +143,7 @@ namespace Turnaj {
 
         private void Start() {
             var problems = ValidationProblems();
+            problems.AddRange(RuleProblems());
             if (problems.Count > 0) {
                 Phase = MatchPhase.Invalid;
                 foreach (var p in problems) Debug.LogError("[Turnaj] " + p);
@@ -149,6 +169,7 @@ namespace Turnaj {
             go.name = team.DisplayName;
             var bp = go.GetComponent<BehaviorParameters>();
             if (bp != null) bp.BehaviorType = BehaviorType.InferenceOnly; // never train by accident
+            AIJam.Validation.VisionLayers.ForceAgentCamera(go);          // agent sees RobotView only
             var robot = go.GetComponent<RobotAgent>();
             robot.OnRobotDie += (s, e) => OnRobotDied(robot);
             robot.OnRobotRespawn += (s, e) => OnRobotRespawned(robot);

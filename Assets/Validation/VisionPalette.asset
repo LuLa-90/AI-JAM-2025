@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8116b3de9ca697b45baf29ba2917181c, type: 3}
+  m_Name: VisionPalette
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.VisionPalette
+  DefaultMaterial: {fileID: 2100000, guid: 05b726eabeea8b743828630cee1b305c, type: 2}
+  RobotPartMaterial: {fileID: 2100000, guid: e5cce091961c58b45be1295ceff076a7, type: 2}
+  TrapMaterial: {fileID: 2100000, guid: 5f334b8b248ce4a47a3abf9ab2c058dd, type: 2}
+  BuffMaterial: {fileID: 2100000, guid: 96a01b6effd88984ba9841ef099c662f, type: 2}
+  BatteryMaterial: {fileID: 2100000, guid: 36c012fab7d93704b9bab16cf09abaff, type: 2}
+  DefaultColor: {r: 0, g: 0, b: 0, a: 1}
+  RobotPartColor: {r: 1, g: 1, b: 1, a: 1}
+  TrapColor: {r: 1, g: 0, b: 0.061853863, a: 1}
+  BuffColor: {r: 0.052818038, g: 1, b: 0, a: 1}
+  BatteryColor: {r: 0, g: 0.0816159, b: 1, a: 1}

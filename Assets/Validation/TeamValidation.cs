@@ -49,6 +49,38 @@ namespace Turnaj {
             return problems;
         }
 
+        /// <summary>
+        /// Full rule check of a team (robot + arena prefabs) with the validation engine. Editor only:
+        /// prefabs are opened in an isolated preview scene, nothing is changed.
+        /// </summary>
+        public static List<AIJam.Validation.Finding> FullCheck(soTeam team, AIJam.Validation.ValidationRules rules) {
+            var all = new List<AIJam.Validation.Finding>();
+            foreach (var p in CheckTeam(team)) all.Add(new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, "Team", p) { Source = "Team" });
+            if (team == null) return all;
+            if (team.RobotPrefab != null) all.AddRange(Tag(ValidatePrefab(team.RobotPrefab, go => AIJam.Validation.RobotValidator.Validate(go, rules)), "Robot"));
+            if (team.ArenaPrefab != null) all.AddRange(Tag(ValidatePrefab(team.ArenaPrefab, go => AIJam.Validation.ArenaValidator.Validate(go, rules)), "Arena"));
+            if (team.RobotPrefab != null && team.RobotPrefab == team.ArenaPrefab)
+                all.Add(new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, "Team", "Robot and arena must be separate prefabs.") { Source = "Team" });
+            return all;
+        }
+
+        public static List<AIJam.Validation.Finding> ValidatePrefab(GameObject prefab, System.Func<GameObject, List<AIJam.Validation.Finding>> check) {
+#if UNITY_EDITOR
+            string path = UnityEditor.AssetDatabase.GetAssetPath(prefab);
+            if (string.IsNullOrEmpty(path)) return check(prefab); // scene object / runtime instance
+            var root = UnityEditor.PrefabUtility.LoadPrefabContents(path);
+            try { return check(root); }
+            finally { UnityEditor.PrefabUtility.UnloadPrefabContents(root); }
+#else
+            return new List<AIJam.Validation.Finding> { new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, "Validation", "Validation runs only in the Unity Editor.") };
+#endif
+        }
+
+        private static IEnumerable<AIJam.Validation.Finding> Tag(List<AIJam.Validation.Finding> f, string source) {
+            foreach (var x in f) x.Source = source;
+            return f;
+        }
+
         public static SpawnPoint Find(GameObject arenaInstance, SpawnSide side) {
             return arenaInstance.GetComponentsInChildren<SpawnPoint>(true).FirstOrDefault(p => p.Side == side);
         }

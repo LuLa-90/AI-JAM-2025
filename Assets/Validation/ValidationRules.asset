@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff1a1c0540521524b8c968c3fb4536cb, type: 3}
+  m_Name: ValidationRules
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.ValidationRules
+  Groups:
+  - Name: Body
+    Min: 1
+    Max: 1
+    Parts:
+    - Prefab: {fileID: 5807489794714987295, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
+      MaxUses: 1
+    - Prefab: {fileID: 7847785585894651137, guid: 97baad11eb9945a468b50ef815a6c0bc, type: 3}
+      MaxUses: 1
+    - Prefab: {fileID: 1400196036404095713, guid: 9e3c081352dad6f449f4853271f89b4b, type: 3}
+      MaxUses: 1
+  - Name: Arm
+    Min: 1
+    Max: 1
+    Parts:
+    - Prefab: {fileID: 3893920837816801082, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
+      MaxUses: 1
+    - Prefab: {fileID: 7491937543216536924, guid: 6c9e39887674e034183422cef4ad3925, type: 3}
+      MaxUses: 1
+  - Name: Wheel sets
+    Min: 2
+    Max: 2
+    Parts:
+    - Prefab: {fileID: 4287508156747798399, guid: 43003ec47f5847540b4943bd78da1073, type: 3}
+      MaxUses: 2
+    - Prefab: {fileID: 9212184175514869242, guid: ec4c1764d07078c4580fade1467ecc4e, type: 3}
+      MaxUses: 2
+    - Prefab: {fileID: 979416787360918270, guid: e11a176f06cdd174cb5eb2cfbd1eceba, type: 3}
+      MaxUses: 2
+  - Name: Bumpers
+    Min: 0
+    Max: 2
+    Parts:
+    - Prefab: {fileID: 6712562983231509806, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
+      MaxUses: 2
+    - Prefab: {fileID: 7061015942067492306, guid: bfafbe056526a4f47a6066016cc4387b, type: 3}
+      MaxUses: 2
+  SensorPrefabs:
+  - {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
+  - {fileID: 8708950312143412897, guid: c1ec550ae4fd83540844fb2f13621c68, type: 3}
+  RobotTemplate: {fileID: 6428795192209815909, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
+  BehaviorName: RobotAgent
+  VectorObservationSize: 0
+  ScaleTolerancePercent: 10
+  OffsetTolerance: 0.002
+  AngleToleranceDegrees: 0.5
+  PhysicsTolerance: 0.0001
+  MinAttachmentPenetration: 0.0001
+  MaxWheelBodyPenetration: 0.02
+  MaxWheelBumperPenetration: 0.005
+  Palette: {fileID: 11400000, guid: f496d9e9f65a2c04ea98730c24377a81, type: 2}
+  ReferenceArena: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}
+  ArenaPositionTolerance: 0.005
+  ArenaScaleTolerance: 0.001
+  SpawnSymmetryTolerance: 0.05
+  SpawnYawToleranceDegrees: 2
+  SpawnMaxHeight: 0.3

@@ -985,6 +985,8 @@ MonoBehaviour:
   TeamAIndex: 0
   TeamBIndex: 1
   NeutralArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}
+  Rules: {fileID: 11400000, guid: aa25ab8605f98f64ca2fbd471acbd5ab, type: 2}
+  IgnoreValidation: 0
   RoundDuration: 90
   DoubleTapWindow: 0.4
   SeparatorSpeed: 2.5

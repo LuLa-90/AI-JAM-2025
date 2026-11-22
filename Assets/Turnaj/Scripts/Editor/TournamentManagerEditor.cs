@@ -55,7 +55,17 @@ namespace Turnaj.EditorTools {
             } else {
                 EditorGUILayout.HelpBox(string.Join("\n", problems), MessageType.Error);
             }
+
+            // Full rule check is slower (opens the prefabs), so it runs on request and again at Play.
+            if (m.IgnoreValidation) EditorGUILayout.HelpBox("Rule check is IGNORED for this match.", MessageType.Warning);
+            if (GUILayout.Button("Check rules for both teams")) ruleReport = string.Join("\n", m.RuleProblems());
+            if (ruleReport != null) {
+                if (ruleReport.Length == 0) EditorGUILayout.HelpBox("Rule check passed for both teams.", MessageType.Info);
+                else EditorGUILayout.HelpBox(ruleReport, MessageType.Error);
+            }
         }
+
+        private string ruleReport;
 
         private void DrawLive(TournamentManager m) {
             if (!GameViewFocused) {

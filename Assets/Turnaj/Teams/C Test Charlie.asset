@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: C Test Charlie
   m_EditorClassIdentifier: Assembly-CSharp::Turnaj.soTeam
   TeamName: Test Charlie
-  RobotPrefab: {fileID: 8619911477845360826, guid: b1520db3fa1a5624fb34d629efba2662, type: 3}
+  RobotPrefab: {fileID: 9080817579513517031, guid: b1520db3fa1a5624fb34d629efba2662, type: 3}
   ArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}

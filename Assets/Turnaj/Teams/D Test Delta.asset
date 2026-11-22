@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: D Test Delta
   m_EditorClassIdentifier: Assembly-CSharp::Turnaj.soTeam
   TeamName: Test Delta
-  RobotPrefab: {fileID: 2736782430314286394, guid: 2d4159a99940ba94e950b5f872e15083, type: 3}
+  RobotPrefab: {fileID: 3197161795045711463, guid: 2d4159a99940ba94e950b5f872e15083, type: 3}
   ArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}

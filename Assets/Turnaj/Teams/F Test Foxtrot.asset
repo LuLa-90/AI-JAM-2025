@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: F Test Foxtrot
   m_EditorClassIdentifier: Assembly-CSharp::Turnaj.soTeam
   TeamName: Test Foxtrot
-  RobotPrefab: {fileID: 5377249086291533549, guid: 873eee908716f2742843f833a3d75b42, type: 3}
+  RobotPrefab: {fileID: 4844266973766143408, guid: 873eee908716f2742843f833a3d75b42, type: 3}
   ArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}

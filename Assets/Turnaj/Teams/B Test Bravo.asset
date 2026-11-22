@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: B Test Bravo
   m_EditorClassIdentifier: Assembly-CSharp::Turnaj.soTeam
   TeamName: Test Bravo
-  RobotPrefab: {fileID: 1672708871566953635, guid: d297eb981e2f0ac4bb3deb731b2d5944, type: 3}
+  RobotPrefab: {fileID: 2203174407598972926, guid: d297eb981e2f0ac4bb3deb731b2d5944, type: 3}
   ArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}

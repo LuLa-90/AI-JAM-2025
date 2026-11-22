@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: E Test Echo
   m_EditorClassIdentifier: Assembly-CSharp::Turnaj.soTeam
   TeamName: Test Echo
-  RobotPrefab: {fileID: 2036654548228686146, guid: 58bef84ff071c584f8490ec2aad5e42f, type: 3}
+  RobotPrefab: {fileID: 1578017082637111839, guid: 58bef84ff071c584f8490ec2aad5e42f, type: 3}
   ArenaPrefab: {fileID: 680453617655590830, guid: 6560c5679fcc66743b63061c3ed4b8f7, type: 3}
