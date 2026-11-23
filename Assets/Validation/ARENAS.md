@@ -40,6 +40,7 @@ Decisions with the user on 2026-11-22. Robot parts are in `ROBOT_PARTS.md`.
 
 ### State after the fixes (2026-11-22)
 - `VisionPalette.asset` (Assets/Validation) holds one material per role. A new `BrightBlack` was added; the others are the existing Bright* materials.
+  - The materials glow (HDR emission), and the glow decides most of what the camera sees (the battery looks azure because its emission has some green). Changing a colour in the palette sets that material's base colour **and** its emission colour, keeping the glow strength. Materials whose colour isn't changed are never touched, so last year's robots keep the look they were trained on (decided 2026-11-23).
 - The template's agent camera sees RobotView only, on a black background. Spawners (training `AIJamManager`, `TournamentManager`, the validation scene) force this on every robot through `VisionLayers.ForceAgentCamera`.
 - Body_Shape2's battery copy is now BrightBlue.
 - **Arenas have no RobotView objects except red traps and green buffs on triggers** (decided 2026-11-23). The camera already clears to black, so floor and wall copies are unnecessary; the black copies that were added to NeutralArena and `Environment (0, 0)` were removed. A black RobotView object in an arena is an error.

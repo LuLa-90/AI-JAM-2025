@@ -44,19 +44,54 @@ namespace AIJam.Validation {
             return null;
         }
 
+        // Colours last applied to the materials. A material is touched only when its colour changes here,
+        // so the materials the old robots were trained with stay exactly as they are until someone recolours them.
+        [SerializeField, HideInInspector] private bool appliedInit;
+        [SerializeField, HideInInspector] private Color appliedDefault, appliedRobotPart, appliedTrap, appliedBuff, appliedBattery;
+
         private void OnValidate() {
-            Apply(DefaultMaterial, DefaultColor);
-            Apply(RobotPartMaterial, RobotPartColor);
-            Apply(TrapMaterial, TrapColor);
-            Apply(BuffMaterial, BuffColor);
-            Apply(BatteryMaterial, BatteryColor);
+            if (!appliedInit) {
+                // first run on an existing asset: remember the current colours, change nothing
+                appliedDefault = DefaultColor; appliedRobotPart = RobotPartColor; appliedTrap = TrapColor; appliedBuff = BuffColor; appliedBattery = BatteryColor;
+                appliedInit = true;
+                MarkDirty(this);
+                return;
+            }
+            Recolour(DefaultMaterial, DefaultColor, ref appliedDefault);
+            Recolour(RobotPartMaterial, RobotPartColor, ref appliedRobotPart);
+            Recolour(TrapMaterial, TrapColor, ref appliedTrap);
+            Recolour(BuffMaterial, BuffColor, ref appliedBuff);
+            Recolour(BatteryMaterial, BatteryColor, ref appliedBattery);
         }
 
-        /// <summary>Sets only the base colour; emission (HDR glow the agents were trained with) is left untouched.</summary>
-        private static void Apply(Material m, Color c) {
+        private void Recolour(Material m, Color c, ref Color applied) {
+            if (c == applied) return;
+            applied = c;
+            MarkDirty(this);
+            Apply(m, c);
+        }
+
+        /// <summary>
+        /// Sets the base colour and gives the emission (the HDR glow that decides most of what the camera sees)
+        /// the same colour at its current strength (brightest channel).
+        /// </summary>
+        public static void Apply(Material m, Color c) {
             if (m == null) return;
             if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
             if (m.HasProperty("_Color")) m.SetColor("_Color", c);
+            if (m.HasProperty("_EmissionColor")) {
+                // raw values: Get/SetColor convert gamma<->linear, which doesn't round-trip HDR values
+                var e = m.GetVector("_EmissionColor");
+                float strength = Mathf.Max(e.x, Mathf.Max(e.y, e.z));
+                if (strength > 0f) m.SetVector("_EmissionColor", new Vector4(c.r * strength, c.g * strength, c.b * strength, e.w));
+            }
+            MarkDirty(m);
+        }
+
+        private static void MarkDirty(Object o) {
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(o);
+#endif
         }
     }
 }

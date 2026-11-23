@@ -84,7 +84,7 @@ Don't add extra Rigidbodies or Joints.
 
 3. **No fake shapes.** Every RobotView mesh on your robot must be the part's own copy:
    - the same mesh, position, rotation and size as that part's collider;
-   - the battery copy is blue, every other part copy is white;
+   - the battery copy is blue, every other part copy is white. You don't set these by hand: every part has a `PartVisionColor` component that applies the colours from `VisionPalette`. On the body it colours the body and the battery; on other parts it uses the single part colour. Keep the component and its palette reference;
    - no extra RobotView meshes.
 4. The camera's own view isn't validated. To see what your robot sees, use the preview in the validation scene.
 

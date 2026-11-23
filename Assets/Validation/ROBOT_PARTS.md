@@ -9,6 +9,8 @@ Source: a dump of every prefab in `Assets/Prefabs/Base Shapes` and of `Assets/Pr
 | 6 | RobotView | Visual 3: simple-colour meshes (`BrightWhite` / `BrightBlue`) seen by the agent's camera, under `[No Editing] RobotViewMaterials` |
 | 8 | ConstructionView | **Colliders** (MeshCollider, convex) together with their default-view meshes (`Lit`) |
 
+Every part root (Body, Arm, Bumper, Wheels) has `PartVisionColor` (Assets/Validation) with a reference to `VisionPalette`. It sets the part's own RobotView copies to the palette materials: on the body, the copy whose mesh matches the battery collider gets the battery colour and the rest the robot-part colour; on every other part, all copies get the robot-part colour. It runs in the Editor and at runtime, and it doesn't touch parts placed under it.
+
 Visual 2, the team's fancy models, isn't part of the base prefabs. Validation applies to colliders, not to visuals.
 
 ## Robot rules agreed so far (2026-11-22)

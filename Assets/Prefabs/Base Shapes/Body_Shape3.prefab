@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4875047675235250622}
   - component: {fileID: 6970406034484671566}
+  - component: {fileID: 5477122023606035057}
   m_Layer: 0
   m_Name: Body_Shape3
   m_TagString: Untagged
@@ -50,6 +51,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c288975caf946b4ea97a0cab98bd5aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5477122023606035057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400196036404095713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79e7afb3ed2c9a4d95dd45e2574185e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.PartVisionColor
+  Palette: {fileID: 11400000, guid: f496d9e9f65a2c04ea98730c24377a81, type: 2}
 --- !u!1 &3192132585682798686
 GameObject:
   m_ObjectHideFlags: 0

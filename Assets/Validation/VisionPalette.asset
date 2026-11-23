@@ -22,3 +22,9 @@ MonoBehaviour:
   TrapColor: {r: 1, g: 0, b: 0.061853863, a: 1}
   BuffColor: {r: 0.052818038, g: 1, b: 0, a: 1}
   BatteryColor: {r: 0, g: 0.0816159, b: 1, a: 1}
+  appliedInit: 1
+  appliedDefault: {r: 0, g: 0, b: 0, a: 1}
+  appliedRobotPart: {r: 1, g: 1, b: 1, a: 1}
+  appliedTrap: {r: 1, g: 0, b: 0.061853863, a: 1}
+  appliedBuff: {r: 0.052818038, g: 1, b: 0, a: 1}
+  appliedBattery: {r: 0, g: 0.0816159, b: 1, a: 1}

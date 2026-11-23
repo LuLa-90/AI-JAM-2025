@@ -90,6 +90,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2546206376055835302}
   - component: {fileID: 4332951936853984528}
+  - component: {fileID: 583869201871521994}
   m_Layer: 0
   m_Name: Bumper_Shape1
   m_TagString: Untagged
@@ -127,6 +128,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d3d4844ce78b3147b33da11a63eaaa7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &583869201871521994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6712562983231509806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79e7afb3ed2c9a4d95dd45e2574185e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.PartVisionColor
+  Palette: {fileID: 11400000, guid: f496d9e9f65a2c04ea98730c24377a81, type: 2}
 --- !u!1001 &6450367339555172435
 PrefabInstance:
   m_ObjectHideFlags: 0

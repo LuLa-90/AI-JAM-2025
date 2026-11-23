@@ -122,6 +122,62 @@ namespace AIJam.Validation.Tests {
             AssertFails(Robot(r => Find(r, "arm_weapon_shape").position += Vector3.up), "Attachment", "weapon");
         }
 
+        private static Renderer[] ViewCopies(GameObject root) =>
+            root.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer == LayerMask.NameToLayer("RobotView")).ToArray();
+
+        [Test]
+        public void PartVisionColor_Body_ColoursBatteryAndBodyOnly() {
+            var root = PrefabUtility.LoadPrefabContents(RobotPath);
+            try {
+                foreach (var r in ViewCopies(root)) r.sharedMaterial = rules.Palette.TrapMaterial; // wrong colour everywhere
+                var body = root.GetComponentInChildren<BodyComponent>();
+                body.GetComponent<PartVisionColor>().Apply();
+                foreach (var r in ViewCopies(root)) {
+                    var owner = PartCatalog.PartRootOf(r.transform);
+                    Material want = owner != body.transform ? rules.Palette.TrapMaterial               // parts under the body untouched
+                        : r.name.Contains("battery") ? rules.Palette.BatteryMaterial : rules.Palette.RobotPartMaterial;
+                    Assert.AreEqual(want, r.sharedMaterial, r.name);
+                }
+            } finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
+        [Test]
+        public void PartVisionColor_Wheel_OneColour() {
+            var root = PrefabUtility.LoadPrefabContents("Assets/Prefabs/Base Shapes/Wheels_Shape2.prefab");
+            try {
+                foreach (var r in ViewCopies(root)) r.sharedMaterial = rules.Palette.BatteryMaterial;
+                root.GetComponent<PartVisionColor>().Apply();
+                foreach (var r in ViewCopies(root)) Assert.AreEqual(rules.Palette.RobotPartMaterial, r.sharedMaterial, r.name);
+            } finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
+        [Test]
+        public void VisionPalette_ColourChange_RecoloursOnlyThatMaterialIncludingEmission() {
+            var pal = ScriptableObject.CreateInstance<VisionPalette>();
+            var trap = new Material(rules.Palette.TrapMaterial);
+            var battery = new Material(rules.Palette.BatteryMaterial);
+            try {
+                pal.TrapMaterial = trap; pal.BatteryMaterial = battery;
+                pal.TrapColor = rules.Palette.TrapColor; pal.BatteryColor = rules.Palette.BatteryColor;
+                var validate = typeof(VisionPalette).GetMethod("OnValidate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                var batteryEmission = battery.GetVector("_EmissionColor");
+                var t0 = trap.GetVector("_EmissionColor");
+                float trapStrength = Mathf.Max(t0.x, Mathf.Max(t0.y, t0.z));
+
+                validate.Invoke(pal, null); // first run: remembers colours, touches nothing
+                Assert.AreEqual(batteryEmission, battery.GetVector("_EmissionColor"));
+
+                pal.TrapColor = new Color(1f, 1f, 0f);
+                validate.Invoke(pal, null);
+                Assert.AreEqual(new Color(1f, 1f, 0f), trap.GetColor("_BaseColor"));
+                var e = trap.GetVector("_EmissionColor");
+                Assert.AreEqual(trapStrength, e.x, 1e-4f); Assert.AreEqual(trapStrength, e.y, 1e-4f); Assert.AreEqual(0f, e.z, 1e-4f);
+                Assert.AreEqual(batteryEmission, battery.GetVector("_EmissionColor"), "unchanged colour keeps its material");
+            } finally {
+                UnityEngine.Object.DestroyImmediate(trap); UnityEngine.Object.DestroyImmediate(battery); UnityEngine.Object.DestroyImmediate(pal);
+            }
+        }
+
         [Test]
         public void Validator_PartNotUnderBody_Fails() {
             AssertFails(Robot(r => Find(r, "Bumper_Shape1").SetParent(r.transform, true)), "Structure");

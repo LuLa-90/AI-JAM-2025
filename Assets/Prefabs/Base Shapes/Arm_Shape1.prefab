@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 7139343900820461138}
   - component: {fileID: 4575091080373296994}
   - component: {fileID: 3784171124427417666}
+  - component: {fileID: 3860087988397168998}
   m_Layer: 0
   m_Name: Arm_Shape1
   m_TagString: RobotArm
@@ -79,10 +80,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3893920837816801082}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0.25, z: 0.05}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -152,6 +153,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ArmAngle: 0
   armDropAngle: 0
+--- !u!114 &3860087988397168998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893920837816801082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79e7afb3ed2c9a4d95dd45e2574185e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.PartVisionColor
+  Palette: {fileID: 11400000, guid: f496d9e9f65a2c04ea98730c24377a81, type: 2}
 --- !u!1 &3987280913891987594
 GameObject:
   m_ObjectHideFlags: 0
