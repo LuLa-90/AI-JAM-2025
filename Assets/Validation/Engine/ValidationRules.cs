@@ -39,9 +39,6 @@ namespace AIJam.Validation {
         [Header("Robot limits")]
         [Tooltip("Max change of each collider axis vs. the part prefab, in percent (not decided yet).")]
         public float ScaleTolerancePercent = 10f;
-        [Tooltip("Collider offset inside its part (local units of the part).")]
-        public float OffsetTolerance = 0.002f;
-        public float AngleToleranceDegrees = 0.5f;
         [Tooltip("Relative tolerance for locked physics values (mass, drag, springs...).")]
         public float PhysicsTolerance = 0.0001f;
 

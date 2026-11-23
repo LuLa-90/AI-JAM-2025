@@ -118,6 +118,11 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_WeaponDetachedFromArm_Fails() {
+            AssertFails(Robot(r => Find(r, "arm_weapon_shape").position += Vector3.up), "Attachment", "weapon");
+        }
+
+        [Test]
         public void Validator_PartNotUnderBody_Fails() {
             AssertFails(Robot(r => Find(r, "Bumper_Shape1").SetParent(r.transform, true)), "Structure");
         }

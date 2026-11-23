@@ -45,7 +45,7 @@ The rules check the colliders, not what the robot looks like. Your fancy model c
    - wheels, battery, bumpers and arm touch the body;
    - the weapon touches the arm;
    - **no hiding parts inside each other.** A wheel may sink at most **2 cm** into the body and at most **0.5 cm** into a bumper. A wheel buried in the body is an error.
-4. **Angles are free.** Rotate whole parts to any angle you like. Only the colliders inside a part stay as they are (rule 5.4).
+4. **Angles and positions are free.** Place and rotate parts, and the colliders inside them, any way you like, as long as the parts touch without overlapping too much (rule 3).
 5. Don't rename the part objects that carry a damage zone. Their names decide the damage and resistance: body, battery, wheels, armbase, weapon, bumper.
 
 ## 5. Colliders
@@ -56,10 +56,10 @@ The rules check the colliders, not what the robot looks like. Your fancy model c
 
    Any other collider is an error. You can't add extra shields, spikes or hidden blocks.
 2. **Shape:** a collider keeps its original mesh. You can't swap one mesh for another.
-3. **Size:** each axis of each collider may differ from the part prefab by at most **±10 %** *(not final)*. Each axis is checked separately.
+3. **Size:** each axis of each collider may differ from the part prefab by at most **±25 %** *(not final)*. Each axis is checked separately.
    - Mirroring (−1 on an axis) is allowed.
    - The size is measured relative to the robot root. Scaling a parent object counts too.
-4. **Position:** a collider stays where it is inside its part. Move and rotate **whole parts**, not the colliders inside them.
+4. **Position:** free, limited only by the touch/overlap rule (4.3). The agent-view copy must move with its collider. Sensor and `ButtMarker` colliders are fixed.
 5. Colliders stay enabled, stay solid (not triggers) and keep their physics material.
 
 ## 6. Physics is locked

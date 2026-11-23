@@ -108,11 +108,11 @@ namespace AIJam.Validation {
             var markerPrint = c.Catalog.ButtMarker;
 
             foreach (var p in parts.Where(p => p.Print != null))
-                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? 0.001f : tol, PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}");
+                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? 0.001f : tol, PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}", lockPose: p.Print.Fixed);
 
             if (marker != null && markerPrint != null) {
                 var cols = marker.GetComponentsInChildren<Collider>(true).ToList();
-                MatchShapes(c, marker, markerPrint, 0.001f, cols, "ButtMarker"); // may move, not be resized
+                MatchShapes(c, marker, markerPrint, 0.001f, cols, "ButtMarker", lockPose: true); // may move, not be resized
             } else if (markerPrint != null) {
                 c.Err("Structure", "ButtMarker (rear target from the template) is missing.");
             }
@@ -127,7 +127,13 @@ namespace AIJam.Validation {
             }
         }
 
-        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, float tol, List<Collider> cols, string partName) {
+        // Fixed colliders (sensors, ButtMarker) keep their pose inside the part. Part colliders may move and
+        // rotate freely (angle freedom); where they sit is limited by the attachment/overlap check.
+        private const float FixedOffset = 0.002f, FixedAngle = 0.5f;
+        // An agent-view copy must sit on its collider.
+        private const float ViewOffset = 0.001f, ViewAngle = 0.5f;
+
+        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, float tol, List<Collider> cols, string partName, bool lockPose) {
             var prints = print.Colliders.Select(s => s.Clone()).ToList();
             foreach (var col in cols) {
                 var mesh = col is MeshCollider mc ? mc.sharedMesh : null;
@@ -141,10 +147,10 @@ namespace AIJam.Validation {
                 if (have.Enabled != fp.Enabled) c.Err("Colliders", $"'{col.name}' must be {(fp.Enabled ? "enabled" : "disabled")} (as in {partName}).", col.transform);
                 if (have.IsTrigger != fp.IsTrigger) c.Err("Colliders", $"'{col.name}' trigger setting differs from {partName}.", col.transform);
                 if (have.Material != fp.Material) c.Err("Physics", $"'{col.name}' uses physic material '{(have.Material ? have.Material.name : "none")}', expected '{(fp.Material ? fp.Material.name : "none")}'.", col.transform);
-                if (Vector3.Distance(have.LocalPos, fp.LocalPos) > c.Rules.OffsetTolerance)
-                    c.Err("Colliders", $"'{col.name}' was moved inside {partName}; move the whole part instead.", col.transform);
-                if (Quaternion.Angle(have.LocalRot, fp.LocalRot) > c.Rules.AngleToleranceDegrees)
-                    c.Err("Colliders", $"'{col.name}' was rotated inside {partName}; rotate the whole part instead.", col.transform);
+                if (lockPose && Vector3.Distance(have.LocalPos, fp.LocalPos) > FixedOffset)
+                    c.Err("Colliders", $"'{col.name}' was moved inside {partName}; this collider is fixed.", col.transform);
+                if (lockPose && Quaternion.Angle(have.LocalRot, fp.LocalRot) > FixedAngle)
+                    c.Err("Colliders", $"'{col.name}' was rotated inside {partName}; this collider is fixed.", col.transform);
                 // size relative to the robot root (includes every parent's scale)
                 var size = PartCatalog.ScaleIn(col.transform, c.Root);
                 if (!Within(size, fp.Scale, tol))
@@ -240,8 +246,14 @@ namespace AIJam.Validation {
 
             foreach (var p in parts.Where(p => p.Group != "" && p != body)) {
                 var own = PartCatalog.OwnColliders(p.Root).Where(Solid).ToList();
-                if (p.Root.GetComponent<ArmComponent>() != null)
+                if (p.Root.GetComponent<ArmComponent>() != null) {
+                    var weapon = own.Where(x => PartCatalog.ZoneKeyword(x.name) == "weapon").ToList();
                     own = own.Where(x => PartCatalog.ZoneKeyword(x.name) == "armbase").ToList();
+                    float grip = 0f;
+                    foreach (var a in weapon) foreach (var b in own) grip = Mathf.Max(grip, Penetration(a, b));
+                    if (grip < c.Rules.MinAttachmentPenetration)
+                        c.Err("Attachment", $"The weapon of '{p.Root.name}' doesn't touch its arm base.", p.Root);
+                }
                 float deepest = 0f;
                 foreach (var a in own) foreach (var b in bodyCols) deepest = Mathf.Max(deepest, Penetration(a, b));
                 if (deepest < c.Rules.MinAttachmentPenetration)
@@ -279,11 +291,14 @@ namespace AIJam.Validation {
                 var mesh = r.GetComponent<MeshFilter>() != null ? r.GetComponent<MeshFilter>().sharedMesh : null;
                 var fp = part.Print.Views.FirstOrDefault(v => v.Mesh == mesh);
                 if (fp == null) { c.Err("Vision", $"'{r.name}' is not one of {part.Print.Prefab.name}'s agent-view copies.", r.transform); continue; }
-                var have = PartCatalog.Print(r.transform, partRoot, null, r);
-                if (Vector3.Distance(have.LocalPos, fp.LocalPos) > c.Rules.OffsetTolerance || Quaternion.Angle(have.LocalRot, fp.LocalRot) > c.Rules.AngleToleranceDegrees)
-                    c.Err("Vision", $"Agent-view copy '{r.name}' was moved away from its collider.", r.transform);
-                // same size as the collider with the same mesh
+                // same pose and size as the collider with the same mesh
                 var col = PartCatalog.OwnColliders(partRoot).FirstOrDefault(x => x is MeshCollider mc && mc.sharedMesh == mesh);
+                if (col != null) {
+                    var rv = PartCatalog.Print(r.transform, c.Root, null, r);
+                    var cv = PartCatalog.Print(col.transform, c.Root, col);
+                    if (Vector3.Distance(rv.LocalPos, cv.LocalPos) > ViewOffset || Quaternion.Angle(rv.LocalRot, cv.LocalRot) > ViewAngle)
+                        c.Err("Vision", $"Agent-view copy '{r.name}' was moved away from its collider.", r.transform);
+                }
                 if (col != null && !Within(PartCatalog.ScaleIn(r.transform, c.Root), PartCatalog.ScaleIn(col.transform, c.Root), 0.005f))
                     c.Err("Vision", $"Agent-view copy '{r.name}' has a different size than its collider.", r.transform);
                 if (r.sharedMaterial != fp.RenderMaterial)

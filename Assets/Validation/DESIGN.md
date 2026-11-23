@@ -36,7 +36,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
    - a sensor's fixed collider.
 
    Anything else is an error.
-5. **Size:** each part collider's scale on each axis may differ from the prefab's own scale by at most **±X %** (rules asset, placeholder 10 %). Mirroring (−1) is allowed. The mesh must be unchanged. `ProximityRays/Sphere` must match exactly (0 %), and the `ButtSensorReciever` colliders must stay disabled.
+5. **Size:** each part collider's scale on each axis may differ from the prefab's own scale by at most **±X %** (rules asset, currently 25 %, not final). Mirroring (−1) is allowed. The mesh must be unchanged. `ProximityRays/Sphere` must match exactly (0 %), and the `ButtSensorReciever` colliders must stay disabled.
 6. **Damage zones:** every part collider keeps its `CollisionZoneBehaviour`, and its object name keeps the same damage keyword as in the prefab (`body`, `battery`, `wheels`, `armbase`, `weapon`, `bumper`). The check compares the zone stats `CollisionForwarder` would assign against the prefab's.
 7. **Attachment** (taken from `PhysicalOverlapValidator`): wheels, battery, bumpers and arm touch the body, and the weapon touches the arm, each with a penetration limit. This uses `Physics.ComputePenetration` on the part colliders.
 8. **Robot vision:**
@@ -49,7 +49,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
    - the arm's HingeJoint spring, motor and limits;
    - PhysicMaterials on colliders;
    - no extra Rigidbodies or Joints.
-10. **How size and position are measured** (my call): each collider's size is compared relative to the robot root, including the scale of its parents, so scaling a parent is caught. Mirroring is allowed. A collider must keep its offset inside its part; teams position whole parts.
+10. **How size and position are measured** (my call): each collider's size is compared relative to the robot root, including the scale of its parents, so scaling a parent is caught. Mirroring is allowed. Collider position and rotation inside a part are free (decided 2026-11-23: angle freedom; placement is limited by the attachment/overlap check, which also requires the weapon to touch its arm base). Sensor and ButtMarker colliders keep their pose. An agent-view copy must sit on its collider.
 
 ### Arena (team `ArenaPrefab`)
 1. The root is at (0, 0, 0) with identity rotation and scale 1.
