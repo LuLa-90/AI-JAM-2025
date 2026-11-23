@@ -76,7 +76,7 @@ Don't add extra Rigidbodies or Joints.
 
 | Colour | Meaning |
 |---|---|
-| black | everything else (floor, walls) |
+| black | the background: floor, walls and everything else. Arenas put nothing on RobotView except traps and buffs. |
 | white | robot parts |
 | red | trap (avoid it) |
 | green | buff (go for it) |

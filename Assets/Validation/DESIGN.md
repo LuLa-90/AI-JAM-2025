@@ -59,8 +59,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
    - Every renderer on RobotView uses a palette material.
    - **Red or green only on an object that has a trigger collider or sits inside one.** That rules out fake traps and buffs.
    - **White and blue are forbidden in arenas.** That rules out fake robots and batteries.
-   - Everything else is black.
-   - A warning is given if the arena has no RobotView floor.
+   - **Nothing else on RobotView** (decided 2026-11-23): no black floor or wall copies; the camera background is black. A black RobotView object is an error.
 5. **Custom scripts:** every MonoBehaviour whose type is not from Unity, ML-Agents or this project's known scripts is listed with its object path, as a manual-review list (warning level).
 6. Music, sounds, VFX, particles and NPCs are allowed. NPCs fall under rule 2: they may have no solid colliders.
 7. **Runtime spawns** (decided 2026-11-23) must be children of the arena object. `SceneRoots` snapshots the scene roots before the arena is instantiated; the test match reports new roots as a failed "Arena spawns" row, and `TournamentManager` destroys them at the round change with a warning.
@@ -110,7 +109,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
 ## Required changes outside `Assets/Validation` (approved by the user 2026-11-22)
 - `Robot Agent Template.prefab`: set the camera culling mask to RobotView only. This fixes the bug where the agent saw Default.
 - `Body_Shape2.prefab`: set the battery's RobotView copy to the battery material (it's white now).
-- The neutral arena (`Turnaj/Prefabs/NeutralArena` and `Prefabs/Environment (0, 0)`): add black RobotView copies of the floor and wall.
+- The neutral arena (`Turnaj/Prefabs/NeutralArena` and `Prefabs/Environment (0, 0)`): ~~add black RobotView copies of the floor and wall~~. Reverted 2026-11-23: arenas have no RobotView parts besides traps and buffs.
 - Add the TournamentView layer. Tournament cameras render TournamentView plus the current layers.
 - Spawners (training `AIJamManager` and `TournamentManager`): force the camera mask to RobotView when a robot spawns, so old robot prefabs are fixed too. Old models then see a black floor and wall; check Firehawk's behaviour once.
 - The old `RobotHierarchyValidator` / `PhysicalOverlapValidator` stay in place for now, because `ConstructionScene` uses them. Replacing or removing them comes later.

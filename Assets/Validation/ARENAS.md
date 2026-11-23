@@ -25,7 +25,7 @@ Decisions with the user on 2026-11-22. Robot parts are in `ROBOT_PARTS.md`.
 
 | What | Colour | Behaviour the agent should learn |
 |---|---|---|
-| Default: everything not listed below (floor, walls, NPCs…) | **black** | – |
+| Default: everything not listed below (floor, walls, NPCs…) | **black**: the camera background; arenas have **no** black RobotView objects (decided 2026-11-23) | – |
 | Robot parts (the enemy) | **white** | ram it |
 | Trap | **red** | avoid |
 | Buff | **green** | approach |
@@ -42,7 +42,7 @@ Decisions with the user on 2026-11-22. Robot parts are in `ROBOT_PARTS.md`.
 - `VisionPalette.asset` (Assets/Validation) holds one material per role. A new `BrightBlack` was added; the others are the existing Bright* materials.
 - The template's agent camera sees RobotView only, on a black background. Spawners (training `AIJamManager`, `TournamentManager`, the validation scene) force this on every robot through `VisionLayers.ForceAgentCamera`.
 - Body_Shape2's battery copy is now BrightBlue.
-- NeutralArena and `Environment (0, 0)` have black RobotView copies of their floor and wall (`RobotView (agent)`).
+- **Arenas have no RobotView objects except red traps and green buffs on triggers** (decided 2026-11-23). The camera already clears to black, so floor and wall copies are unnecessary; the black copies that were added to NeutralArena and `Environment (0, 0)` were removed. A black RobotView object in an arena is an error.
 - TournamentView is layer 9.
 - Floor and wall are both black (default), so the agent camera can't see the walls. **Decided 2026-11-22: walls are detected with the proximity sensor**, and teams that need wall awareness add `ProximityRays` to their robot. No separate wall colour.
 

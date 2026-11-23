@@ -66,14 +66,15 @@ namespace AIJam.Validation {
             // 4. vision
             int robotView = LayerMask.NameToLayer(VisionLayers.RobotViewName);
             var triggers = root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && c.isTrigger).ToList();
-            bool hasDefault = false;
             foreach (var r in root.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer == robotView)) {
                 var role = rules.Palette != null ? rules.Palette.RoleOf(r.sharedMaterial) : null;
                 foreach (var m in r.sharedMaterials.Skip(1))
                     if (rules.Palette != null && rules.Palette.RoleOf(m) == null) Err("Vision", $"'{r.name}' uses a non-palette material '{(m ? m.name : "none")}'.", r.transform);
                 if (role == null) { Err("Vision", $"'{r.name}' is on RobotView with a non-palette material '{(r.sharedMaterial ? r.sharedMaterial.name : "none")}'.", r.transform); continue; }
                 switch (role.Value) {
-                    case VisionRole.Default: hasDefault = true; break;
+                    case VisionRole.Default:
+                        Err("Vision", $"'{r.name}' is a black RobotView object – arenas may show only trap (red) and buff (green) colours; the agent camera background is already black.", r.transform);
+                        break;
                     case VisionRole.RobotPart:
                     case VisionRole.Battery:
                         Err("Vision", $"'{r.name}' uses the {role.Value} colour – robot and battery colours are not allowed in arenas.", r.transform);
@@ -85,7 +86,6 @@ namespace AIJam.Validation {
                         break;
                 }
             }
-            if (!hasDefault) Warn("Vision", "No black RobotView floor/wall – the agent camera will not see the arena.");
 
             // 5. custom scripts for manual review
             foreach (var mb in root.GetComponentsInChildren<MonoBehaviour>(true)) {

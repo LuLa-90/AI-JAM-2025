@@ -163,6 +163,16 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_ArenaBlackObject_Fails() {
+            AssertFails(Arena(a => {
+                var floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                floor.layer = LayerMask.NameToLayer("RobotView");
+                floor.GetComponent<Renderer>().sharedMaterial = rules.Palette.DefaultMaterial;
+                floor.transform.SetParent(a.transform, false);
+            }), "Vision", "black");
+        }
+
+        [Test]
         public void Validator_ArenaWhiteObject_Fails() {
             AssertFails(Arena(a => {
                 var fake = GameObject.CreatePrimitive(PrimitiveType.Cube);
