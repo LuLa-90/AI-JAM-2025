@@ -63,6 +63,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
    - A warning is given if the arena has no RobotView floor.
 5. **Custom scripts:** every MonoBehaviour whose type is not from Unity, ML-Agents or this project's known scripts is listed with its object path, as a manual-review list (warning level).
 6. Music, sounds, VFX, particles and NPCs are allowed. NPCs fall under rule 2: they may have no solid colliders.
+7. **Runtime spawns** (decided 2026-11-23) must be children of the arena object. `SceneRoots` snapshots the scene roots before the arena is instantiated; the test match reports new roots as a failed "Arena spawns" row, and `TournamentManager` destroys them at the round change with a warning.
 
 ### Team
 - `TeamName` is set, and `RobotPrefab` and `ArenaPrefab` are set and are separate prefabs.

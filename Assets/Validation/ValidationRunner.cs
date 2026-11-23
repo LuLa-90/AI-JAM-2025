@@ -56,6 +56,7 @@ namespace AIJam.Validation {
         public GameObject ArenaInstance => arena;
 
         private GameObject arena, matchRoot;
+        private SceneRoots roots; // arena rule: runtime spawns must stay under the arena
         private RobotAgent robot, enemy;
         private RobotMovement robotMove, enemyMove;
         private int respawns;
@@ -70,6 +71,7 @@ namespace AIJam.Validation {
                 Status = "Pick a team with a robot and an arena, then press Play.";
                 return;
             }
+            roots = SceneRoots.Take();
             arena = Instantiate(Team.ArenaPrefab, Vector3.zero, Team.ArenaPrefab.transform.rotation);
             arena.name = "Arena (" + Team.DisplayName + ")";
             matchRoot = new GameObject("Match");
@@ -152,6 +154,7 @@ namespace AIJam.Validation {
                 }
             }
             yield return ResetRound();
+            CheckArenaSpawns();
             Status = "Done. " + Results.Count(r => r.Status == TestStatus.Fail) + " failed, " + Results.Count(r => r.Status == TestStatus.Warn) + " warnings.";
             Debug.Log("[Test match]\n" + string.Join("\n", Results));
             Busy = false;
@@ -159,6 +162,15 @@ namespace AIJam.Validation {
 
         public string ResultsReport() =>
             $"Test match – {(Team != null ? Team.DisplayName : "")}\n" + string.Join("\n", Results.Select(r => "  " + r));
+
+        /// <summary>Everything the arena spawned during the events must be a child of the arena object.</summary>
+        private void CheckArenaSpawns() {
+            const string evt = "Arena spawns";
+            if (roots == null) return;
+            var stray = roots.NewSince(arena, matchRoot);
+            if (stray.Count == 0) Add(evt, TestStatus.Pass, "nothing was spawned outside the arena object");
+            else Add(evt, TestStatus.Fail, $"{stray.Count} object(s) spawned outside the arena (must be children of the arena so they are destroyed with it): {SceneRoots.Names(stray)}");
+        }
 
         private void Add(string evt, TestStatus s, string text) {
             Results.RemoveAll(r => r.Event == evt);

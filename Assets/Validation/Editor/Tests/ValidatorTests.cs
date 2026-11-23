@@ -108,6 +108,16 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_WheelHiddenInsideBody_Fails() {
+            AssertFails(Robot(r => {
+                var bodyCol = Find(r, "body_shape").GetComponent<Collider>();
+                var wheel = r.GetComponentInChildren<WheelComponent>().transform;
+                var wheelCol = wheel.Find("wheels_shape").GetComponent<Collider>();
+                wheel.position += bodyCol.bounds.center - wheelCol.bounds.center; // wheel buried in the body
+            }), "Attachment", "sinks");
+        }
+
+        [Test]
         public void Validator_PartNotUnderBody_Fails() {
             AssertFails(Robot(r => Find(r, "Bumper_Shape1").SetParent(r.transform, true)), "Structure");
         }

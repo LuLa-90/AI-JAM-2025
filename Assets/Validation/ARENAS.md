@@ -16,7 +16,8 @@ Decisions with the user on 2026-11-22. Robot parts are in `ROBOT_PARTS.md`.
 4. **Spawn points.** There is exactly one `SpawnPoint` Home and one Guest, and they must be **symmetric across the centre**: Guest position = −Home position (x and z), and Guest yaw = Home yaw + 180°, within tolerance.
 5. **Allowed freely:** custom music, sounds, VFX and particle effects, and NPCs that spawn but don't interact with robots. NPCs have no solid colliders (rule 3).
 6. **Traps and buffs** are team-written scripts on trigger colliders. The validator can't judge what custom code does, so it **lists every custom script** in the arena for a human reviewer, together with what each one is attached to.
-7. **Optional:** `ArenaViewAngle` sets the camera angle from which the floor text reads correctly.
+7. **Runtime spawns stay under the arena** (decided 2026-11-23). Everything an arena creates while it runs (NPCs, VFX, projectiles, sounds) must be a **child of the arena object**, so it is destroyed together with the arena between rounds. The test match fails "Arena spawns" for any new scene root object, and the tournament destroys such objects at the round change and logs a warning.
+8. **Optional:** `ArenaViewAngle` sets the camera angle from which the floor text reads correctly.
 
 ## Robot vision (agent camera)
 - `RobotCameraSensor`: 32 × 32 pixels, in colour. Its culling mask is **Default (0), TransparentFX, Ignore Raycast, Water, UI, RobotView (6)**. It does **not** see ConstructionView (8).

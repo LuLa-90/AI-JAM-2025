@@ -78,6 +78,8 @@ namespace Turnaj {
         public AudioClip Round1Clip;
         public AudioClip Round2Clip;
         public AudioClip FinalRoundClip;
+        [Tooltip("Seconds into each round clip where \"Fight!\" starts (Round 1, Round 2, Final). The part before plays with the round title, the rest with FIGHT!!")]
+        public Vector3 FightCueSeconds = new Vector3(1.40f, 1.40f, 1.60f);
         public AudioClip FlawlessClip;
         public AudioClip RoundWonClip;
         [Tooltip("Optional tick for 3-2-1.")]
@@ -105,6 +107,7 @@ namespace Turnaj {
 
         private RobotAgent robotA, robotB;
         private GameObject matchRoot, arena;
+        private AIJam.Validation.SceneRoots arenaRoots; // arena rule: runtime spawns must stay under the arena
         private DoubleTap tapW, tapQ, tapE, tapR;
         private float lastSeparator = -100f;
         private Coroutine countdown, afterRound;
@@ -197,13 +200,26 @@ namespace Turnaj {
         private void LoadRound(int round) {
             RoundIndex = round;
             ResetRoundState();
-            if (arena != null) Destroy(arena);
+            if (arena != null) {
+                DestroyStraySpawns();
+                Destroy(arena);
+            }
             var owner = MatchRules.ArenaForRound(round);
             var prefab = owner == ArenaOwner.TeamA ? TeamA.ArenaPrefab : owner == ArenaOwner.TeamB ? TeamB.ArenaPrefab : NeutralArenaPrefab;
+            arenaRoots = AIJam.Validation.SceneRoots.Take();
             arena = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             arena.name = $"Arena R{round + 1} ({(owner == ArenaOwner.Neutral ? "neutral" : owner == ArenaOwner.TeamA ? NameA : NameB)})";
             Cameras.SetArena(arena);
             EnterWaiting();
+        }
+
+        /// <summary>Objects the old arena spawned outside itself break the rule; remove them so the next arena starts clean.</summary>
+        private void DestroyStraySpawns() {
+            if (arenaRoots == null) return;
+            var stray = arenaRoots.NewSince(arena, matchRoot);
+            if (stray.Count == 0) return;
+            Debug.LogWarning($"[Turnaj] Arena '{arena.name}' spawned {stray.Count} object(s) outside itself (rule break), destroyed: {AIJam.Validation.SceneRoots.Names(stray)}");
+            foreach (var g in stray) Destroy(g);
         }
 
         private void EnterWaiting() {
@@ -227,7 +243,9 @@ namespace Turnaj {
 
         private IEnumerator Countdown() {
             Phase = MatchPhase.Countdown;
-            Play(RoundIndex == 0 ? Round1Clip : RoundIndex == 1 ? Round2Clip : FinalRoundClip);
+            var roundClip = RoundIndex == 0 ? Round1Clip : RoundIndex == 1 ? Round2Clip : FinalRoundClip;
+            float cue = RoundIndex == 0 ? FightCueSeconds.x : RoundIndex == 1 ? FightCueSeconds.y : FightCueSeconds.z;
+            PlayPart(roundClip, 0f, cue);   // "Round X"
             Hud.ShowFightLayout();
             Hud.SetTimer(RoundDuration, false);
             Hud.ShowCenter(MatchRules.RoundTitle(RoundIndex), Hud.AccentColor);
@@ -239,7 +257,8 @@ namespace Turnaj {
                 yield return Wait(1f);
             }
             Hud.ShowCenter("FIGHT!!", Hud.DangerColor, 1.2f);
-            Play(FightClip);
+            if (FightClip != null) Play(FightClip);
+            else PlayPart(roundClip, cue, -1f); // "Fight!" from the round clip
             TimeLeft = RoundDuration;
             SetFrozen(robotA, false);
             SetFrozen(robotB, false);
@@ -504,6 +523,16 @@ namespace Turnaj {
                 }
                 rb.isKinematic = frozen;
             }
+        }
+
+        /// <summary>Plays clip from <paramref name="from"/> s, stopping at <paramref name="to"/> s (to &lt; 0 = to the end).</summary>
+        private void PlayPart(AudioClip clip, float from, float to) {
+            if (clip == null || Voice == null) return;
+            Voice.Stop();
+            Voice.clip = clip;
+            Voice.time = Mathf.Clamp(from, 0f, clip.length - 0.01f);
+            Voice.Play();
+            if (to > from) Voice.SetScheduledEndTime(AudioSettings.dspTime + (to - from));
         }
 
         private void Play(AudioClip clip) {
