@@ -39,6 +39,9 @@ public class AIJamManager : MonoBehaviour
         foreach (var env in environments.OrderBy(e => e.name).Take((int)numOfArenas)) {
             var robotA = Instantiate(robotPrefabA, env.transform);
             var robotB = Instantiate(robotPrefabB, env.transform);
+            // Agent camera sees only the RobotView layer (old prefabs also saw Default - a bug).
+            AIJam.Validation.VisionLayers.ForceAgentCamera(robotA.gameObject);
+            AIJam.Validation.VisionLayers.ForceAgentCamera(robotB.gameObject);
             robotA.gameObject.name = robotPrefabA.gameObject.name;
             robotB.gameObject.name = robotPrefabB.gameObject.name;
 

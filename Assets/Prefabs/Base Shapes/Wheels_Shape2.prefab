@@ -90,6 +90,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8602644496448642672}
   - component: {fileID: 6104241875235648901}
+  - component: {fileID: 6319755180924308791}
   m_Layer: 0
   m_Name: Wheels_Shape2
   m_TagString: Untagged
@@ -127,6 +128,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf20b42a5ce617e489c3d6d5748002ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6319755180924308791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9212184175514869242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79e7afb3ed2c9a4d95dd45e2574185e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIJam.Validation.PartVisionColor
+  Palette: {fileID: 11400000, guid: f496d9e9f65a2c04ea98730c24377a81, type: 2}
 --- !u!1001 &6421568284039143100
 PrefabInstance:
   m_ObjectHideFlags: 0
