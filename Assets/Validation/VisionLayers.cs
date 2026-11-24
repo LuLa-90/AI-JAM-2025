@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace AIJam.Validation {
-    /// <summary>Layer conventions (see ARENAS.md) and the agent-camera fix used by every spawner.</summary>
+    /// <summary>Layer conventions (see README.md 6.2.5 and 6.3) and the agent-camera fix used by every spawner.</summary>
     public static class VisionLayers {
         public const string RobotViewName = "RobotView";       // 6: agent view (palette colours only)
         public const string ConstructionViewName = "ConstructionView"; // 8: colliders + default view

@@ -128,7 +128,7 @@ Last year's voice lines are copied to `Assets/Turnaj/Sounds`: round-1, round-2, 
 ```
 Assets/Turnaj/
   Turnaj.unity                  scene
-  DESIGN.md                     this file
+  (design: TOURNAMENT_DESIGN.md in the project root)
   Scripts/                      soTeam, SpawnPoint, TournamentManager, cameras (Rezia port), HUD, helpers
   Scripts/Editor/               TournamentManager inspector (dropdowns, focus banner, result), Scene view overlay
   Prefabs/                      HUD canvas, camera rig, neutral arena with spawn markers

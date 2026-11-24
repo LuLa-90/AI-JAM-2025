@@ -19,7 +19,7 @@ Priebeh podujatia:
 | [3. Tréning](#3-tréning) | Trénovacia scéna, spustenie trénera, použitie modelu |
 | [4. Validácia](#4-validácia) | Kontrola pravidiel a testovací zápas |
 | [5. Turnaj](#5-turnaj) | Turnajová scéna a ovládanie |
-| [6. Pravidlá](#6-pravidlá) | Pravidlá tímu, robota, arény a zápasu |
+| [6. Pravidlá](#6-pravidlá) | Pravidlá tímu, robota, arény a zápasu, poškodenie a HP |
 | [7. Riešenie problémov](#7-riešenie-problémov) | Časté chyby a ich oprava |
 | [8. Dokumenty](#8-dokumenty) | Podrobné dokumenty v projekte |
 
@@ -298,7 +298,7 @@ V turnajovej scéne si môžete zápas vyskúšať vopred.
 | R ×2 | opakovanie kola |
 | T | pauza / pokračovanie |
 
-Pravidlá zápasu (kolá, čas, body): [6.4 Zápas](#64-zápas). Celý návrh turnaja: [`Assets/Turnaj/DESIGN.md`](Assets/Turnaj/DESIGN.md).
+Pravidlá zápasu (kolá, čas, body): [6.4 Zápas](#64-zápas). Celý návrh turnaja: [`TOURNAMENT_DESIGN.md`](TOURNAMENT_DESIGN.md).
 
 ---
 
@@ -410,8 +410,8 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
    - 2. kolo je v domácej aréne tímu B.
    - 3. kolo sa hrá iba pri stave 1:1, v neutrálnej aréne.
 2. **Štart:** každé kolo sa začína až na pokyn rozhodcu. Roboty štartujú na značkách Home (domáci tím) a Guest.
-3. **Knockout:** kolo vyhráva robot, ktorého súper stratí HP.
-4. **Pád a prevrátenie:** robot, ktorý vypadne z arény alebo sa prevráti, stratí časť HP na všetkých zónach a vráti sa na svoju značku.
+3. **Knockout:** kolo vyhráva robot, ktorého súper je vyradený, teda jeho HP klesne na hranicu vyradenia ([6.5](#65-poškodenie-a-hp)).
+4. **Pád a prevrátenie:** robot, ktorý vypadne z arény alebo sa prevráti, stratí časť HP na všetkých zónach ([6.5](#65-poškodenie-a-hp)) a vráti sa na svoju značku.
 5. **Čas:** kolo trvá 90 s. Po uplynutí času vyhráva robot s vyšším HP.
    - Rovnaké HP v 1. alebo 2. kole: kolo sa opakuje.
    - Rovnaké HP vo finálnom kole: **náhla smrť** (sudden death). Prehráva robot, ktorý ako prvý dostane poškodenie od súpera, vypadne alebo sa prevráti. Dotyk steny alebo podlahy sa nepočíta.
@@ -424,6 +424,24 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
    | 2:1 | 2 |
    | 1:2 | 1 |
    | 0:2 | 0 |
+
+### 6.5 Poškodenie a HP
+1. Každý diel robota má **zónu poškodenia** s vlastným HP (od 0 do 1). Zóna má dve hodnoty: **poškodenie**, ktoré spôsobuje súperovi, a **odolnosť** voči zásahom.
+
+   | Zóna (názov objektu obsahuje) | Poškodenie | Odolnosť |
+   |---|:---:|:---:|
+   | `body` (telo) | 1 | 3 |
+   | `battery` (batéria) | 1 | 1 |
+   | `wheels` (kolesá) | 5 | 4 |
+   | `armbase` (základ ramena) | 2 | 3 |
+   | `weapon` (zbraň) | 200 | 15 |
+   | `bumper` (nárazník) | 150 | 10 |
+
+2. **Zásah:** keď sa zóny dvoch robotov zrazia, zasiahnutá zóna stráca HP úmerne pomeru *poškodenie súperovej zóny / vlastná odolnosť*. Zbraň a nárazník teda ubližujú najviac a batéria je najzraniteľnejšia.
+3. **HP robota** je vážený priemer HP jeho zón. Robot je **vyradený**, keď tento priemer klesne na **0,2** alebo nižšie. Ukazovateľ HP v turnaji vtedy ukazuje 0 %.
+4. **Pád z arény:** −0,3 HP na každej zóne.
+5. **Prevrátenie:** −0,2 HP na každej zóne.
+6. Hodnoty zón sa priraďujú podľa **názvu objektu**, preto sa objekty zón nesmú premenovať (6.2.2, bod 5).
 
 ---
 
@@ -442,14 +460,10 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
 
 ## 8. Dokumenty
 
-Dokumenty v `Assets/` sú v angličtine. Pravidlá v kapitole 6 z nich vychádzajú.
+Tieto dokumenty sú v angličtine a sú určené najmä organizátorom a vývojárom. Všetko, čo potrebuje tím, je v tomto README.
 
 | Dokument | Obsah |
 |---|---|
-| [`Assets/Validation/ROBOT_RULES.md`](Assets/Validation/ROBOT_RULES.md) | Pravidlá robota pre tímy (anglicky) |
-| [`Assets/Validation/ARENAS.md`](Assets/Validation/ARENAS.md) | Pravidlá arény, farby pohľadu robota, vrstvy |
-| [`Assets/Validation/ROBOT_PARTS.md`](Assets/Validation/ROBOT_PARTS.md) | Všetky diely, ich collidery a tabuľka poškodení |
-| [`Assets/Validation/DESIGN.md`](Assets/Validation/DESIGN.md) | Ako funguje validácia a testovací zápas |
-| [`Assets/Turnaj/DESIGN.md`](Assets/Turnaj/DESIGN.md) | Ako funguje turnajová scéna |
-| [`documentation.md`](documentation.md) | Pôvodná dokumentácia projektu |
-| [`Config_README.md`](Config_README.md) | Pôvodné poznámky k tréningu (konfigurácia je teraz `Assets/konfig.yaml`) |
+| [`ROBOT_PARTS.md`](ROBOT_PARTS.md) | Všetky diely: ich collidery, meshe a zóny poškodenia |
+| [`VALIDATION_DESIGN.md`](VALIDATION_DESIGN.md) | Ako funguje validácia a testovací zápas |
+| [`TOURNAMENT_DESIGN.md`](TOURNAMENT_DESIGN.md) | Ako funguje turnajová scéna (réžia, rozhodca, kamery, zvuky) |

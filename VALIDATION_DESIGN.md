@@ -1,7 +1,7 @@
 # Validation scene – design
 
 Date: 2026-11-22. The hackathon ends **29. 11. 2026 at 12:00** (presentations), then the organisers validate each team. The tournament is on 30. 11. 2026.
-Reference documents in this folder: `ROBOT_PARTS.md` (all base parts, robot rules) and `ARENAS.md` (arena rules, vision colours, layers).
+Reference documents: `ROBOT_PARTS.md` (all base parts) and `README.md`, chapter 6 (the rules for teams, in Slovak).
 
 ## Intent
 Teams build a robot (from the provided parts) and a home arena during the hackathon. They need a scene where they can **continuously check** that both follow the rules, and where they can **see how their robot behaves** in typical match situations. After the presentations the organisers use the same scene for the **final validation, one team at a time**. The goal is a fair tournament: same physical limits for everyone, personalised looks allowed.
@@ -24,7 +24,7 @@ Teams build a robot (from the provided parts) and a home arena during the hackat
 - A result that passes a robot which has extra solid colliders, renamed damage zones, or scaled-up fixed colliders.
 - Changing how training works without saying so. Changes to the robot template or the spawners are listed explicitly below.
 
-## Rules to check (from `ROBOT_PARTS.md` and `ARENAS.md`)
+## Rules to check (team-facing version: `README.md`, chapter 6)
 
 ### Robot (team `RobotPrefab`)
 1. **Root:** has `RobotAgent`, `BehaviorParameters` with a model assigned, `Rigidbody`, and `CollisionForwarder`.
