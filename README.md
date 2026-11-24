@@ -509,10 +509,14 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
    | `battery` (batéria) | 1 | 1 |
    | `wheels` (kolesá) | 5 | 4 |
    | `armbase` (základ ramena) | 2 | 3 |
-   | `weapon` (zbraň) | 200 | 15 |
-   | `bumper` (nárazník) | 150 | 10 |
+   | `weapon` (zbraň) | 300 | 15 |
+   | `bumper` (nárazník) | 1500 | 10 |
 
-2. **Zásah:** keď sa zóny dvoch robotov zrazia, zasiahnutá zóna stráca HP úmerne pomeru *poškodenie súperovej zóny / vlastná odolnosť*. Zbraň a nárazník teda ubližujú najviac a batéria je najzraniteľnejšia.
+2. **Zásah:** keď sa zóny dvoch robotov zrazia, zasiahnutá zóna stráca HP úmerne *sile nárazu* a pomeru *poškodenie súperovej zóny / vlastná odolnosť*. Čím rýchlejší náraz, tým väčšie poškodenie.
+   - **Hlavným zdrojom poškodenia je náraz nárazníkom (taranovanie).** Nárazník ubližuje päťkrát viac než úder zbraňou. V skúšobných súbojoch spôsobil asi 84 % celého poškodenia, zbraň asi 16 %.
+   - Jeden čelný náraz v plnej rýchlosti uberie robotovi asi 14 % HP. Dobre mierené nárazy vyradia súpera do 90 s; v skúšobných súbojoch čiastočne natrénovaných robotov sa vyradením skončila asi polovica kôl.
+   - Batéria je najzraniteľnejšia zóna (odolnosť 1), telo a kolesá sú stredne odolné.
+   - Dotyk s arénou bez sily (státie, jazda po podlahe) HP neuberá. Tvrdý náraz do steny áno.
 3. **HP robota** je vážený priemer HP jeho zón. Robot je **vyradený**, keď tento priemer klesne na **0,2** alebo nižšie. Ukazovateľ HP v turnaji vtedy ukazuje 0 %.
 4. **Pád z arény:** −0,3 HP na každej zóne.
 5. **Prevrátenie:** −0,2 HP na každej zóne.

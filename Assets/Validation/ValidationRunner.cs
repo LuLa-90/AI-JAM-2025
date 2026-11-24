@@ -347,8 +347,9 @@ namespace AIJam.Validation {
             go.transform.position = at;
             go.transform.localScale = Vector3.one * 0.08f;
             var zone = go.AddComponent<CollisionZoneBehaviour>();
-            zone.damageOfZone = 200f;   // same as arm_weapon_shape (CollisionForwarder)
-            zone.resistanceOfZone = 15f;
+            var weaponStats = CollisionForwarder.StatsFor("arm_weapon_shape");
+            zone.damageOfZone = weaponStats.damage;
+            zone.resistanceOfZone = weaponStats.resistance;
             var rb = go.AddComponent<Rigidbody>();
             rb.mass = 1f;
             rb.useGravity = false;

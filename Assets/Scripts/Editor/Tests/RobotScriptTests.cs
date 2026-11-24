@@ -114,11 +114,11 @@ namespace AIJam.RobotScripts.Tests {
             weapon.OnCollision += (s, e) => weaponEvent = e;
             body.OnCollision += (s, e) => bodyEvent = e;
 
-            CollisionZoneBehaviour.ResolveHit(Col(weapon), Col(body), 1000f, 1.00f);
+            CollisionZoneBehaviour.ResolveHit(Col(weapon), Col(body), Impulse(0.001f), 1.00f);
 
-            Assert.AreEqual(200f / 3f * Force(1000f), weaponEvent.DamageDealt, 1e-5f);
+            Assert.AreEqual(200f / 3f * 0.001f, weaponEvent.DamageDealt, 1e-6f);
             Assert.AreEqual(bodyEvent.Damage, weaponEvent.DamageDealt, 1e-6f, "dealt by the weapon = taken by the body");
-            Assert.AreEqual(1f / 15f * Force(1000f), weaponEvent.Damage, 1e-6f);
+            Assert.AreEqual(1f / 15f * 0.001f, weaponEvent.Damage, 1e-7f);
         }
 
         [Test]
@@ -197,6 +197,46 @@ namespace AIJam.RobotScripts.Tests {
 
             Assert.AreNotEqual(0f, weapon.CollisionRewardAt(1.00f + dt), "the step after the hit reads the reward");
             Assert.AreEqual(0f, weapon.CollisionRewardAt(1.00f + 2f * dt), "one step later it is gone");
+        }
+
+        // ---------------------------------------------------------------- zone stats: ramming is the main weapon
+
+        [Test]
+        public void ZoneStats_RammingWithTheBumper_DealsFarMoreThanAnArmStrike() {
+            var bumper = CollisionForwarder.StatsFor("bumper_shape");
+            var weapon = CollisionForwarder.StatsFor("arm_weapon_shape");
+
+            Assert.AreEqual(1500f, bumper.damage);
+            Assert.AreEqual(300f, weapon.damage);
+            Assert.GreaterOrEqual(bumper.damage, 3f * weapon.damage);
+        }
+
+        [Test]
+        public void ZoneStats_ResistancesAndMinorZones_AreUnchanged() {
+            Assert.AreEqual((1f, 3f), CollisionForwarder.StatsFor("body_shape"));
+            Assert.AreEqual((1f, 1f), CollisionForwarder.StatsFor("battery_shape"));
+            Assert.AreEqual((5f, 4f), CollisionForwarder.StatsFor("wheels_shape"));
+            Assert.AreEqual((2f, 3f), CollisionForwarder.StatsFor("arm_armbase_shape"));
+            Assert.AreEqual(15f, CollisionForwarder.StatsFor("arm_weapon_shape").resistance);
+            Assert.AreEqual(10f, CollisionForwarder.StatsFor("bumper_shape").resistance);
+            Assert.AreEqual((1f, 5f), CollisionForwarder.StatsFor("something_else"));
+        }
+
+        [Test]
+        public void ResolveHit_DamageDealt_IsNeverMoreThanTheHpTheEnemyZoneHad() {
+            var bumper = Zone(Robot("A"), "bumper_shape");
+            var battery = Zone(Robot("B"), "battery_shape");
+            bumper.damageOfZone = 1500f;
+            battery.CurrentHealth = 0.25f;
+            CollisionZoneBehaviour.CollisionEventArgs bumperEvent = null, batteryEvent = null;
+            bumper.OnCollision += (s, e) => bumperEvent = e;
+            battery.OnCollision += (s, e) => batteryEvent = e;
+
+            CollisionZoneBehaviour.ResolveHit(Col(bumper), Col(battery), Impulse(0.1f), 1.00f); // 150 units of raw damage
+
+            Assert.AreEqual(0f, battery.CurrentHealth);
+            Assert.AreEqual(0.25f, batteryEvent.Damage, 1e-6f, "damage taken = HP actually lost");
+            Assert.AreEqual(0.25f, bumperEvent.DamageDealt, 1e-6f, "damage dealt = HP actually removed");
         }
 
         // ---------------------------------------------------------------- fight statistics for TensorBoard

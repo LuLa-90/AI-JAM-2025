@@ -25,35 +25,25 @@ public class CollisionForwarder : MonoBehaviour
         var zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
 
         foreach (var zone in zoneComponents) {
-            if (zone.gameObject.name.Contains("body")) { 
-                zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 3f;
-            }
-            else if (zone.gameObject.name.Contains("battery")) { 
-                zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 1f;
-            }
-            else if (zone.gameObject.name.Contains("wheels")) {
-                zone.damageOfZone = 5f;
-                zone.resistanceOfZone = 4f;
-            }
-            else if (zone.gameObject.name.Contains("armbase")) {
-                zone.damageOfZone = 2f;
-                zone.resistanceOfZone = 3f;
-            }
-            else if (zone.gameObject.name.Contains("weapon")) {
-                zone.damageOfZone = 200f;
-                zone.resistanceOfZone = 15f;
-            }
-            else if (zone.gameObject.name.Contains("bumper")) {
-                zone.damageOfZone = 150f;
-                zone.resistanceOfZone = 10f;
-            }
-            else {
-                zone.damageOfZone = 1f;
-                zone.resistanceOfZone = 5f;
-            }
+            var stats = StatsFor(zone.gameObject.name);
+            zone.damageOfZone = stats.damage;
+            zone.resistanceOfZone = stats.resistance;
         }
+    }
+
+    /// <summary>
+    /// Damage and resistance of a zone, chosen by the first keyword its object name contains.
+    /// Ramming with the bumper is the main source of damage: it deals five times an arm strike.
+    /// The values are set so that well-aimed rams can knock a robot out within a 90 s round.
+    /// </summary>
+    public static (float damage, float resistance) StatsFor(string zoneName) {
+        if (zoneName.Contains("body")) return (1f, 3f);
+        if (zoneName.Contains("battery")) return (1f, 1f);
+        if (zoneName.Contains("wheels")) return (5f, 4f);
+        if (zoneName.Contains("armbase")) return (2f, 3f);
+        if (zoneName.Contains("weapon")) return (300f, 15f);
+        if (zoneName.Contains("bumper")) return (1500f, 10f);
+        return (1f, 5f);
     }
 
 }

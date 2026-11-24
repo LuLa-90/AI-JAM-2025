@@ -65,8 +65,11 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
         var zoneA = a.GetComponent<CollisionZoneBehaviour>();
         var zoneB = b.GetComponent<CollisionZoneBehaviour>();
-        if (zoneA != null) zoneA.ApplyHit(impulse, zoneB, TagOf(b), stepTime);
-        if (zoneB != null) zoneB.ApplyHit(impulse, zoneA, TagOf(a), stepTime);
+        // HP of both zones before the hit: the damage a zone deals is capped by the HP the other one had.
+        float healthA = zoneA != null ? zoneA.CurrentHealth : 0f;
+        float healthB = zoneB != null ? zoneB.CurrentHealth : 0f;
+        if (zoneA != null) zoneA.ApplyHit(impulse, zoneB, healthB, TagOf(b), stepTime);
+        if (zoneB != null) zoneB.ApplyHit(impulse, zoneA, healthA, TagOf(a), stepTime);
     }
 
     /// <summary>Tag of the body a collider belongs to: its Rigidbody's object (robot root or arm), else its own object.</summary>
@@ -75,7 +78,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         return body != null ? body.gameObject.tag : collider.gameObject.tag;
     }
 
-    private void ApplyHit(float impulse, CollisionZoneBehaviour enemyCollisionZone, string hitTag, float stepTime) {
+    private void ApplyHit(float impulse, CollisionZoneBehaviour enemyCollisionZone, float enemyHealthBefore, string hitTag, float stepTime) {
         // normalised collision force
         float collisionForce = impulse / Time.fixedDeltaTime / 100000f;
         if (enemyCollisionZone != null) {
@@ -90,7 +93,8 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         float damageTaken = enemyCollisionZone == null
             ? 1f / resistanceOfZone
             : enemyCollisionZone.damageOfZone / resistanceOfZone;
-        var damage = damageTaken * collisionForce;
+        // a zone can't lose more HP than it has; the reported damage is the HP actually lost
+        var damage = Math.Min(damageTaken * collisionForce, CurrentHealth);
 
         CurrentHealth = Math.Max(CurrentHealth - damage, 0f);
 
@@ -99,7 +103,7 @@ public class CollisionZoneBehaviour : MonoBehaviour {
             // Calculate damage dealt to the enemy zone, normalize it by logarithm with base 20,
             // because our damage values range from 1 to 20
             float damageRatio = damageOfZone / enemyCollisionZone.resistanceOfZone;
-            damageDealt = damageRatio * collisionForce;
+            damageDealt = Math.Min(damageRatio * collisionForce, enemyHealthBefore);
 
             collisionReward = Mathf.Clamp(Mathf.Log(damageRatio, 20), -1, 1);
             collisionRewardTime = stepTime;
