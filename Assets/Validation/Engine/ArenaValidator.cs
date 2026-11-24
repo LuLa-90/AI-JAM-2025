@@ -6,7 +6,7 @@ using UnityEngine;
 namespace AIJam.Validation {
     /// <summary>
     /// Checks an arena instance (e.g. loaded prefab contents) against ValidationRules. Pure: changes nothing.
-    /// Rules: VALIDATION_DESIGN.md "Arena" and README.md 6.3.
+    /// Rules: README.md 6.3.
     /// </summary>
     public static class ArenaValidator {
         /// <param name="isReference">true for the neutral arena itself: only origin and spawns are checked.</param>

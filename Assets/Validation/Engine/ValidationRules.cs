@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AIJam.Validation {
     /// <summary>
-    /// All limits for robot and arena validation (see VALIDATION_DESIGN.md, ROBOT_PARTS.md and README.md chapter 6).
+    /// All limits for robot and arena validation (see README.md chapters 6 and 7.1).
     /// Part shapes are NOT stored here: they are read from the listed prefabs at check time.
     /// </summary>
     [CreateAssetMenu(fileName = "ValidationRules", menuName = "AI Jam/Validation Rules")]

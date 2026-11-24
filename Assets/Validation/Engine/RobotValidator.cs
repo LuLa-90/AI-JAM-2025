@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 namespace AIJam.Validation {
     /// <summary>
     /// Checks a robot instance (e.g. loaded prefab contents) against ValidationRules. Pure: changes nothing.
-    /// Rules: VALIDATION_DESIGN.md "Robot" 1–10 and README.md 6.2. Parts are identified by collider mesh, never by name.
+    /// Rules: README.md 6.2. Parts are identified by collider mesh, never by name.
     /// </summary>
     public static class RobotValidator {
         public static List<Finding> Validate(GameObject robot, ValidationRules rules) {

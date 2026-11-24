@@ -15,13 +15,13 @@ Priebeh podujatia:
 | Kapitola | Čo v nej nájdete |
 |---|---|
 | [1. Inštalácia](#1-inštalácia) | Nástroje, kontrola inštalácie, otvorenie projektu |
-| [2. Stavba](#2-stavba) | Robot, domáca aréna, tímový asset |
+| [2. Stavba](#2-stavba) | Robot, domáca aréna, tímový asset, prehľad dielov |
 | [3. Tréning](#3-tréning) | Trénovacia scéna, spustenie trénera, použitie modelu |
 | [4. Validácia](#4-validácia) | Kontrola pravidiel a testovací zápas |
 | [5. Turnaj](#5-turnaj) | Turnajová scéna a ovládanie |
 | [6. Pravidlá](#6-pravidlá) | Pravidlá tímu, robota, arény a zápasu, poškodenie a HP |
-| [7. Riešenie problémov](#7-riešenie-problémov) | Časté chyby a ich oprava |
-| [8. Dokumenty](#8-dokumenty) | Podrobné dokumenty v projekte |
+| [7. Pre organizátorov](#7-pre-organizátorov) | Nastavenie pravidiel, finálna validácia, réžia a rozhodca |
+| [8. Riešenie problémov](#8-riešenie-problémov) | Časté chyby a ich oprava |
 
 ---
 
@@ -178,6 +178,50 @@ V okne Project kliknite pravým tlačidlom → **Create → AI Jam → Turnaj Te
 
 Príklady sú v `Assets/Turnaj/Teams`.
 
+### 2.4 Prehľad dielov
+
+Čo je v ktorom prefabe. Hodnoty poškodenia a odolnosti zón sú v časti [6.5](#65-poškodenie-a-hp).
+
+**Vrstvy (layers):**
+
+| Vrstva | Názov | Na čo slúži |
+|:---:|---|---|
+| 0 | Default | kontajnery, senzory |
+| 6 | RobotView | pohľad agenta: jednofarebné kópie dielov, ktoré vidí kamera robota |
+| 8 | ConstructionView | **collidery** a základný vzhľad dielov |
+| 9 | TournamentView | efektné modely, vidia ich iba turnajové kamery |
+
+**Diely** (`Assets/Prefabs/Base Shapes`):
+
+| Prefab | Komponenty koreňa dielu | Collidery (objekt → zóna) | Senzory v dieli |
+|---|---|---|---|
+| Body_Shape1, 2, 3 | `BodyComponent` | `body_shape` → body, `battery_shape` → battery | `ForwardSpeedSensor`, `SidewaysSpeedSensor`, `DamageSensor` |
+| Arm_Shape1, 2 | `ArmComponent`, vlastné `Rigidbody` (hmotnosť 1) a `HingeJoint`, tag `RobotArm` | `arm_armbase_shape` → armbase, `arm_weapon_shape` → weapon | `AngleSensor`, `DamageSensor` |
+| Bumper_Shape1, 2 | `BumperComponent` | `bumper_shape` → bumper | `DamageSensor` |
+| Wheels_Shape1, 2, 3 | `WheelComponent` | `wheels_shape` → wheels | `DamageSensor` |
+
+- Všetky collidery dielov sú konvexné `MeshCollider` vo vrstve ConstructionView.
+- Každý diel má pod objektom `[No Editing] RobotViewMaterials` svoje kópie pre pohľad agenta (vrstva RobotView, bez colliderov) a komponent `PartVisionColor`, ktorý im nastavuje farbu.
+- Rameno má vlastné `Rigidbody`. Jeho `HingeJoint` sa pri štarte pripojí k `Rigidbody` koreňa robota.
+- Pohonné wheel collidery **nie sú** v prefaboch kolies. Sú v šablóne robota.
+
+**Senzory** (`Assets/Prefabs/Base Shapes`):
+
+| Prefab | Collidery |
+|---|---|
+| `ProximityRays` | `Sphere`: pevný guľový collider (polomer asi 1,7 cm), zapnutý, bez zóny poškodenia. Nesmie sa meniť. |
+| `ButtSensorReciever` | `Sphere` a `Cylinder`: oba vypnuté a také musia zostať |
+
+**Šablóna robota** (`Robot Agent Template`):
+
+| Objekt | Obsah |
+|---|---|
+| koreň | `Rigidbody` (hmotnosť 10), `RobotMovement`, `RobotAgent`, `BehaviorParameters`, `DecisionRequester`, kamerový senzor, `CollisionForwarder`, tag `Robot` |
+| `Wheels Left`, `Wheels Right` | po 2 wheel collidery (`Wheel Coll Front`, `Wheel Coll Back`). Sem patria sady kolies. `Wheels Right` má mierku X = −1 (zrkadlenie). |
+| `RobotCameraSensor` | kamera agenta: 32 × 32 pixelov, farebná |
+| `ButtMarker` | `MarkerHitPoint` a `Cylinder`: cieľ, ktorý deteguje súperov senzor `ButtSensorReciever`. Súčasť šablóny, nemeňte ho. |
+| `Bounding Box` | dve vizuálne kocky bez colliderov. Pôvodný limit veľkosti, dnes sa nepoužíva: nahrádza ho pravidlo ±25 % (6.2.3). |
+
 ---
 
 ## 3. Tréning
@@ -250,15 +294,18 @@ Kontrola modelu zlyhá, kým robota nenatrénujete ([kapitola 3](#3-tréning)). 
 
 ### 4.2 Testovací zápas (Run test match)
 
-Kliknite na **Run test match**. Váš robot bojuje proti skriptovanému súperovi vo vašej aréne a meria sa šesť udalostí:
-1. súper do vás narazí;
-2. vypadnete z arény;
-3. prejdete cez svoje pasce a bonusy;
-4. prevrátite sa;
-5. zásah do tela;
-6. zásah do batérie.
+Kliknite na **Run test match**. Váš robot stojí na značke Home vo vašej aréne a na značke Guest stojí skriptovaný súper (`ReferenceBot`). Spustí sa šesť udalostí za sebou; každú môžete spustiť aj samostatne vlastným tlačidlom. Pred každou udalosťou sa obnoví HP aj pozície.
 
-Skontroluje sa aj to, že aréna nevytvára nič mimo objektu arény. Výsledky ukazujú, ako váš robot dostáva poškodenie. Nerozhodujú o tom, či prejdete.
+| # | Udalosť | Čo sa stane | Čo sa meria | Kedy je výsledok Pass |
+|:---:|---|---|---|---|
+| 1 | Enemy rams | súper ide priamo do vášho robota | HP zón a HP robota pred a po | aspoň jedna zóna dostala poškodenie |
+| 2 | Robot falls | robot sa zdvihne ponad stenu a pustí von | zmena HP, miesto návratu | robot sa vrátil na svoju značku a HP kleslo o trest za pád |
+| 3 | Traps and buffs | robot pomaly prejde stredom každého trigger collidera v aréne | HP, rýchlosť a pozícia počas prechodu | iba meranie (Info), je to návrh tímu |
+| 4 | Robot flips | robot sa otočí hore nohami | zmena HP, návrat | robot sa vrátil a HP kleslo o trest za prevrátenie |
+| 5 | Body hit | testovacia zbraň narazí do tela | HP zóny tela a HP robota | HP zóny tela kleslo |
+| 6 | Battery hit | testovacia zbraň narazí do batérie | HP zóny batérie a HP robota | HP zóny batérie kleslo |
+
+Nakoniec sa skontroluje, že aréna nevytvorila nič mimo objektu arény (riadok **Arena spawns**). Výsledky ukazujú, ako váš robot dostáva poškodenie. Nerozhodujú o tom, či prejdete.
 
 Náhľad kamery ukazuje, čo váš robot vidí.
 
@@ -298,7 +345,9 @@ V turnajovej scéne si môžete zápas vyskúšať vopred.
 | R ×2 | opakovanie kola |
 | T | pauza / pokračovanie |
 
-Pravidlá zápasu (kolá, čas, body): [6.4 Zápas](#64-zápas). Celý návrh turnaja: [`TOURNAMENT_DESIGN.md`](TOURNAMENT_DESIGN.md).
+Pred Play turnajová scéna skontroluje oba tímy rovnakými pravidlami ako validačná scéna. Výsledok vidíte v Inspectore; tlačidlo **Check rules for both teams** kontrolu zopakuje. Tím s chybami zápas nespustí.
+
+Pravidlá zápasu (kolá, čas, body): [6.4 Zápas](#64-zápas). Podrobnosti pre réžiu a rozhodcu: [7. Pre organizátorov](#7-pre-organizátorov).
 
 ---
 
@@ -445,7 +494,66 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
 
 ---
 
-## 7. Riešenie problémov
+## 7. Pre organizátorov
+
+Táto kapitola je pre réžiu, rozhodcu a tých, ktorí spravujú validáciu. Tímy ju čítať nemusia.
+
+### 7.1 Nastavenie pravidiel a farieb
+- **Limity** sú v `Assets/Validation/ValidationRules.asset`:
+  - skupiny dielov a ich počty (minimum, maximum, maximum na jeden prefab);
+  - `Scale Tolerance Percent`: povolená zmena veľkosti collidera (pravidlo ±25 %);
+  - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm);
+  - tolerancie pre arénu a štartovacie značky;
+  - `Behavior Name`, šablóna robota, referenčná aréna a paleta.
+- **Farby pohľadu agenta** sú v `Assets/Validation/VisionPalette.asset`, jeden materiál na každú úlohu (pozadie, časť robota, pasca, bonus, batéria). Zmena farby v palete prefarbí príslušný materiál vrátane žiary (emission), takže ju prevezmú všetky prefaby. Materiály, ktorých farbu nezmeníte, zostanú nedotknuté, aby roboty z minulého ročníka videli to, na čom boli trénované.
+- Validácia rozpoznáva diely podľa **meshu collidera**, nie podľa názvu. Premenovanie objektu kontrolu neobíde.
+- **Testy:** po zmene pravidiel alebo kódu spustite **Window → General → Test Runner → EditMode**. Testy validácie sú v `Assets/Validation/Editor/Tests`, testy pravidiel zápasu v `Assets/Turnaj/Scripts/Editor/Tests`.
+
+### 7.2 Finálna validácia tímov
+Po prezentáciách skontrolujte tímy po jednom vo validačnej scéne ([kapitola 4](#4-validácia)):
+1. Pridajte tímový asset do zoznamu **Teams**, vyberte tím a stlačte Play.
+2. **Run validation:** tím s chybami nemôže bojovať. Pri varovaniach si pozrite vypísané vlastné skripty robota a arény a rozhodnite.
+3. **Run test match:** sledujte najmä pasce a bonusy (udalosť 3) a riadok **Arena spawns**.
+4. Výsledky skopírujte tlačidlom **Copy test report**.
+
+### 7.3 Príprava zápasu
+- Turnajová scéna beží **iba v Unity Editore** a jedno spustenie Play je jeden zápas. Rozpis zápasov, výsledky a tabuľka sú mimo Unity (na webe).
+- Na objekte **Tournament** sú všetky tímy v zozname **Teams** a neutrálna aréna v poli **Neutral Arena Prefab**.
+- **Pred Play** vyberte **Team A** a **Team B**. Inspector ukáže „Ready: A vs B. Press Play." alebo zoznam problémov.
+- **Kontrola pravidiel:** chyby zápas zablokujú, varovania nie. Prepínač **Ignore Validation** kontrolu vypne, ak sa v deň turnaja rozhodnete inak. Inspector to potom zreteľne hlási.
+- Pri štarte scéna každému robotovi vynúti **Behavior Type = Inference Only** (nič sa nemôže omylom trénovať) a kameru nastaví iba na vrstvu RobotView.
+- Nastavenia v časti **Rules**: dĺžka kola (`Round Duration`, 90 s), okno dvojitého stlačenia (0,4 s), sila a prestávka rozdeľovača, vzdialenosť pre návrat robota (0,5 m) a pauza po kole (4 s).
+
+### 7.4 Réžia a rozhodca
+| Kto | Čo sleduje | Čo ovláda |
+|---|---|---|
+| **Réžia** | okno **Game**, maximalizované na vlastnej obrazovke, ktorú sníma OBS | kamery na numerickej klávesnici |
+| **Rozhodca** | okno **Scene** na druhej obrazovke | štart kola a zásahy na ľavej strane klávesnice |
+
+- Klávesy sú v tabuľke v [kapitole 5](#5-turnaj). **Fungujú iba vtedy, keď je aktívne okno Game.** Ak nie je, Inspector a okno Scene ukážu červené upozornenie „GAME VIEW NOT FOCUSED". V okne Game sa nikdy nezobrazí.
+- **Dvojité stlačenie** (W, Q, E, R): dve stlačenia do 0,4 s. Jedno stlačenie iba ukáže nápovedu v Inspectore a v okne Scene, nie vo vysielaní.
+- **F1–F4** sú vyhradené pre OBS (hra / promo / sponzori / web). Unity ich nepoužíva.
+- Do okna Game nejdú žiadne informácie pre réžiu. Všetko je v Inspectore a v okne Scene.
+- **Kamery 8 / 5 / 2** sa pri každom výbere natočia tak, aby sa nápis na podlahe čítal správne. Uhol určuje `ArenaViewAngle` na koreni arény; predvolená hodnota je 120°.
+
+### 7.5 Priebeh zápasu v scéne
+1. **Čakacia obrazovka** (po Play a medzi kolami): „Tím A vs Tím B", názov kola a pomaly krúžiaca kamera. Roboty stoja zmrazené.
+2. **Medzerník:** zaznie „Round 1" (alebo „Round 2", „Final round"), beží odpočítavanie 3-2-1, potom „FIGHT!!" a roboty sa uvoľnia.
+3. **Počas kola** sú na obrazovke panely HP oboch tímov, skóre kôl a časovač, ktorý pod 10 s sčervenie.
+4. **Návrat po páde alebo prevrátení:** robot sa vracia na svoju značku. Ak je súper bližšie než 0,5 m od nej, použije sa bod zrkadlený cez stred arény.
+5. **Rozdeľovač (W ×2):** každý robot dostane jednorazový odraz od súpera s miernym nadvihnutím. Sám nespôsobuje poškodenie, ale pád, ktorý vyvolá, sa trestá ako zvyčajne. Má prestávku 1 s a na obrazovke sa krátko ukáže „BREAK!".
+6. **Koniec kola:** krátka správa o víťazovi a návrat na čakaciu obrazovku s názvom ďalšieho kola. „Flawless victory" zaznie, keď má víťaz kola na ukazovateli viac než 51 % HP.
+7. **Výmena arény:** objekty, ktoré aréna vytvorila mimo seba, scéna pri zmene kola zničí a vypíše varovanie do konzoly.
+8. **Koniec zápasu:** obrazovka víťaza so skóre a ligovými bodmi. V Inspectore je rovnaký súhrn a riadok za každé kolo; tlačidlo **Copy result to clipboard** ho skopíruje na zapísanie na web.
+
+### 7.6 Zvuky
+Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v časti **Sounds**: `round-1`, `round-2`, `final-round`, `flawless-victory` a `hahaha` (výhra kola).
+- Nahrávky kôl obsahujú aj slovo „Fight". Pole **Fight Cue Seconds** určuje, v ktorej sekunde nahrávky sa „Fight" začína, aby zaznelo až pri nápise „FIGHT!!".
+- Polia **Countdown Tick Clip** a **Fight Clip** sú voliteľné a predvolene prázdne.
+
+---
+
+## 8. Riešenie problémov
 
 | Problém | Riešenie |
 |---|---|
@@ -457,13 +565,3 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
 | Súper sa počas tréningu správa čudne | Nastavte mu Behavior Type na **Inference Only** (časť 3.1). |
 | Chcete, aby model robota prestal konať | Odstráňte komponent `DecisionRequester`. Vypnutie nestačí: ML-Agents aj tak žiada rozhodnutia. |
 | Chyby certifikátov v pip, conda alebo git | Pozrite poznámku o SSL v časti 1.3. |
-
-## 8. Dokumenty
-
-Tieto dokumenty sú v angličtine a sú určené najmä organizátorom a vývojárom. Všetko, čo potrebuje tím, je v tomto README.
-
-| Dokument | Obsah |
-|---|---|
-| [`ROBOT_PARTS.md`](ROBOT_PARTS.md) | Všetky diely: ich collidery, meshe a zóny poškodenia |
-| [`VALIDATION_DESIGN.md`](VALIDATION_DESIGN.md) | Ako funguje validácia a testovací zápas |
-| [`TOURNAMENT_DESIGN.md`](TOURNAMENT_DESIGN.md) | Ako funguje turnajová scéna (réžia, rozhodca, kamery, zvuky) |
