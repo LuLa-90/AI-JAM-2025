@@ -124,6 +124,30 @@ public class RobotAgent : Agent {
         // (No log line per hit: logging every collision slows training down a lot.)
         float zoneReward = HitReward(e);
         if (zoneReward != 0f) AddReward(zoneReward);
+
+        if (e.colliderHitName == "Robot" || e.colliderHitName == "RobotArm") {
+            fightStats.AddHit(e.DamageDealt, e.Damage);
+        }
+    }
+
+    // ---------------------------------------------------------------- fight statistics (TensorBoard, group "Fight")
+    private readonly FightStats fightStats = new FightStats();
+
+    /// <summary>
+    /// Ends this robot's episode with its final reward. While a trainer is connected, it also writes what the
+    /// robot did in the episode to TensorBoard, so progress can be judged by more than the mean reward.
+    /// </summary>
+    private void FinishEpisode(float reward, bool knockout) {
+        if (Academy.Instance.IsCommunicatorOn) {
+            var stats = Academy.Instance.StatsRecorder;
+            stats.Add("Fight/Damage Dealt", fightStats.DamageDealt);
+            stats.Add("Fight/Damage Taken", fightStats.DamageTaken);
+            stats.Add("Fight/Falls and Flips", fightStats.Respawns);
+            stats.Add("Fight/Ended By Knockout", knockout ? 1f : 0f);
+            stats.Add("Fight/End HP", weightedAverageHealth);
+        }
+        AddReward(reward);
+        EndEpisode();
     }
 
 
@@ -143,6 +167,7 @@ public class RobotAgent : Agent {
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
         episodeStartTime = Time.time;
+        fightStats.Reset();
 
         OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
 
@@ -179,6 +204,7 @@ public class RobotAgent : Agent {
             foreach (var zone in zoneComponents) {
                 zone.ChangeHealth(-0.3f);
             }
+            fightStats.AddRespawn();
 
             OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
@@ -190,6 +216,7 @@ public class RobotAgent : Agent {
             foreach (var zone in zoneComponents) {
                 zone.ChangeHealth(-0.2f);
             }
+            fightStats.AddRespawn();
 
             OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
@@ -200,12 +227,10 @@ public class RobotAgent : Agent {
             OnRobotDie?.Invoke(this, System.EventArgs.Empty);
 
             // End the episode with negative reward (lose)
-            AddReward(LoseReward);
-            EndEpisode();
+            FinishEpisode(LoseReward, true);
 
             // Give positive reward to enemy robot (win)
-            enemyRobot?.AddReward(WinReward);
-            enemyRobot?.EndEpisode();
+            if (enemyRobot != null) enemyRobot.FinishEpisode(WinReward, true);
         }
         // Training only: end the episode when its time runs out. The robot with more HP wins half a point,
         // like a round that ends on time in the tournament.
@@ -213,13 +238,8 @@ public class RobotAgent : Agent {
             float myHealth = weightedAverageHealth;
             float enemyHealth = enemyRobot != null ? enemyRobot.weightedAverageHealth : myHealth;
 
-            AddReward(TimeoutReward(myHealth, enemyHealth));
-            EndEpisode();
-
-            if (enemyRobot != null) {
-                enemyRobot.AddReward(TimeoutReward(enemyHealth, myHealth));
-                enemyRobot.EndEpisode();
-            }
+            FinishEpisode(TimeoutReward(myHealth, enemyHealth), false);
+            if (enemyRobot != null) enemyRobot.FinishEpisode(TimeoutReward(enemyHealth, myHealth), false);
         }
 
         /// origin position ***AAA***

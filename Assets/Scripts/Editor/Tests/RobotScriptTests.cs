@@ -199,6 +199,25 @@ namespace AIJam.RobotScripts.Tests {
             Assert.AreEqual(0f, weapon.CollisionRewardAt(1.00f + 2f * dt), "one step later it is gone");
         }
 
+        // ---------------------------------------------------------------- fight statistics for TensorBoard
+
+        [Test]
+        public void FightStats_AddUpHitsAndRespawns_AndResetForTheNextEpisode() {
+            var stats = new FightStats();
+            stats.AddHit(0.2f, 0.1f);
+            stats.AddHit(0.3f, 0f);
+            stats.AddRespawn();
+
+            Assert.AreEqual(0.5f, stats.DamageDealt, 1e-6f);
+            Assert.AreEqual(0.1f, stats.DamageTaken, 1e-6f);
+            Assert.AreEqual(1, stats.Respawns);
+
+            stats.Reset();
+            Assert.AreEqual(0f, stats.DamageDealt);
+            Assert.AreEqual(0f, stats.DamageTaken);
+            Assert.AreEqual(0, stats.Respawns);
+        }
+
         // ---------------------------------------------------------------- floor and wall contacts
 
         [Test]
