@@ -36,7 +36,7 @@ public class ArmComponent : MonoBehaviour, IHealth
     float IHealth.influenceOnTotalHealth => 0.1f;
 
     private void Start() {
-        var sensors = GetComponentsInChildren<SensorComponent>();
+        var sensors = this.OwnParts<SensorComponent>();
 
         foreach (var sensor in sensors) {
             if (sensor.GetSensorType == SensorComponent.SensorType.Angle) {
@@ -47,7 +47,7 @@ public class ArmComponent : MonoBehaviour, IHealth
                 sensorDamage = sensor;
                 sensorDamage.SetSensorValue(1f);
 
-                zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+                zoneComponents = this.OwnParts<CollisionZoneBehaviour>();
                 foreach (var zone in zoneComponents) {
                     zone.SetZoneType("arm");
                 }

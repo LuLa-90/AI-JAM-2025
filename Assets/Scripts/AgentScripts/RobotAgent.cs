@@ -75,33 +75,36 @@ public class RobotAgent : Agent {
    
     }
 
+    /// <summary>
+    /// Reward for one zone hit: the damage this robot DEALT to an enemy robot or its arm, scaled.
+    /// Damage the robot took and hits against the arena give nothing.
+    /// </summary>
+    public static float HitReward(CollisionZoneBehaviour.CollisionEventArgs e) {
+        bool hitEnemy = e.colliderHitName == "Robot" || e.colliderHitName == "RobotArm";
+        return hitEnemy ? e.DamageDealt * 10000f : 0f;
+    }
+
+    /// <summary>Collision-combination reward for one step, scaled by its Reward Editor factor.</summary>
+    public static float CollisionStepReward(float combinationReward, float deltaTime, float factor) =>
+        (float)System.Math.Round(combinationReward * 100f * deltaTime, 2) * factor;
+
     public void HandleZoneCollision(object sender, CollisionZoneBehaviour.CollisionEventArgs e)
     {
-        // You can check what we hit using e.colliderHitName (it's the tag)
-        bool hitEnemy = e.colliderHitName == "Robot"; // or whatever tag you use for enemy tank
-        
         Debug.Log(
             $"[HANDLE COLLISION] " +
             $"Agent={gameObject.name} | " +
             $"HitTag={e.colliderHitName} | " +
-            $"Damage={e.Damage:F6}"
+            $"DamageTaken={e.Damage:F6} | " +
+            $"DamageDealt={e.DamageDealt:F6}"
         );
 
-        if (!hitEnemy)
+        float zoneReward = HitReward(e);
+        if (zoneReward == 0f)
         {
-            // Maybe no reward for walls or non-enemy objects
+            // No reward for walls, non-enemy objects or hits that dealt nothing
             return;
         }
 
-        float zoneReward = 0;
-        // Option 1: Use the per-zone reward that CollisionZoneBehaviour already computed
-        //zoneReward = zone.RewardOfCollision; // This was set in OnCollisionHit
-        // Option 2: You could also use e.Damage if you want to scale by actual damage taken
-        zoneReward = e.Damage;
-        // Scale
-        zoneReward *= 10000f;
-        // apply
-        //Debug.Log(zoneReward);
         /*Upgrade*/float rewardBefore = GetCumulativeReward();
 
         AddReward(zoneReward);
@@ -405,9 +408,8 @@ return finalReward;
             arenaPositionRwd = (float)System.Math.Round(arenaPositionReward, 2) * rewardEditor.arenaPositionRF;
             AddReward(arenaPositionRwd);
 
-            float collisionCombinationReward = GetRewards_collisionCombination() * 100f * Time.deltaTime;
-            //AddReward(collisionCombinationReward * rewardEditor.collisionCombinationRF);
-            collisionCombinationRwd += (float)System.Math.Round(collisionCombinationReward, 2);
+            // This step's reward only (it used to add the running total again on every step).
+            collisionCombinationRwd = CollisionStepReward(GetRewards_collisionCombination(), Time.deltaTime, rewardEditor.collisionCombinationRF);
             AddReward(collisionCombinationRwd);
 
             // TODO: If Butt Sensor not null, then add reward for butt marker visibility (maybe could surpress unwanted front collisions?)

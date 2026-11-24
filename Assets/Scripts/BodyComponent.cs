@@ -24,7 +24,7 @@ public class BodyComponent : MonoBehaviour, IHealth
 
         thisRobot = GetComponentInParent<RobotAgent>();
 
-        var sensors = GetComponentsInChildren<SensorComponent>();
+        var sensors = this.OwnParts<SensorComponent>();
 
         foreach (var sensor in sensors) {
             // TODO: znormalizovatť
@@ -38,7 +38,7 @@ public class BodyComponent : MonoBehaviour, IHealth
                 sensorDamage = sensor;
                 sensorDamage.SetSensorValue(1f);
 
-                zoneComponents = GetComponentsInChildren<CollisionZoneBehaviour>();
+                zoneComponents = this.OwnParts<CollisionZoneBehaviour>();
                 foreach (var zone in zoneComponents) {
                     zone.SetZoneType("body");
                 }

@@ -71,5 +71,13 @@ public class AIJamManager : MonoBehaviour
         robot.transform.localPosition = new Vector3(0, 0.022f, 0);
         robot.transform.localPosition += Quaternion.Euler(0, angle, 0) * Vector3.forward * Random.Range(0.8f, 1.7f);
         robot.transform.localRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+
+        // Stop the robot and its arm. Otherwise a robot that fell or flipped keeps its speed and spin
+        // after the respawn and can flip again at once.
+        foreach (var body in robot.GetComponentsInChildren<Rigidbody>()) {
+            if (body.isKinematic) continue;
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+        }
     }
 }

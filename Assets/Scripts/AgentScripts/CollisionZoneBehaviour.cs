@@ -1,12 +1,19 @@
 using System;
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CollisionZoneBehaviour : MonoBehaviour {
 
     private float totalHealth = 1f;
     [SerializeField] public float CurrentHealth = 1f;
-    public float RewardOfCollision { get; private set; }
+
+    /// <summary>
+    /// Reward of the last hit against an enemy zone. It is readable during exactly one physics step (the step
+    /// after the hit), so the agent counts every hit once, whatever the frame rate or time scale.
+    /// </summary>
+    public float RewardOfCollision => CollisionRewardAt(Time.fixedTime);
+    private float collisionReward;
+    private float collisionRewardTime = float.NegativeInfinity;
 
     // Percentual value of how much damage is taken per hit based on collision force
     // [SerializeField, Range(1f, 20f)]
@@ -19,12 +26,17 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
     public event EventHandler<CollisionEventArgs> OnCollision;
     public class CollisionEventArgs : EventArgs {
+        /// <summary>Damage this zone took.</summary>
         public float Damage { get; private set; }
+        /// <summary>Tag of what hit this zone: the other object's Rigidbody (Robot, RobotArm) or its collider (arena).</summary>
         public string colliderHitName { get; private set; }
+        /// <summary>Damage this zone dealt to the other zone (0 when the other object has no zone).</summary>
+        public float DamageDealt { get; private set; }
 
-        public CollisionEventArgs(float damage, string colliderHitName) {
+        public CollisionEventArgs(float damage, string colliderHitName, float damageDealt = 0f) {
             this.Damage = damage;
             this.colliderHitName = colliderHitName;
+            this.DamageDealt = damageDealt;
         }
     }
 
@@ -32,49 +44,75 @@ public class CollisionZoneBehaviour : MonoBehaviour {
         CurrentHealth = totalHealth;
     }
 
-    private void Update() {
-        RewardOfCollision = 0f;
+    // ------------------------------------------------------------------ hits
+
+    private static readonly HashSet<(Collider, Collider)> resolvedThisStep = new HashSet<(Collider, Collider)>();
+    private static float resolvedStepTime = float.NaN;
+
+    /// <summary>
+    /// Applies one hit between two colliders to their zones. A pair is resolved once per physics step:
+    /// Unity reports a hit once per contact point and to both robots, which used to multiply the damage.
+    /// </summary>
+    /// <param name="stepTime">Time.fixedTime of the physics step the hit happened in.</param>
+    public static void ResolveHit(Collider a, Collider b, float impulse, float stepTime) {
+        if (a == null || b == null) return;
+        if (stepTime != resolvedStepTime) {
+            resolvedThisStep.Clear();
+            resolvedStepTime = stepTime;
+        }
+        if (!resolvedThisStep.Add((a, b))) return;
+        resolvedThisStep.Add((b, a));
+
+        var zoneA = a.GetComponent<CollisionZoneBehaviour>();
+        var zoneB = b.GetComponent<CollisionZoneBehaviour>();
+        if (zoneA != null) zoneA.ApplyHit(impulse, zoneB, TagOf(b), stepTime);
+        if (zoneB != null) zoneB.ApplyHit(impulse, zoneA, TagOf(a), stepTime);
     }
-    
-    internal void OnCollisionHit(Collision collision, CollisionZoneBehaviour enemyCollisionZone) {
+
+    /// <summary>Tag of the body a collider belongs to: its Rigidbody's object (robot root or arm), else its own object.</summary>
+    private static string TagOf(Collider collider) {
+        var body = collider.GetComponentInParent<Rigidbody>();
+        return body != null ? body.gameObject.tag : collider.gameObject.tag;
+    }
+
+    private void ApplyHit(float impulse, CollisionZoneBehaviour enemyCollisionZone, string hitTag, float stepTime) {
         // normalised collision force
-        float collisionForce = collision.impulse.magnitude / Time.fixedDeltaTime / 100000f;
-        //Debug.Log($"Collision detected with force: {collisionForce}");
+        float collisionForce = Math.Max(impulse / Time.fixedDeltaTime / 100000f, 0.0001f);
 
-        float damageTaken = 0f;
-        if (enemyCollisionZone == null) {
-            damageTaken = 1f / (resistanceOfZone);
-        }
-        else {
-            damageTaken = (enemyCollisionZone.damageOfZone) / (resistanceOfZone);
-        }
-
-        var damage = damageTaken * Math.Max(collisionForce, 0.0001f);
+        float damageTaken = enemyCollisionZone == null
+            ? 1f / resistanceOfZone
+            : enemyCollisionZone.damageOfZone / resistanceOfZone;
+        var damage = damageTaken * collisionForce;
 
         CurrentHealth = Math.Max(CurrentHealth - damage, 0f);
 
-        //Debug.Log($"{this.gameObject.name} -> {enemyCollisionZone?.gameObject.name}");
-        if (enemyCollisionZone != null)
-        {
+        float damageDealt = 0f;
+        if (enemyCollisionZone != null) {
             // Calculate damage dealt to the enemy zone, normalize it by logarithm with base 20,
             // because our damage values range from 1 to 20
-            float damageDealt = damageOfZone / enemyCollisionZone.resistanceOfZone;
-            float damageDealtNormalized = Mathf.Clamp(Mathf.Log(damageDealt, 20), -1, 1);
+            float damageRatio = damageOfZone / enemyCollisionZone.resistanceOfZone;
+            damageDealt = damageRatio * collisionForce;
 
-            RewardOfCollision = damageDealtNormalized;
-
-            //Debug.Log(gameObject.name + " (" + enemyCollisionZone.damageOfZone + ";" + resistanceOfZone + ") got reward: " + RewardOfCollision);
+            collisionReward = Mathf.Clamp(Mathf.Log(damageRatio, 20), -1, 1);
+            collisionRewardTime = stepTime;
         }
-         Debug.Log(
+
+        Debug.Log(
             $"[ZONE COLLISION] " +
             $"Zone={gameObject.name} | " +
-            $"OtherZone={enemyCollisionZone?.name ?? "Environment"} | " +
+            $"OtherZone={(enemyCollisionZone != null ? enemyCollisionZone.name : "Environment")} | " +
             $"DamageTaken={damage:F6} | " +
-            $"RewardOfCollision={RewardOfCollision:F6} | " +
-            $"HitTag={collision.gameObject.tag}"
-            );
+            $"DamageDealt={damageDealt:F6} | " +
+            $"HitTag={hitTag}"
+        );
 
-        OnCollision?.Invoke(this, new CollisionEventArgs(damage, collision.gameObject.tag));
+        OnCollision?.Invoke(this, new CollisionEventArgs(damage, hitTag, damageDealt));
+    }
+
+    /// <summary>The collision reward as seen from the physics step at <paramref name="stepTime"/>: non-zero only in the step right after the hit.</summary>
+    public float CollisionRewardAt(float stepTime) {
+        float age = stepTime - collisionRewardTime;
+        return age > 0f && age <= Time.fixedDeltaTime * 1.5f ? collisionReward : 0f;
     }
 
     public void ResetHealth() {

@@ -1,7 +1,18 @@
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 
 public static class ExtensionMethod {
+
+    /// <summary>
+    /// Components under a robot part that belong to that part, not to another part nested below it.
+    /// All parts sit under the body, so a plain GetComponentsInChildren on the body would also return
+    /// the sensors and damage zones of the wheels, arm and bumpers.
+    /// </summary>
+    public static T[] OwnParts<T>(this MonoBehaviour part) where T : Component {
+        return part.GetComponentsInChildren<T>()
+            .Where(c => ReferenceEquals(c.GetComponentInParent<IHealth>(), part))
+            .ToArray();
+    }
 
     /// <summary>
     /// Sets a sensor's value, optionally normalizing it to the range [-1, 1].

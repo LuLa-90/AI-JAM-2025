@@ -13,12 +13,11 @@ public class CollisionForwarder : MonoBehaviour
     }
 
     void OnCollisionEnter(Collision collision) {
-        foreach (var collider in collision.contacts) {
-            var thisCollisionZone = collider.thisCollider.GetComponent<CollisionZoneBehaviour>();
-            var otherCollisionZone = collider.otherCollider.GetComponent<CollisionZoneBehaviour>();
-
-            thisCollisionZone?.OnCollisionHit(collision, otherCollisionZone);
-            otherCollisionZone?.OnCollisionHit(collision, thisCollisionZone);
+        // A collision has one contact per contact point and is reported to both robots.
+        // ResolveHit applies each collider pair once per physics step.
+        float impulse = collision.impulse.magnitude;
+        foreach (var contact in collision.contacts) {
+            CollisionZoneBehaviour.ResolveHit(contact.thisCollider, contact.otherCollider, impulse, Time.fixedTime);
         }
     }
 
