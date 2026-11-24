@@ -155,6 +155,9 @@ Postup:
 6. Voliteľne pridajte efektný model vo vrstve **TournamentView**, bez colliderov.
 7. Robota pretiahnite do okna Project a **uložte ho ako prefab** do priečinka svojho tímu.
 
+![Editor s otvoreným prefabom ReferenceBot: hierarchia dielov, collidery v okne Scene a komponenty koreňa v Inspectore](img/editor_construction.png)
+*Prefab `ReferenceBot` v Prefab Mode. V hierarchii vľavo je telo (`Body_Shape2`) priamo pod koreňom a kolesá aj rameno sú pod telom. V strede sú collidery, vpravo komponenty koreňa.*
+
 Všetky pravidlá robota: [`Assets/Validation/ROBOT_RULES.md`](Assets/Validation/ROBOT_RULES.md). Podrobnosti o dieloch a tabuľka poškodení: [`ROBOT_PARTS.md`](Assets/Validation/ROBOT_PARTS.md).
 
 ## 4. Stavba domácej arény
@@ -181,6 +184,8 @@ V okne Project kliknite pravým tlačidlom → **Create → AI Jam → Turnaj Te
 - `RobotPrefab`: váš robot;
 - `ArenaPrefab`: vaša aréna.
 
+<img src="img/inspector_team.png" width="480" alt="Inspector tímového assetu: Team Name, Robot Prefab a Arena Prefab">
+
 Príklady sú v `Assets/Turnaj/Teams`.
 
 ## 6. Kontrolujte priebežne
@@ -204,9 +209,13 @@ Kontrola modelu zlyhá, kým ho nenatrénujete (krok 7). Všetko ostatné môže
    - **Robot Prefab B:** jeho súper. Môže to byť znova váš robot (obe kópie sa učia tú istú politiku) alebo niektorý robot z minulého ročníka z `Assets/Training Results`.
    - **Num Of Arenas:** One, Three alebo Five. Viac arén zbiera skúsenosti rýchlejšie, ale potrebuje výkonnejší počítač.
 
+   <img src="img/inspector_aijammanager.png" width="480" alt="Inspector AIJamManager: Robot Prefab A, Robot Prefab B a Num Of Arenas">
+
    > **Pevný súper musí mať Inference Only.** Ak trénujete proti hotovému robotovi, otvorte jeho prefab a nastavte **BehaviorParameters → Behavior Type = Inference Only** s priradeným modelom. Inak ho tréner prevezme tiež (má rovnaký Behavior Name) a prestane hrať podľa svojho modelu.
 
 2. Vyberte **Reward Editor** a nastavte koeficienty odmien (0–1): pohyb, natočenie k súperovi, uhol ramena, vzdialenosť od súpera, pozícia v aréne a kombinácia zrážok. Určujú, čo sa robot naučí.
+
+   <img src="img/inspector_reward.png" width="480" alt="Inspector Reward Editor s posuvníkmi koeficientov odmien">
 3. *(Voliteľné)* Upravte nastavenia PPO v `Assets/konfig.yaml`.
 
 ### 7.2 Spustenie trénera
@@ -231,6 +240,10 @@ Keď vypíše **„Listening on port 5004"**, stlačte v Unity **Play**. Roboty 
 1. Tréner uloží model do `results/<run-id>/RobotAgent.onnx` v priečinku projektu.
 2. Skopírujte ho do `Assets/`, napríklad vedľa prefabu robota.
 3. Otvorte prefab robota a pretiahnite `.onnx` do **BehaviorParameters → Model**.
+
+   <img src="img/inspector_behavior.png" width="480" alt="Komponent Behavior Parameters: Behavior Name RobotAgent, Model a Behavior Type">
+
+   *Behavior Name musí byť `RobotAgent`, Model je váš `.onnx` a Behavior Type je Default pri tréningu alebo Inference Only pri teste.*
 4. Otestujte ho: v TrainingScene nastavte robotovi **Behavior Type** na **Inference Only** a stlačte Play *bez* spusteného trénera. Ak chcete trénovať ďalej, vráťte ho na **Default**.
 
 ## 8. Finálna kontrola: validácia a testovací zápas
@@ -249,18 +262,9 @@ Vo validačnej scéne s vybraným tímom:
 
    Náhľad kamery ukazuje, čo váš robot vidí.
 
-   Príklad výsledku testovacieho zápasu (testovací tím, aréna bez pascí):
+   <img src="img/inspector_validation.png" width="480" alt="Inspector validačnej scény po validácii a testovacom zápase: tlačidlá, výsledky šiestich udalostí a náhľad kamery robota">
 
-```
-Test match – Test Alpha
-  PASS Enemy rams: damaged arm_armbase_shape 100 % → 98 %, arm_weapon_shape 100 % → 70 %, bumper_shape 100 % → 1 %; robot HP 100 % → 53 %
-  PASS Robot falls: respawned 0.00 m from its Home marker, zone HP lowered: yes
-  INFO Traps and buffs: the arena has no traps or buffs (no trigger colliders)
-  PASS Robot flips: respawned upright, zone HP lowered: yes
-  PASS Body hit: body_shape 100 % → 89 %, robot HP 100 % → 95 %
-  PASS Battery hit: battery_shape 100 % → 61 %, robot HP 100 % → 82 %
-  PASS Arena spawns: nothing was spawned outside the arena object
-```
+   *Inspector validačnej scény po **Run validation** a **Run test match** (testovací tím, aréna bez pascí). Červený odtieň je farba Unity počas Play mode, nie chyba. Dole je náhľad kamery robota. Tlačidlo **Copy test report** skopíruje výsledky ako text.*
 
 Organizátori po prezentáciách spúšťajú rovnaké kontroly. **Robot s chybami nemôže bojovať.**
 
@@ -268,6 +272,8 @@ Organizátori po prezentáciách spúšťajú rovnaké kontroly. **Robot s chyba
 
 1. Otvorte `Assets/Turnaj/Turnaj.unity` a vyberte objekt **Tournament**.
 2. Pridajte svoj tímový asset do **Teams** a v rozbaľovacích zoznamoch vyberte **Team A** a **Team B** (napríklad váš tím proti testovaciemu).
+
+   <img src="img/inspector_tournament.png" width="480" alt="Inspector Tournament Manager: výber tímov A a B, stav a zoznam tímov">
 3. Stlačte **Play**, kliknite do okna **Game** (klávesy fungujú iba vtedy, keď je aktívne) a stlačte **medzerník** na spustenie odpočítavania.
 
 ![Turnajová scéna počas kola: časovač, skóre a panely HP oboch tímov](img/tournament.png)
