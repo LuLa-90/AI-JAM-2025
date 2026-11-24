@@ -252,7 +252,7 @@ Príklady sú v `Assets/Turnaj/Teams`.
 
 - **Epizóda pri tréningu trvá najviac 90 s** (pole `Max Episode Seconds` na komponente `RobotAgent`, 0 = bez limitu). Skončí sa aj vyradením. Limit platí iba vtedy, keď je pripojený tréner; turnaj a validácia majú vlastný čas.
 - Poškodenie, ktoré robot utrpí, ani náraz do steny odmenu nedávajú.
-- Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) zostáva blízko 0, lebo jeden vyhrá a druhý prehrá. Pokrok vtedy sledujte v TensorBoarde podľa `Policy/Entropy` (má klesať) a podľa správania robotov v scéne.
+- Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) zostáva blízko 0, lebo jeden vyhrá a druhý prehrá. Pokrok vtedy sledujte v TensorBoarde v skupine **Fight** (pozri 3.2) a podľa správania robotov v scéne.
 
 ### 3.2 Spustenie trénera
 V Anaconda Prompte:
@@ -265,10 +265,23 @@ mlagents-learn Assets/konfig.yaml --run-id=moj_prvy_beh --timeout-wait 300
 
 Keď vypíše **„Listening on port 5004"**, stlačte v Unity **Play**. Roboty sa rozbehnú a tréner každých 5000 krokov vypíše štatistiky.
 
-- **Zastavenie:** Ctrl+C v prompte alebo ukončenie Play mode. Model sa uloží.
+- **Zastavenie:** stlačte **Ctrl+C v prompte**. Tréner vtedy uloží model (`.onnx`). Ak iba ukončíte Play mode v Unity, tréner model neuloží a čaká na ďalšie spustenie Play.
+- **Priebežné modely:** tréner sám ukladá model každých 500 000 krokov do `results/<run-id>/RobotAgent/` (nastavenie `checkpoint_interval` v `konfig.yaml`).
 - **Pokračovanie behu:** `mlagents-learn Assets/konfig.yaml --run-id=moj_prvy_beh --resume`
 - **Beh odznova:** namiesto `--resume` pridajte `--force`.
-- **Sledovanie priebehu:** v druhom prompte spustite `tensorboard --logdir results` a otvorte http://localhost:6006. Kumulatívna odmena (cumulative reward) by mala rásť.
+- **Sledovanie priebehu:** v druhom prompte spustite `tensorboard --logdir results` a otvorte http://localhost:6006.
+
+**Ako spoznať, že sa robot učí.** Okrem odmeny zapisuje projekt do TensorBoardu skupinu **Fight** s priemermi za epizódu:
+
+| Graf | Čo ukazuje | Čo chcete vidieť |
+|---|---|---|
+| `Fight/Damage Dealt` | poškodenie spôsobené súperovi | rastie |
+| `Fight/Damage Taken` | poškodenie od súpera | proti slabšiemu súperovi klesá |
+| `Fight/Falls and Flips` | pády z arény a prevrátenia | klesá |
+| `Fight/Ended By Knockout` | podiel epizód ukončených vyradením | rastie (spočiatku je 0) |
+| `Fight/End HP` | HP robota na konci epizódy | podľa stratégie |
+
+**Koľko to trvá.** Na bežnom počítači s 5 arénami robí tréning v editore asi 5 000 krokov za minútu. Prvé zlepšenie (viac zásahov, menej pádov) vidno po 200 000 až 500 000 krokoch, teda po 1 až 2 hodinách. Na dobrého bojovníka počítajte s niekoľkými hodinami.
 
 > Editor sa veľmi spomalí, keď nie je aktívnym oknom. Počas tréningu ho majte vpredu.
 
