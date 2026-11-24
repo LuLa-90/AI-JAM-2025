@@ -58,8 +58,11 @@ public class RobotAgent : Agent {
 
         rb = gameObject.GetComponent<Rigidbody>();
 
-        var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
-        enemyRobot = robots.FirstOrDefault(r => r != this);
+        // The enemy is the other robot under the same parent (a robot without a parent has none).
+        if (transform.parent != null) {
+            var robots = transform.parent.gameObject.GetComponentsInChildren<RobotAgent>();
+            enemyRobot = robots.FirstOrDefault(r => r != this);
+        }
 
         rewardEditor = FindAnyObjectByType<RewardEditor>();
         behavior = GetComponent<BehaviorParameters>();
@@ -117,32 +120,10 @@ public class RobotAgent : Agent {
 
     public void HandleZoneCollision(object sender, CollisionZoneBehaviour.CollisionEventArgs e)
     {
-        Debug.Log(
-            $"[HANDLE COLLISION] " +
-            $"Agent={gameObject.name} | " +
-            $"HitTag={e.colliderHitName} | " +
-            $"DamageTaken={e.Damage:F6} | " +
-            $"DamageDealt={e.DamageDealt:F6}"
-        );
-
+        // No reward for walls, non-enemy objects or hits that dealt nothing.
+        // (No log line per hit: logging every collision slows training down a lot.)
         float zoneReward = HitReward(e);
-        if (zoneReward == 0f)
-        {
-            // No reward for walls, non-enemy objects or hits that dealt nothing
-            return;
-        }
-
-        /*Upgrade*/float rewardBefore = GetCumulativeReward();
-
-        AddReward(zoneReward);
-
-        Debug.Log(
-            $"[DIRECT REWARD] " +
-            $"Agent={gameObject.name} | " +
-            $"AddedReward={zoneReward:F6} | " +
-            $"CumulativeBefore={rewardBefore:F6} | " +
-            $"CumulativeAfter={GetCumulativeReward():F6}"
-        );
+        if (zoneReward != 0f) AddReward(zoneReward);
     }
 
 
@@ -302,7 +283,10 @@ public class RobotAgent : Agent {
 
         // NEW
         // average of zone rewards for this frame
-        var avgReward = zoneComponents.Average(z => z.RewardOfCollision);
+        // (a robot without damage zones has nothing to average)
+        float avgReward = zoneComponents != null && zoneComponents.Length > 0
+            ? zoneComponents.Average(z => z.RewardOfCollision)
+            : 0f;
 
         // If we actually got some reward this frame (positive or negative),
         // consider that as "impact happened"
@@ -337,19 +321,7 @@ public class RobotAgent : Agent {
         }
 
         //return Mathf.Clamp(reward, -10f, 1f);
-        float finalReward = Mathf.Clamp(reward, -10f, 1f);
-
-        if (Mathf.Abs(finalReward) > 0.0001f)
-        {
-            Debug.Log(
-                $"[COLLISION COMBINATION] " +
-                $"Agent={gameObject.name} | " +
-                $"AverageReward={avgReward:F6} | " +
-                $"FinalReward={finalReward:F6}"
-            );
-}
-
-return finalReward;
+        return Mathf.Clamp(reward, -10f, 1f);
     }
 
     private float GetRewards_ArenaPosition() {
@@ -367,7 +339,10 @@ return finalReward;
     }
 
     private float GetRewards_ArmRelease() {
-        var reward = (0.02f * robotMovement.armComponent.ArmRaisingReward) + robotMovement.armComponent.ArmDropReward;
+        var arm = robotMovement != null ? robotMovement.armComponent : null;
+        if (arm == null) return 0f; // robot without an arm
+
+        var reward = (0.02f * arm.ArmRaisingReward) + arm.ArmDropReward;
         return Mathf.Clamp(reward, 0f, 1f);
     }
 

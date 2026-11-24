@@ -18,6 +18,7 @@ public class ProximitySensorRay : MonoBehaviour
     private float rayDistanceWide = 0.7f;
 
     private void Start() {
+        ownRobot = GetComponentInParent<RobotAgent>();
         var sensors = GetComponentsInChildren<SensorComponent>();
         foreach (var sensor in sensors) {
             if (sensor.GetSensorType == SensorComponent.SensorType.Proximity) {
@@ -28,6 +29,25 @@ public class ProximitySensorRay : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// What a ray hit: 1 = arena, 2 = robot, 3 = bonus, 0 = anything else.
+    /// The arm has its own Rigidbody and tag (RobotArm): an enemy's arm counts as a robot, the robot's own arm doesn't.
+    /// </summary>
+    /// <param name="hitBody">RaycastHit.transform: the Rigidbody's object, or the collider's own object without one.</param>
+    public static int HitType(Transform hitBody, RobotAgent ownRobot) {
+        switch (hitBody.gameObject.tag) {
+            case "Arena": return 1;
+            case "Robot": return 2;
+            case "Bonus": return 3;
+            case "RobotArm":
+                var owner = hitBody.GetComponentInParent<RobotAgent>();
+                return owner != null && owner != ownRobot ? 2 : 0;
+        }
+        return 0;
+    }
+
+    private RobotAgent ownRobot;
 
     private void FixedUpdate() {
 
@@ -54,17 +74,8 @@ public class ProximitySensorRay : MonoBehaviour
                 //Debug.DrawRay(transform.position, raycastDirection * hit.distance, Color.red);
                 if (sensorValue > hit.distance) {
                     sensorValue = hit.distance;
-                    switch (hit.transform.gameObject.tag) {
-                        case "Arena":
-                            objectHitType = 1;
-                            break;
-                        case "Robot":
-                            objectHitType = 2;
-                            break;
-                        case "Bonus":
-                            objectHitType = 3;
-                            break;
-                    }
+                    // always the type of the nearest hit (an unknown object used to keep the type of a farther ray)
+                    objectHitType = HitType(hit.transform, ownRobot);
                 }
 
                 //return;

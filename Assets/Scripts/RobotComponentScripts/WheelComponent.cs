@@ -27,7 +27,7 @@ public class WheelComponent : MonoBehaviour, IHealth {
     }
 
     private void Update() {
-        float minCurrentHealth = zoneComponents?.Min(e => e.CurrentHealth) ?? 1f;
+        float minCurrentHealth = zoneComponents.MinHealth();
         sensorDamage.SetSensorValue(minCurrentHealth); // Placeholder for damage value
     }
 }

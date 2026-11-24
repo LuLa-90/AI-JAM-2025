@@ -55,12 +55,13 @@ public class BodyComponent : MonoBehaviour, IHealth
         SetVelocitySensorValues();
         SetAzimuthSensorValues();
 
-        float minCurrentHealth = zoneComponents?.Min(e => e.CurrentHealth) ?? 1f;
+        float minCurrentHealth = zoneComponents.MinHealth();
         sensorDamage.SetSensorValue(minCurrentHealth); // Placeholder for damage value
         
     }
 
     private void SetVelocitySensorValues() {
+        if (rb == null) return; // body that is not part of a robot
         Vector3 localVelocity = transform.InverseTransformDirection(rb.linearVelocity);
         sensorVelocityForwards.SetSensorValue(localVelocity.z);
         sensorVelocitySideways.SetSensorValue(localVelocity.x);
@@ -68,7 +69,7 @@ public class BodyComponent : MonoBehaviour, IHealth
 
     private void SetAzimuthSensorValues() {
         
-        if (thisRobot.enemyRobot != null) {
+        if (thisRobot != null && thisRobot.enemyRobot != null) {
             var vectorToEnemy = thisRobot.enemyRobot.transform.position - thisRobot.transform.position;
             var angleToEnemy = Vector3.SignedAngle(thisRobot.transform.forward, vectorToEnemy, Vector3.up);
 

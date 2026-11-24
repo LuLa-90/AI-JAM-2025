@@ -77,7 +77,15 @@ public class CollisionZoneBehaviour : MonoBehaviour {
 
     private void ApplyHit(float impulse, CollisionZoneBehaviour enemyCollisionZone, string hitTag, float stepTime) {
         // normalised collision force
-        float collisionForce = Math.Max(impulse / Time.fixedDeltaTime / 100000f, 0.0001f);
+        float collisionForce = impulse / Time.fixedDeltaTime / 100000f;
+        if (enemyCollisionZone != null) {
+            // a touch between two robots always costs a little
+            collisionForce = Math.Max(collisionForce, 0.0001f);
+        }
+        else if (collisionForce <= 0f) {
+            // resting or rolling on the arena: no force, no damage (the old minimum slowly drained HP on the floor)
+            return;
+        }
 
         float damageTaken = enemyCollisionZone == null
             ? 1f / resistanceOfZone
@@ -96,15 +104,6 @@ public class CollisionZoneBehaviour : MonoBehaviour {
             collisionReward = Mathf.Clamp(Mathf.Log(damageRatio, 20), -1, 1);
             collisionRewardTime = stepTime;
         }
-
-        Debug.Log(
-            $"[ZONE COLLISION] " +
-            $"Zone={gameObject.name} | " +
-            $"OtherZone={(enemyCollisionZone != null ? enemyCollisionZone.name : "Environment")} | " +
-            $"DamageTaken={damage:F6} | " +
-            $"DamageDealt={damageDealt:F6} | " +
-            $"HitTag={hitTag}"
-        );
 
         OnCollision?.Invoke(this, new CollisionEventArgs(damage, hitTag, damageDealt));
     }

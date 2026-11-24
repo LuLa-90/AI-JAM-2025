@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,32 +19,56 @@ public class RobotMovement : MonoBehaviour {
 
     float motorTorqueMax = 25f;
 
+    // All robots share one input asset. Its "Robot" action map stays enabled while at least one robot uses it;
+    // disabling it with the first robot that goes away used to switch the keyboard off for every robot.
+    private static readonly Dictionary<InputActionMap, int> actionMapUsers = new Dictionary<InputActionMap, int>();
+    private InputActionMap actionMap;
+
     private void OnEnable() {
-        var actionMap = inputActions.FindActionMap("Robot");
+        if (inputActions == null) return;
+        actionMap = inputActions.FindActionMap("Robot");
+        if (actionMap == null) return;
+
         leftWheelsAxis = actionMap.FindAction("MoveL");
         rightWheelsAxis = actionMap.FindAction("MoveR");
         armLiftAction = actionMap.FindAction("ArmLift");
 
+        actionMapUsers.TryGetValue(actionMap, out int users);
+        actionMapUsers[actionMap] = users + 1;
         actionMap.Enable();
     }
 
     private void OnDisable() {
-        var actionMap = inputActions.FindActionMap("Robot");
-        actionMap.Disable();
+        if (actionMap == null) return;
+        actionMapUsers.TryGetValue(actionMap, out int users);
+        users = Mathf.Max(users - 1, 0);
+        actionMapUsers[actionMap] = users;
+        if (users == 0) actionMap.Disable();
+        actionMap = null;
     }
 
     private void Start() {
         armComponent = GetComponentInChildren<ArmComponent>();
-        armJointControl = armComponent.GetComponent<HingeJoint>();
-        armJointControl.connectedBody = gameObject.GetComponent<Rigidbody>();
+        if (armComponent == null) return; // robot without an arm
 
+        armJointControl = armComponent.GetComponent<HingeJoint>();
+        if (armJointControl == null) return;
+
+        armJointControl.connectedBody = gameObject.GetComponent<Rigidbody>();
         armJointControl.useMotor = false;
         armJointControl.useSpring = false;
     }
 
     private void FixedUpdate() {
         float slowdown = Time.fixedDeltaTime * motorTorqueMax;
-        foreach (var wheel in rightWheels.Concat(leftWheels)) {
+        SlowDown(rightWheels, slowdown);
+        SlowDown(leftWheels, slowdown);
+    }
+
+    private void SlowDown(WheelCollider[] wheels, float slowdown) {
+        if (wheels == null) return;
+        foreach (var wheel in wheels) {
+            if (wheel == null) continue;
             if (Mathf.Abs(wheel.motorTorque) < slowdown) {
                 wheel.motorTorque = 0f;
             }
@@ -55,7 +79,7 @@ public class RobotMovement : MonoBehaviour {
     }
 
     public void ApplyArmInput(int inputValue) {
-        if (stationaryRobot) {
+        if (stationaryRobot || armJointControl == null) {
             return;
         }
         if (inputValue == 1) {
@@ -83,11 +107,13 @@ public class RobotMovement : MonoBehaviour {
     }
 
     void ApplyTrackInput(WheelCollider[] wheels, float inputValue) {
+        if (wheels == null || wheels.Length == 0 || wheels[0] == null) return; // robot without wheel colliders
+
         float torqueStep = motorTorqueMax * 0.3f * inputValue;
         float changedMotorTorque = Mathf.Clamp(wheels[0].motorTorque + torqueStep, -motorTorqueMax, motorTorqueMax);
 
         foreach (var wheel in wheels) {
-            wheel.motorTorque = changedMotorTorque;
+            if (wheel != null) wheel.motorTorque = changedMotorTorque;
         }
     }
 
@@ -106,8 +132,9 @@ public class RobotMovement : MonoBehaviour {
     }
 
     void ApplyTrackInputHeuristic(WheelCollider[] wheels, float inputValue) {
+        if (wheels == null) return;
         foreach (var wheel in wheels) {
-            wheel.motorTorque = inputValue * motorTorqueMax;
+            if (wheel != null) wheel.motorTorque = inputValue * motorTorqueMax;
         }
     }
 }

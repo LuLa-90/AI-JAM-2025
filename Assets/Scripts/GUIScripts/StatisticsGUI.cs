@@ -59,10 +59,10 @@ public class StatisticsGUI : MonoBehaviour {
                     statBar.UpdateStatBar(robot.GetComponentInChildren<BodyComponent>());
                     break;
                 case "StatItemLWheels":
-                    statBar.UpdateStatBar(wheelComponents[0]);
+                    statBar.UpdateStatBar(wheelComponents.ElementAtOrDefault(0)); // null (no bar update) when the robot has no such wheel set
                     break;
                 case "StatItemRWheels":
-                    statBar.UpdateStatBar(wheelComponents[1]);
+                    statBar.UpdateStatBar(wheelComponents.ElementAtOrDefault(1));
                     break;
                 case "StatItemAverage":
                     statBar.UpdateStatBar(robot.weightedAverageHealth, 0.2f, 1f);

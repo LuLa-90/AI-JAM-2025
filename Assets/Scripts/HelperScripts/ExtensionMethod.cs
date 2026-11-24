@@ -3,6 +3,12 @@ using UnityEngine;
 
 public static class ExtensionMethod {
 
+    /// <summary>The lowest health among the zones; 1 (full) for a part without damage zones.</summary>
+    public static float MinHealth(this CollisionZoneBehaviour[] zones) {
+        if (zones == null || zones.Length == 0) return 1f;
+        return zones.Min(z => z.CurrentHealth);
+    }
+
     /// <summary>
     /// Components under a robot part that belong to that part, not to another part nested below it.
     /// All parts sit under the body, so a plain GetComponentsInChildren on the body would also return

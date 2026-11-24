@@ -71,7 +71,7 @@ public class ArmComponent : MonoBehaviour, IHealth
     }
 
     private void FixedUpdate() {
-        float minCurrentHealth = zoneComponents?.Min(e=> e.CurrentHealth) ?? 1f;
+        float minCurrentHealth = zoneComponents.MinHealth();
         ArmAngle = Mathf.Round(90f-transform.localEulerAngles.x);
 
         // Is arm raising?
