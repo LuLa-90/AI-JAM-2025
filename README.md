@@ -262,6 +262,8 @@ Vo validačnej scéne s vybraným tímom:
 
    Náhľad kamery ukazuje, čo váš robot vidí.
 
+   > **Tip:** Umiestnite kameru robota (`RobotCameraSensor`) tak, aby nevidela vlastného robota. Vlastné biele diely v obraze zakrývajú výhľad a robot si ich môže pomýliť so súperom, ktorého tiež vidí bielou farbou. V náhľade by mal byť iba súper, pasce, bonusy a čierne pozadie.
+
    <img src="img/inspector_validation.png" width="480" alt="Inspector validačnej scény po validácii a testovacom zápase: tlačidlá, výsledky šiestich udalostí a náhľad kamery robota">
 
    *Inspector validačnej scény po **Run validation** a **Run test match** (testovací tím, aréna bez pascí). Červený odtieň je farba Unity počas Play mode, nie chyba. Dole je náhľad kamery robota. Tlačidlo **Copy test report** skopíruje výsledky ako text.*
