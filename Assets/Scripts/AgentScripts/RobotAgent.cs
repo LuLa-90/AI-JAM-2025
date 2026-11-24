@@ -81,12 +81,39 @@ public class RobotAgent : Agent {
     /// </summary>
     public static float HitReward(CollisionZoneBehaviour.CollisionEventArgs e) {
         bool hitEnemy = e.colliderHitName == "Robot" || e.colliderHitName == "RobotArm";
-        return hitEnemy ? e.DamageDealt * 10000f : 0f;
+        return hitEnemy ? e.DamageDealt * HitRewardPerDamage : 0f;
     }
+
+    // ---------------------------------------------------------------- reward balance
+    // Winning must be worth more than everything else in an episode:
+    //   win / loss            +1 / -1
+    //   time-out              +0.5 / -0.5 by HP (same rule as the tournament), 0 on equal HP
+    //   hits                  0.1 per unit of damage dealt (a long fight deals 2 to 4 units)
+    //   shaping (Reward Editor) at most about 0.09 per term over a 90 s episode
+    public const float WinReward = 1f;
+    public const float LoseReward = -1f;
+    public const float TimeoutWinReward = 0.5f;
+    public const float HitRewardPerDamage = 0.1f;
+    /// <summary>Brings the per-step shaping rewards (about 1 per second at full strength) far below a win.</summary>
+    public const float ShapingScale = 0.001f;
+
+    /// <summary>One step of a shaping reward: value (-1..1) x gain x step time x Reward Editor factor, not rounded.</summary>
+    public static float ShapingReward(float value, float gain, float deltaTime, float factor) =>
+        value * gain * deltaTime * factor * ShapingScale;
 
     /// <summary>Collision-combination reward for one step, scaled by its Reward Editor factor.</summary>
     public static float CollisionStepReward(float combinationReward, float deltaTime, float factor) =>
-        (float)System.Math.Round(combinationReward * 100f * deltaTime, 2) * factor;
+        ShapingReward(combinationReward, 100f, deltaTime, factor);
+
+    /// <summary>Reward when the episode time runs out: the robot with more HP wins half a point.</summary>
+    public static float TimeoutReward(float myHealth, float enemyHealth) {
+        if (Mathf.Abs(myHealth - enemyHealth) < 0.01f) return 0f;
+        return myHealth > enemyHealth ? TimeoutWinReward : -TimeoutWinReward;
+    }
+
+    /// <summary>The episode time limit applies only while a trainer is connected; matches run their own clock.</summary>
+    public static bool IsTimedOut(float episodeSeconds, float limitSeconds, bool training) =>
+        training && limitSeconds > 0f && episodeSeconds >= limitSeconds;
 
     public void HandleZoneCollision(object sender, CollisionZoneBehaviour.CollisionEventArgs e)
     {
@@ -120,6 +147,10 @@ public class RobotAgent : Agent {
 
 
 
+    [Tooltip("Training only: an episode ends after this many seconds (0 = no limit). The robot with more HP gets the time-out reward.")]
+    [SerializeField] private float maxEpisodeSeconds = 90f;
+    private float episodeStartTime;
+
     public override void OnEpisodeBegin() {
         movementRwd = 0f;
         robotFacingRwd = 0f;
@@ -130,6 +161,7 @@ public class RobotAgent : Agent {
 
         SetReward(0f);
         cumulativeReward = GetCumulativeReward();
+        episodeStartTime = Time.time;
 
         OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
 
@@ -187,12 +219,26 @@ public class RobotAgent : Agent {
             OnRobotDie?.Invoke(this, System.EventArgs.Empty);
 
             // End the episode with negative reward (lose)
-            AddReward(-1000f);
+            AddReward(LoseReward);
             EndEpisode();
 
             // Give positive reward to enemy robot (win)
-            enemyRobot?.AddReward(1000f);
+            enemyRobot?.AddReward(WinReward);
             enemyRobot?.EndEpisode();
+        }
+        // Training only: end the episode when its time runs out. The robot with more HP wins half a point,
+        // like a round that ends on time in the tournament.
+        else if (IsTimedOut(Time.time - episodeStartTime, maxEpisodeSeconds, Academy.Instance.IsCommunicatorOn)) {
+            float myHealth = weightedAverageHealth;
+            float enemyHealth = enemyRobot != null ? enemyRobot.weightedAverageHealth : myHealth;
+
+            AddReward(TimeoutReward(myHealth, enemyHealth));
+            EndEpisode();
+
+            if (enemyRobot != null) {
+                enemyRobot.AddReward(TimeoutReward(enemyHealth, myHealth));
+                enemyRobot.EndEpisode();
+            }
         }
 
         /// origin position ***AAA***
@@ -384,28 +430,23 @@ return finalReward;
         if (rewardEditor != null)
         {
 
-            float movementRewards = GetRewards_Movement() * 0.5f * Time.deltaTime;
-            movementRwd = (float)System.Math.Round(movementRewards, 2) * rewardEditor.movementRF;
+            // Shaping rewards: value x gain x step time x Reward Editor factor (see ShapingReward).
+            // They are no longer rounded to 2 decimals, which used to turn the small ones into 0.
+            float dt = Time.deltaTime;
+
+            movementRwd = ShapingReward(GetRewards_Movement(), 0.5f, dt, rewardEditor.movementRF);
             AddReward(movementRwd);
 
-            float robotFacingRewards = GetRewards_FacingRobot() * 0.5f * Time.deltaTime;
-            //AddReward(robotFacingRewards * rewardEditor.facingRF);
-            robotFacingRwd = (float)System.Math.Round(robotFacingRewards, 2) * rewardEditor.facingRF;
+            robotFacingRwd = ShapingReward(GetRewards_FacingRobot(), 0.5f, dt, rewardEditor.facingRF);
             AddReward(robotFacingRwd);
 
-            float armReleaseReward = GetRewards_ArmRelease() * 10f * Time.deltaTime;
-            //AddReward(armReleaseReward * rewardEditor.armAngleRF);
-            armReleaseRwd = (float)System.Math.Round(armReleaseReward, 2) * rewardEditor.armAngleRF;
+            armReleaseRwd = ShapingReward(GetRewards_ArmRelease(), 10f, dt, rewardEditor.armAngleRF);
             AddReward(armReleaseRwd);
 
-            float enemyDistanceReward = GetRewards_EnemyDistance() * Time.deltaTime;
-            //AddReward(enemyDistanceReward * rewardEditor.enemyDistanceRF);
-            enemyDistanceRwd = (float)System.Math.Round(enemyDistanceReward, 2) * rewardEditor.enemyDistanceRF;
+            enemyDistanceRwd = ShapingReward(GetRewards_EnemyDistance(), 1f, dt, rewardEditor.enemyDistanceRF);
             AddReward(enemyDistanceRwd);
 
-            float arenaPositionReward = GetRewards_ArenaPosition() * Time.deltaTime;
-            //AddReward(arenaPositionReward * rewardEditor.arenaPositionRF);
-            arenaPositionRwd = (float)System.Math.Round(arenaPositionReward, 2) * rewardEditor.arenaPositionRF;
+            arenaPositionRwd = ShapingReward(GetRewards_ArenaPosition(), 1f, dt, rewardEditor.arenaPositionRF);
             AddReward(arenaPositionRwd);
 
             // This step's reward only (it used to add the running total again on every step).

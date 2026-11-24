@@ -127,17 +127,63 @@ namespace AIJam.RobotScripts.Tests {
             var hitEnemyArm = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "RobotArm", 0.002f);
             var hitWall = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "Arena", 0f);
 
-            Assert.AreEqual(10f, RobotAgent.HitReward(hitEnemy), 1e-4f);
-            Assert.AreEqual(20f, RobotAgent.HitReward(hitEnemyArm), 1e-4f);
+            Assert.AreEqual(0.0001f, RobotAgent.HitReward(hitEnemy), 1e-8f); // 0.1 per unit of damage dealt
+            Assert.AreEqual(0.0002f, RobotAgent.HitReward(hitEnemyArm), 1e-8f);
             Assert.AreEqual(0f, RobotAgent.HitReward(hitWall));
         }
 
-        // ---------------------------------------------------------------- collision reward per step
+        // ---------------------------------------------------------------- reward balance: win > hits > shaping
+
+        [Test]
+        public void Rewards_WinIsPlusOne_LossIsMinusOne() {
+            Assert.AreEqual(1f, RobotAgent.WinReward);
+            Assert.AreEqual(-1f, RobotAgent.LoseReward);
+        }
+
+        [Test]
+        public void Rewards_AllTheHitsOfALongFight_AreWorthLessThanAWin() {
+            // The check run measured 2 to 3.5 units of damage dealt per robot per fight.
+            var wholeFight = new CollisionZoneBehaviour.CollisionEventArgs(0f, "Robot", 4f);
+            Assert.Less(RobotAgent.HitReward(wholeFight), RobotAgent.WinReward);
+            Assert.Greater(RobotAgent.HitReward(wholeFight), 0.1f, "hits must still matter");
+        }
+
+        [Test]
+        public void ShapingReward_SmallValuesAreNotRoundedAway() {
+            // value 0.2, gain 0.5, step 0.02 s, factor 0.8: this used to round to 0.
+            float reward = RobotAgent.ShapingReward(0.2f, 0.5f, 0.02f, 0.8f);
+            Assert.AreEqual(0.2f * 0.5f * 0.02f * 0.8f * 0.001f, reward, 1e-10f);
+            Assert.Greater(reward, 0f);
+        }
+
+        [Test]
+        public void ShapingReward_APerfectEpisodeOfAllFiveTerms_IsWorthLessThanAWin() {
+            int steps = Mathf.RoundToInt(90f / 0.02f);
+            float episode = 5 * steps * RobotAgent.ShapingReward(1f, 1f, 0.02f, 1f);
+            Assert.Less(episode, RobotAgent.WinReward);
+        }
 
         [Test]
         public void CollisionStepReward_UsesTheRewardEditorFactor() {
-            Assert.AreEqual(0.7f, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0.7f), 1e-5f); // 0.5 * 100 * 0.02 = 1, times 0.7
+            Assert.AreEqual(0.5f * 100f * 0.02f * 0.7f * 0.001f, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0.7f), 1e-9f);
             Assert.AreEqual(0f, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0f));
+        }
+
+        // ---------------------------------------------------------------- episode time limit (training only)
+
+        [Test]
+        public void TimeoutReward_HigherHpWinsHalfAPoint() {
+            Assert.AreEqual(0.5f, RobotAgent.TimeoutReward(0.8f, 0.5f));
+            Assert.AreEqual(-0.5f, RobotAgent.TimeoutReward(0.5f, 0.8f));
+            Assert.AreEqual(0f, RobotAgent.TimeoutReward(0.6f, 0.6f));
+        }
+
+        [Test]
+        public void EpisodeTimesOut_OnlyWhileTraining_AndOnlyWithALimit() {
+            Assert.IsTrue(RobotAgent.IsTimedOut(91f, 90f, true));
+            Assert.IsFalse(RobotAgent.IsTimedOut(89f, 90f, true));
+            Assert.IsFalse(RobotAgent.IsTimedOut(91f, 90f, false), "tournament and validation run their own clock");
+            Assert.IsFalse(RobotAgent.IsTimedOut(91f, 0f, true), "0 switches the limit off");
         }
 
         [Test]

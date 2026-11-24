@@ -241,6 +241,19 @@ Príklady sú v `Assets/Turnaj/Teams`.
    <img src="img/inspector_reward.png" width="480" alt="Inspector Reward Editor s posuvníkmi koeficientov odmien">
 3. *(Voliteľné)* Upravte nastavenia PPO v `Assets/konfig.yaml`.
 
+**Ako sa robot odmeňuje.** Najviac sa oplatí vyhrať; koeficienty v Reward Editore iba jemne usmerňujú správanie.
+
+| Odmena | Hodnota |
+|---|---|
+| Výhra (vyradenie súpera) / prehra | +1 / −1 |
+| Koniec času: robot s vyšším HP / s nižším HP | +0,5 / −0,5 (pri rovnakom HP 0) |
+| Zásah súpera | 0,1 za jednotku spôsobeného poškodenia (dlhý súboj dá spolu asi 0,2 až 0,4) |
+| Koeficienty z Reward Editora | spolu najviac desatiny bodu za epizódu |
+
+- **Epizóda pri tréningu trvá najviac 90 s** (pole `Max Episode Seconds` na komponente `RobotAgent`, 0 = bez limitu). Skončí sa aj vyradením. Limit platí iba vtedy, keď je pripojený tréner; turnaj a validácia majú vlastný čas.
+- Poškodenie, ktoré robot utrpí, ani náraz do steny odmenu nedávajú.
+- Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) zostáva blízko 0, lebo jeden vyhrá a druhý prehrá. Pokrok vtedy sledujte v TensorBoarde podľa `Policy/Entropy` (má klesať) a podľa správania robotov v scéne.
+
 ### 3.2 Spustenie trénera
 V Anaconda Prompte:
 
