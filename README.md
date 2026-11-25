@@ -278,10 +278,12 @@ Keď vypíše **„Listening on port 5004"**, stlačte v Unity **Play**. Roboty 
 | `Fight/Damage Dealt` | poškodenie spôsobené súperovi | rastie |
 | `Fight/Damage Taken` | poškodenie od súpera | proti slabšiemu súperovi klesá |
 | `Fight/Falls and Flips` | pády z arény a prevrátenia | klesá |
-| `Fight/Ended By Knockout` | podiel epizód ukončených vyradením | rastie (spočiatku je 0) |
+| `Fight/Ended By Knockout` | podiel epizód ukončených vyradením | najprv rastie; neskôr môže klesnúť, keď sa roboty naučia aj brániť |
 | `Fight/End HP` | HP robota na konci epizódy | podľa stratégie |
 
-**Koľko to trvá.** Na bežnom počítači s 5 arénami robí tréning v editore asi 5 000 krokov za minútu. Prvé zlepšenie (viac zásahov, menej pádov) vidno po 200 000 až 500 000 krokoch, teda po 1 až 2 hodinách. Na dobrého bojovníka počítajte s niekoľkými hodinami.
+**Koľko to trvá.** Na bežnom počítači s 5 arénami robí tréning v editore 5 000 až 8 000 krokov za minútu. Prvé zlepšenie (viac zásahov, viac vyradení) vidno po 100 000 až 300 000 krokoch, teda asi po hodine. Na dobrého bojovníka počítajte s niekoľkými hodinami.
+
+Príklad zo skúšobného tréningu referenčného robota (1 500 000 krokov, 3 hodiny 20 minút): taranovať sa roboty naučili počas prvých 300 000 krokov, keď sa vyradením končili asi tri štvrtiny epizód. Potom sa naučili aj uhýbať a podiel vyradení klesol asi na 15 %. Robot sa pritom ďalej zlepšoval: model z konca tréningu vyhral nad modelom z 500 000 krokov 48 zo 67 súbojov. Pokles vyradení teda sám osebe neznamená, že sa tréning pokazil.
 
 > Editor sa veľmi spomalí, keď nie je aktívnym oknom. Počas tréningu ho majte vpredu.
 
@@ -513,8 +515,8 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
    | `bumper` (nárazník) | 1500 | 10 |
 
 2. **Zásah:** keď sa zóny dvoch robotov zrazia, zasiahnutá zóna stráca HP úmerne *sile nárazu* a pomeru *poškodenie súperovej zóny / vlastná odolnosť*. Čím rýchlejší náraz, tým väčšie poškodenie.
-   - **Hlavným zdrojom poškodenia je náraz nárazníkom (taranovanie).** Nárazník ubližuje päťkrát viac než úder zbraňou. V skúšobných súbojoch spôsobil asi 84 % celého poškodenia, zbraň asi 16 %.
-   - Jeden čelný náraz v plnej rýchlosti uberie robotovi asi 14 % HP. Dobre mierené nárazy vyradia súpera do 90 s; v skúšobných súbojoch čiastočne natrénovaných robotov sa vyradením skončila asi polovica kôl.
+   - **Hlavným zdrojom poškodenia je náraz nárazníkom (taranovanie).** Nárazník ubližuje päťkrát viac než úder zbraňou. V skúšobných súbojoch natrénovaných robotov spôsobil asi tri štvrtiny celého poškodenia, zbraň zvyšok.
+   - Jeden čelný náraz v plnej rýchlosti uberie robotovi asi 14 % HP. Dobre mierené nárazy vyradia súpera do 90 s; krátko trénované roboty tak končia väčšinu kôl. Dlhšie trénované roboty sa vedia aj brániť a medzi dvoma rovnako dobrými sa väčšina kôl skončí uplynutím času.
    - Batéria je najzraniteľnejšia zóna (odolnosť 1), telo a kolesá sú stredne odolné.
    - Dotyk s arénou bez sily (státie, jazda po podlahe) HP neuberá. Tvrdý náraz do steny áno.
 3. **HP robota** je vážený priemer HP jeho zón. Robot je **vyradený**, keď tento priemer klesne na **0,2** alebo nižšie. Ukazovateľ HP v turnaji vtedy ukazuje 0 %.
