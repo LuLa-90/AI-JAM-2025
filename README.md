@@ -265,7 +265,7 @@ Príklady sú v `Assets/Turnaj/Teams`.
 - **Epizóda pri tréningu trvá najviac 90 s** (pole `Max Episode Seconds` na komponente `RobotAgent`, 0 = bez limitu). Skončí sa aj vyradením. Limit platí iba vtedy, keď je pripojený tréner; turnaj a validácia majú vlastný čas.
 - Náraz do steny ani do iného predmetu odmenu nedáva a netrestá sa.
 - Pri **Damage Taken RF** nad 0 býva priemerná odmena záporná, lebo trest dostávajú obaja roboti. Nie je to chyba tréningu.
-- Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) zostáva blízko 0, lebo jeden vyhrá a druhý prehrá. Pokrok vtedy sledujte v TensorBoarde v skupine **Fight** (pozri 3.2) a podľa správania robotov v scéne.
+- Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) hovorí málo: výhra jedného a prehra druhého sa vyrušia a zostane najmä odmena za zásahy a z posuvníkov. Pokrok vtedy sledujte v TensorBoarde v skupine **Fight** (pozri 3.2) a podľa správania robotov v scéne.
 
 ### 3.2 Spustenie trénera
 V Anaconda Prompte:
@@ -296,7 +296,7 @@ Keď vypíše **„Listening on port 5004"**, stlačte v Unity **Play**. Roboty 
 
 **Koľko to trvá.** Na bežnom počítači s 5 arénami robí tréning v editore 5 000 až 8 000 krokov za minútu. Prvé zlepšenie (viac zásahov, viac vyradení) vidno po 100 000 až 300 000 krokoch, teda asi po hodine. Na dobrého bojovníka počítajte s niekoľkými hodinami.
 
-Príklad zo skúšobného tréningu referenčného robota (1 500 000 krokov, 3 hodiny 20 minút): taranovať sa roboty naučili počas prvých 300 000 krokov, keď sa vyradením končili asi tri štvrtiny epizód. Potom sa naučili aj uhýbať a podiel vyradení klesol asi na 15 %. Robot sa pritom ďalej zlepšoval: model z konca tréningu vyhral nad modelom z 500 000 krokov 48 zo 67 súbojov. Pokles vyradení teda sám osebe neznamená, že sa tréning pokazil.
+Príklad zo skúšobného tréningu referenčného robota (1 500 000 krokov, 3 hodiny 20 minút, Fight Factors na predvolených hodnotách, ešte so slabšími Reward Factors): taranovať sa roboty naučili počas prvých 300 000 krokov, keď sa vyradením končili asi tri štvrtiny epizód. Potom sa naučili aj uhýbať a podiel vyradení klesol asi na 15 %. Robot sa pritom ďalej zlepšoval: model z konca tréningu vyhral nad modelom z 500 000 krokov 48 zo 67 súbojov. Pokles vyradení teda sám osebe neznamená, že sa tréning pokazil.
 
 > Editor sa veľmi spomalí, keď nie je aktívnym oknom. Počas tréningu ho majte vpredu.
 
