@@ -152,20 +152,77 @@ namespace AIJam.RobotScripts.Tests {
         public void ShapingReward_SmallValuesAreNotRoundedAway() {
             // value 0.2, gain 0.5, step 0.02 s, factor 0.8: this used to round to 0.
             float reward = RobotAgent.ShapingReward(0.2f, 0.5f, 0.02f, 0.8f);
-            Assert.AreEqual(0.2f * 0.5f * 0.02f * 0.8f * 0.001f, reward, 1e-10f);
+            Assert.AreEqual(0.2f * 0.5f * 0.02f * 0.8f * RobotAgent.ShapingScale, reward, 1e-10f);
             Assert.Greater(reward, 0f);
         }
 
         [Test]
-        public void ShapingReward_APerfectEpisodeOfAllFiveTerms_IsWorthLessThanAWin() {
+        public void ShapingReward_APerfectEpisodeWithAllPositionSlidersAtMaximum_MattersButIsWorthLessThanAWin() {
+            // movement, facing, enemy distance and arena position, each at value 1 for a whole 90 s episode
             int steps = Mathf.RoundToInt(90f / 0.02f);
-            float episode = 5 * steps * RobotAgent.ShapingReward(1f, 1f, 0.02f, 1f);
+            float gains = RobotAgent.MovementGain + RobotAgent.FacingGain + RobotAgent.EnemyDistanceGain + RobotAgent.ArenaPositionGain;
+            float episode = steps * RobotAgent.ShapingReward(1f, gains, 0.02f, 1f);
             Assert.Less(episode, RobotAgent.WinReward);
+            Assert.Greater(episode, 0.5f, "teams steer training only with the sliders, so they must carry weight");
+        }
+
+        // ---------------------------------------------------------------- fight sliders (Reward Editor)
+
+        [Test]
+        public void HitReward_ScalesWithTheHitSlider() {
+            var hit = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "Robot", 1f);
+            Assert.AreEqual(0.2f, RobotAgent.HitReward(hit, 1f, 0f), 1e-6f);
+            Assert.AreEqual(0.1f, RobotAgent.HitReward(hit, 0.5f, 0f), 1e-6f);
+            Assert.AreEqual(0f, RobotAgent.HitReward(hit, 0f, 0f));
+        }
+
+        [Test]
+        public void HitReward_DamageTakenSlider_PenalisesDamageFromTheEnemyOnly() {
+            var hitByEnemy = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "Robot", 0f);
+            var hitWall = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "Arena", 0f);
+            Assert.AreEqual(-0.1f, RobotAgent.HitReward(hitByEnemy, 0f, 1f), 1e-6f);
+            Assert.AreEqual(0f, RobotAgent.HitReward(hitByEnemy, 0f, 0f));
+            Assert.AreEqual(0f, RobotAgent.HitReward(hitWall, 1f, 1f));
+        }
+
+        [Test]
+        public void HitReward_WithBothSliders_IsRewardForDamageDealtMinusPenaltyForDamageTaken() {
+            var trade = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "RobotArm", 1f);
+            Assert.AreEqual(1f * 0.2f - 0.5f * 0.2f, RobotAgent.HitReward(trade, 1f, 1f), 1e-6f);
+        }
+
+        [Test]
+        public void TimeoutReward_UsesTheTimeoutSlider() {
+            Assert.AreEqual(1f, RobotAgent.TimeoutReward(0.8f, 0.5f, 1f));
+            Assert.AreEqual(-0.25f, RobotAgent.TimeoutReward(0.5f, 0.8f, 0.25f));
+            Assert.AreEqual(0f, RobotAgent.TimeoutReward(0.8f, 0.5f, 0f), "0: only a knockout counts");
+            Assert.AreEqual(0f, RobotAgent.TimeoutReward(0.6f, 0.6f, 1f));
+        }
+
+        [Test]
+        public void FightSliders_AtAnySetting_NeverMakeLosingPayOrHitsWorthMoreThanAWin() {
+            var wholeFight = new CollisionZoneBehaviour.CollisionEventArgs(0f, "Robot", 4f);
+            Assert.Less(RobotAgent.HitReward(wholeFight, 1f, 0f), RobotAgent.WinReward);
+            Assert.LessOrEqual(RobotAgent.TimeoutReward(0.8f, 0.5f, 1f), RobotAgent.WinReward);
+            Assert.LessOrEqual(RobotAgent.TimeoutReward(0.5f, 0.8f, 1f), 0f);
+            Assert.GreaterOrEqual(RobotAgent.TimeoutReward(0.5f, 0.8f, 1f), RobotAgent.LoseReward);
+        }
+
+        [Test]
+        public void RewardEditor_DefaultFightSliders_GiveTheStandardBalance() {
+            var editor = new GameObject("RewardEditor").AddComponent<RewardEditor>();
+            spawned.Add(editor.gameObject);
+            var hit = new CollisionZoneBehaviour.CollisionEventArgs(0.5f, "Robot", 1f);
+
+            Assert.AreEqual(0.1f, RobotAgent.HitReward(hit, editor.hitRF, editor.damageTakenRF), 1e-6f);
+            Assert.AreEqual(0.5f, RobotAgent.TimeoutReward(0.8f, 0.5f, editor.timeoutRF));
+            Assert.AreEqual(RobotAgent.HitReward(hit), RobotAgent.HitReward(hit, editor.hitRF, editor.damageTakenRF), 1e-6f,
+                "a robot without a Reward Editor gets the same rewards as the default sliders");
         }
 
         [Test]
         public void CollisionStepReward_UsesTheRewardEditorFactor() {
-            Assert.AreEqual(0.5f * 100f * 0.02f * 0.7f * 0.001f, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0.7f), 1e-9f);
+            Assert.AreEqual(0.5f * 100f * 0.02f * 0.7f * RobotAgent.ShapingScale, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0.7f), 1e-9f);
             Assert.AreEqual(0f, RobotAgent.CollisionStepReward(0.5f, 0.02f, 0f));
         }
 

@@ -236,22 +236,35 @@ Príklady sú v `Assets/Turnaj/Teams`.
 
    > **Pevný súper musí mať Inference Only.** Ak trénujete proti hotovému robotovi, otvorte jeho prefab a nastavte **BehaviorParameters → Behavior Type = Inference Only** s priradeným modelom. Inak ho tréner prevezme tiež (má rovnaký Behavior Name) a prestane hrať podľa svojho modelu.
 
-2. Vyberte **Reward Editor** a nastavte koeficienty odmien (0–1): pohyb, natočenie k súperovi, uhol ramena, vzdialenosť od súpera, pozícia v aréne a kombinácia zrážok. Určujú, čo sa robot naučí.
+2. Vyberte **Reward Editor** a nastavte posuvníky (0–1). Sú jediný spôsob, ako tréning usmerniť, a určujú štýl robota.
+   - **Reward Factors**: malé odmeny v každom kroku za to, ako sa robot pohybuje a kde stojí. Pohyb (Movement), natočenie k súperovi (Facing), uhol ramena (Arm Angle), vzdialenosť od súpera (Enemy Distance), pozícia v aréne (Arena Position) a kombinácia zrážok (Collision Combination).
+   - **Fight Factors**: odmeny za samotný súboj. **Hit RF** platí za poškodenie spôsobené súperovi, **Damage Taken RF** trestá za utrpené poškodenie a **Timeout RF** určuje, koľko je hodná výhra na čas oproti vyradeniu.
 
-   <img src="img/inspector_reward.png" width="480" alt="Inspector Reward Editor s posuvníkmi koeficientov odmien">
+   <img src="img/inspector_reward.png" width="480" alt="Inspector Reward Editor s posuvníkmi Reward Factors a Fight Factors">
 3. *(Voliteľné)* Upravte nastavenia PPO v `Assets/konfig.yaml`.
 
-**Ako sa robot odmeňuje.** Najviac sa oplatí vyhrať; koeficienty v Reward Editore iba jemne usmerňujú správanie.
+**Ako sa robot odmeňuje.** Najviac sa oplatí vyhrať vyradením. Posuvníky rozhodujú o tom, akou cestou sa k výhre robot dostane; žiadne nastavenie nespôsobí, že sa oplatí prehrať.
 
-| Odmena | Hodnota |
-|---|---|
-| Výhra (vyradenie súpera) / prehra | +1 / −1 |
-| Koniec času: robot s vyšším HP / s nižším HP | +0,5 / −0,5 (pri rovnakom HP 0) |
-| Zásah súpera | 0,1 za jednotku spôsobeného poškodenia (dlhý súboj dá spolu asi 0,2 až 0,4) |
-| Koeficienty z Reward Editora | spolu najviac desatiny bodu za epizódu |
+| Odmena | Posuvník | Hodnota |
+|---|---|---|
+| Výhra (vyradenie súpera) / prehra | – | +1 / −1 |
+| Koniec času: robot s vyšším HP / s nižším HP | Timeout RF | 0 až +1 / −1, predvolene +0,5 / −0,5 (pri rovnakom HP 0) |
+| Zásah súpera | Hit RF | 0 až 0,2 za jednotku spôsobeného poškodenia, predvolene 0,1 (dlhý súboj má 2 až 4 jednotky) |
+| Utrpené poškodenie | Damage Taken RF | 0 až −0,2 za jednotku poškodenia od súpera, predvolene 0 |
+| Pohyb, natočenie, vzdialenosť, pozícia | Reward Factors | spolu najviac asi 0,8 bodu za 90 s epizódu, ak sú všetky na maxime |
+
+**Posuvníky naozaj menia správanie.** Dva tréningy referenčného robota proti vlastnej kópii, každý 250 000 krokov, s opačným nastavením:
+
+| Nastavenie | Poškodenie za súboj | Súboje ukončené vyradením | HP na konci |
+|---|---|---|---|
+| Útočník: Hit 1, Damage Taken 0, Timeout 0, Facing 1, Enemy Distance 1 | 3,2 | 68 % | 35 % |
+| Obranca: Hit 0, Damage Taken 1, Timeout 1, Enemy Distance 0, Arena Position 1 | 0,6 | 0 % | 85 % |
+
+Čísla sú z posledných 50 000 krokov a z jedného tréningu na každé nastavenie; berte ich ako smer, nie ako presnú hodnotu.
 
 - **Epizóda pri tréningu trvá najviac 90 s** (pole `Max Episode Seconds` na komponente `RobotAgent`, 0 = bez limitu). Skončí sa aj vyradením. Limit platí iba vtedy, keď je pripojený tréner; turnaj a validácia majú vlastný čas.
-- Poškodenie, ktoré robot utrpí, ani náraz do steny odmenu nedávajú.
+- Náraz do steny ani do iného predmetu odmenu nedáva a netrestá sa.
+- Pri **Damage Taken RF** nad 0 býva priemerná odmena záporná, lebo trest dostávajú obaja roboti. Nie je to chyba tréningu.
 - Ak trénujete robota proti jeho vlastnej kópii, priemerná odmena (Mean Reward) zostáva blízko 0, lebo jeden vyhrá a druhý prehrá. Pokrok vtedy sledujte v TensorBoarde v skupine **Fight** (pozri 3.2) a podľa správania robotov v scéne.
 
 ### 3.2 Spustenie trénera

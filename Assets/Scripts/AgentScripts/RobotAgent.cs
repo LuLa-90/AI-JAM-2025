@@ -82,23 +82,40 @@ public class RobotAgent : Agent {
     /// Reward for one zone hit: the damage this robot DEALT to an enemy robot or its arm, scaled.
     /// Damage the robot took and hits against the arena give nothing.
     /// </summary>
-    public static float HitReward(CollisionZoneBehaviour.CollisionEventArgs e) {
+    public static float HitReward(CollisionZoneBehaviour.CollisionEventArgs e) =>
+        HitReward(e, DefaultHitFactor, DefaultDamageTakenFactor);
+
+    /// <summary>
+    /// Reward for one hit with the fight sliders of the Reward Editor: pay for damage dealt to the enemy,
+    /// minus a penalty for damage taken from the enemy. Walls and other objects give nothing.
+    /// </summary>
+    public static float HitReward(CollisionZoneBehaviour.CollisionEventArgs e, float hitFactor, float damageTakenFactor) {
         bool hitEnemy = e.colliderHitName == "Robot" || e.colliderHitName == "RobotArm";
-        return hitEnemy ? e.DamageDealt * HitRewardPerDamage : 0f;
+        if (!hitEnemy) return 0f;
+        return e.DamageDealt * hitFactor * MaxHitRewardPerDamage - e.Damage * damageTakenFactor * MaxDamageTakenPenalty;
     }
 
     // ---------------------------------------------------------------- reward balance
     // Winning must be worth more than everything else in an episode:
     //   win / loss            +1 / -1
-    //   time-out              +0.5 / -0.5 by HP (same rule as the tournament), 0 on equal HP
-    //   hits                  0.1 per unit of damage dealt (a long fight deals 2 to 4 units)
-    //   shaping (Reward Editor) at most about 0.09 per term over a 90 s episode
+    //   time-out              by HP (same rule as the tournament), 0 on equal HP;
+    //                         slider "Timeout RF": 0 to +1 / -1, default +0.5 / -0.5
+    //   hits                  slider "Hit RF": 0 to 0.2 per unit of damage dealt, default 0.1
+    //                         (a long fight deals 2 to 4 units)
+    //   damage taken          slider "Damage Taken RF": 0 to -0.2 per unit, default 0
+    //   shaping (Reward Editor) movement and facing at most 0.135, enemy distance and arena position
+    //                         at most 0.27 each over a 90 s episode: together below a win
+    // Teams steer training only with the Reward Editor, so every slider has to carry weight;
+    // no setting may make losing pay or the hits of a fight worth more than a win.
     public const float WinReward = 1f;
     public const float LoseReward = -1f;
-    public const float TimeoutWinReward = 0.5f;
-    public const float HitRewardPerDamage = 0.1f;
-    /// <summary>Brings the per-step shaping rewards (about 1 per second at full strength) far below a win.</summary>
-    public const float ShapingScale = 0.001f;
+    public const float MaxHitRewardPerDamage = 0.2f;
+    public const float MaxDamageTakenPenalty = 0.2f;
+    // Values used when the scene has no Reward Editor; the same as the defaults of the Reward Editor.
+    public const float DefaultHitFactor = 0.5f, DefaultDamageTakenFactor = 0f, DefaultTimeoutFactor = 0.5f;
+    /// <summary>Brings the per-step shaping rewards (about 1 per second at full strength) below a win.</summary>
+    public const float ShapingScale = 0.003f;
+    public const float MovementGain = 0.5f, FacingGain = 0.5f, ArmReleaseGain = 10f, EnemyDistanceGain = 1f, ArenaPositionGain = 1f;
 
     /// <summary>One step of a shaping reward: value (-1..1) x gain x step time x Reward Editor factor, not rounded.</summary>
     public static float ShapingReward(float value, float gain, float deltaTime, float factor) =>
@@ -109,9 +126,17 @@ public class RobotAgent : Agent {
         ShapingReward(combinationReward, 100f, deltaTime, factor);
 
     /// <summary>Reward when the episode time runs out: the robot with more HP wins half a point.</summary>
-    public static float TimeoutReward(float myHealth, float enemyHealth) {
+    public static float TimeoutReward(float myHealth, float enemyHealth) =>
+        TimeoutReward(myHealth, enemyHealth, DefaultTimeoutFactor);
+
+    /// <summary>
+    /// Reward when the episode time runs out, with the time-out slider of the Reward Editor (0..1):
+    /// the robot with more HP gets that share of a win, the other one loses the same amount.
+    /// </summary>
+    public static float TimeoutReward(float myHealth, float enemyHealth, float timeoutFactor) {
         if (Mathf.Abs(myHealth - enemyHealth) < 0.01f) return 0f;
-        return myHealth > enemyHealth ? TimeoutWinReward : -TimeoutWinReward;
+        float reward = Mathf.Clamp01(timeoutFactor) * WinReward;
+        return myHealth > enemyHealth ? reward : -reward;
     }
 
     /// <summary>The episode time limit applies only while a trainer is connected; matches run their own clock.</summary>
@@ -122,7 +147,9 @@ public class RobotAgent : Agent {
     {
         // No reward for walls, non-enemy objects or hits that dealt nothing.
         // (No log line per hit: logging every collision slows training down a lot.)
-        float zoneReward = HitReward(e);
+        float zoneReward = rewardEditor != null
+            ? HitReward(e, rewardEditor.hitRF, rewardEditor.damageTakenRF)
+            : HitReward(e);
         if (zoneReward != 0f) AddReward(zoneReward);
 
         if (e.colliderHitName == "Robot" || e.colliderHitName == "RobotArm") {
@@ -238,8 +265,9 @@ public class RobotAgent : Agent {
             float myHealth = weightedAverageHealth;
             float enemyHealth = enemyRobot != null ? enemyRobot.weightedAverageHealth : myHealth;
 
-            FinishEpisode(TimeoutReward(myHealth, enemyHealth), false);
-            if (enemyRobot != null) enemyRobot.FinishEpisode(TimeoutReward(enemyHealth, myHealth), false);
+            float timeoutFactor = rewardEditor != null ? rewardEditor.timeoutRF : DefaultTimeoutFactor;
+            FinishEpisode(TimeoutReward(myHealth, enemyHealth, timeoutFactor), false);
+            if (enemyRobot != null) enemyRobot.FinishEpisode(TimeoutReward(enemyHealth, myHealth, timeoutFactor), false);
         }
 
         /// origin position ***AAA***
@@ -429,19 +457,19 @@ public class RobotAgent : Agent {
             // They are no longer rounded to 2 decimals, which used to turn the small ones into 0.
             float dt = Time.deltaTime;
 
-            movementRwd = ShapingReward(GetRewards_Movement(), 0.5f, dt, rewardEditor.movementRF);
+            movementRwd = ShapingReward(GetRewards_Movement(), MovementGain, dt, rewardEditor.movementRF);
             AddReward(movementRwd);
 
-            robotFacingRwd = ShapingReward(GetRewards_FacingRobot(), 0.5f, dt, rewardEditor.facingRF);
+            robotFacingRwd = ShapingReward(GetRewards_FacingRobot(), FacingGain, dt, rewardEditor.facingRF);
             AddReward(robotFacingRwd);
 
-            armReleaseRwd = ShapingReward(GetRewards_ArmRelease(), 10f, dt, rewardEditor.armAngleRF);
+            armReleaseRwd = ShapingReward(GetRewards_ArmRelease(), ArmReleaseGain, dt, rewardEditor.armAngleRF);
             AddReward(armReleaseRwd);
 
-            enemyDistanceRwd = ShapingReward(GetRewards_EnemyDistance(), 1f, dt, rewardEditor.enemyDistanceRF);
+            enemyDistanceRwd = ShapingReward(GetRewards_EnemyDistance(), EnemyDistanceGain, dt, rewardEditor.enemyDistanceRF);
             AddReward(enemyDistanceRwd);
 
-            arenaPositionRwd = ShapingReward(GetRewards_ArenaPosition(), 1f, dt, rewardEditor.arenaPositionRF);
+            arenaPositionRwd = ShapingReward(GetRewards_ArenaPosition(), ArenaPositionGain, dt, rewardEditor.arenaPositionRF);
             AddReward(arenaPositionRwd);
 
             // This step's reward only (it used to add the running total again on every step).
