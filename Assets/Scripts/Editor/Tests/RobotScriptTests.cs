@@ -511,5 +511,68 @@ namespace AIJam.RobotScripts.Tests {
                 Assert.AreEqual(Vector3.zero, rb.angularVelocity, rb.name + " angular");
             }
         }
+
+        // ---- DemoDriver: scripted driver for recording demonstrations ----
+
+        [Test]
+        public void DemoDriver_EnemyStraightAhead_DrivesBothTracksForward() {
+            DemoDriver.Steer(new Vector3(0f, 0f, 3f), out float left, out float right);
+            Assert.AreEqual(1f, left, 1e-4f);
+            Assert.AreEqual(1f, right, 1e-4f);
+        }
+
+        [Test]
+        public void DemoDriver_EnemyToTheRight_TurnsRight() {
+            DemoDriver.Steer(new Vector3(2f, 0f, 2f), out float left, out float right);
+            Assert.Greater(left, right, "the left track must push harder to turn right");
+            Assert.Greater(left, 0f);
+        }
+
+        [Test]
+        public void DemoDriver_EnemyToTheLeft_TurnsLeft() {
+            DemoDriver.Steer(new Vector3(-2f, 0f, 2f), out float left, out float right);
+            Assert.Greater(right, left);
+            Assert.Greater(right, 0f);
+        }
+
+        [Test]
+        public void DemoDriver_EnemyBehind_TurnsOnTheSpot() {
+            DemoDriver.Steer(new Vector3(0.5f, 0f, -3f), out float left, out float right);
+            Assert.Greater(left, 0f);
+            Assert.Less(right, 0f);
+        }
+
+        [Test]
+        public void DemoDriver_AlwaysGivesFullCommands_LikeAKeyboard() {
+            // A model action changes the motor torque step by step, so only a held full command has a clear meaning.
+            // Small or zero actions would teach the imitating robot to do nothing.
+            for (int deg = -180; deg <= 180; deg += 5) {
+                var enemy = Quaternion.Euler(0f, deg, 0f) * Vector3.forward * 2f;
+                DemoDriver.Steer(enemy, out float left, out float right);
+                Assert.AreEqual(1f, Mathf.Abs(left), 1e-4f, "left track at " + deg + " degrees");
+                Assert.AreEqual(1f, Mathf.Abs(right), 1e-4f, "right track at " + deg + " degrees");
+            }
+        }
+
+        [Test]
+        public void DemoDriver_EnemySlightlyOffCentre_StillDrivesStraight() {
+            DemoDriver.Steer(Quaternion.Euler(0f, 5f, 0f) * Vector3.forward * 2f, out float left, out float right);
+            Assert.AreEqual(1f, left, 1e-4f);
+            Assert.AreEqual(1f, right, 1e-4f);
+        }
+
+        [Test]
+        public void DemoDriver_PushingAgainstTheEnemyWithoutMoving_IsStalled() {
+            Assert.IsTrue(DemoDriver.Stalled(0.5f, 0.1f), "touching and standing");
+            Assert.IsFalse(DemoDriver.Stalled(0.5f, 1.5f), "touching but still moving: the ram is in progress");
+            Assert.IsFalse(DemoDriver.Stalled(3f, 0f), "far away: just starting to drive");
+        }
+
+        [Test]
+        public void DemoDriver_ArmAction_LiftsOnlyWhenTheEnemyIsCloseInFront() {
+            Assert.AreEqual(1, DemoDriver.ArmAction(new Vector3(0.1f, 0f, 0.8f)));
+            Assert.AreEqual(0, DemoDriver.ArmAction(new Vector3(0f, 0f, 3f)), "too far");
+            Assert.AreEqual(0, DemoDriver.ArmAction(new Vector3(0f, 0f, -0.8f)), "behind");
+        }
     }
 }

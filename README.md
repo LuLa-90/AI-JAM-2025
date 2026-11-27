@@ -315,22 +315,26 @@ Pri imitačnom učení robot najprv napodobňuje nahraté ručné riadenie a až
 
 **Hotové ukážky** sú v `Assets/Demonstrations`:
 
-| Súbor | Obsah |
-|---|---|
-| `RobotApproachFin.demo`, `RobotApproach.demo`, `RobotApproach_0.demo` | priblíženie k súperovi |
-| `TrainingMoves/` (6 súborov) | otočenie k súperovi z rôznych strán |
+| Súbor | Obsah | Pre robota |
+|---|---|---|
+| `RamEnemy/` (5 súborov, spolu asi 5 600 krokov) | celý súboj: otočenie k súperovi, náraz, cúvnutie a nový náraz, zdvihnutie ramena pri súperovi | kamera 32 × 32, **Space Size 10** (tohtoročný štandard) |
+| `RobotApproachFin.demo`, `RobotApproach.demo`, `RobotApproach_0.demo` | priblíženie k súperovi | Space Size 7 (minulý ročník) |
+| `TrainingMoves/` (6 súborov) | otočenie k súperovi z rôznych strán | Space Size 7 (minulý ročník) |
 
-> **Hotové ukážky nesedia na tohtoročné roboty.** Boli nahraté s **Vector Observation → Space Size = 7** (3 pevné hodnoty a 4 senzory), ako mali roboty minulý rok. Tento rok je predpísaná hodnota **10** ([pravidlo 6.2.6](#626-senzory)), preto tréner s hotovou ukážkou skončí chybou „shape … do not match“. Berte ich ako príklad a pre svojho robota si nahrajte vlastnú ukážku podľa postupu nižšie.
+Ukážky `RamEnemy` nenahral človek, ale skriptový vodič `DemoDriver` na referenčnom robote proti jeho modelu. Jazdí ako človek na klávesnici, teda vždy plným príkazom dopredu, dozadu alebo do otáčky.
+
+> **Ukážka sedí iba na robota s rovnakými pozorovaniami.** Tohtoročné roboty majú **Vector Observation → Space Size = 10** ([pravidlo 6.2.6](#626-senzory)) a kameru 32 × 32, preto na ne sedí `RamEnemy`. Ukážky z minulého ročníka majú Space Size 7 a tréner s nimi skončí chybou „shape … do not match“; nechávame ich iba ako príklad.
 
 **Tréning s ukážkou.** Postup je rovnaký ako v [3.2](#32-spustenie-trénera), iba použijete inú konfiguráciu:
 
 ```
-mlagents-learn Assets/demokonfig.yaml --run-id=<run_id>
+mlagents-learn Assets/demokonfig_ramenemy.yaml --run-id=<run_id>
 ```
 
 | Konfigurácia | Čo robí |
 |---|---|
-| `Assets/demokonfig.yaml` | PPO s ukážkou `RobotApproachFin.demo`; napodobňovanie pôsobí prvých 50 000 krokov |
+| `Assets/demokonfig_ramenemy.yaml` | **pre tohtoročné roboty:** rovnaké nastavenie ako `konfig.yaml` a navyše ukážky `RamEnemy`; napodobňovanie pôsobí prvých 100 000 krokov a postupne slabne |
+| `Assets/demokonfig.yaml` | PPO s ukážkou `RobotApproachFin.demo` (Space Size 7); napodobňovanie pôsobí prvých 50 000 krokov |
 | `Assets/demokonfig_trainingmoves.yaml` | to isté s ukážkami z `TrainingMoves`, krátky tréning (asi 53 000 krokov) |
 | `Assets/demokonfig_nodemo.yaml` | rovnako krátky tréning bez ukážky, na porovnanie |
 | `Assets/robot_bc.yaml`, `Assets/robot_bc_only.yaml` | staršie varianty s väčšou dávkou; `robot_bc_only.yaml` nemá odmeny, iba napodobňuje |
@@ -348,8 +352,10 @@ Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to by�
    | Ľavý pás dopredu / dozadu | Q / A | ľavá páčka |
    | Pravý pás dopredu / dozadu | P / L | pravá páčka |
    | Rameno | medzerník | horné tlačidlá (LB, RB) |
-5. Zastavte Play. Súbor `.demo` sa uloží do zvoleného priečinka. Nahrávajte iba jazdu, ktorú má robot napodobniť; chyby sa naučí tiež.
+5. Zastavte Play. Súbor `.demo` sa uloží do zvoleného priečinka. Ak editor počas nahrávania zastaví Play s chybou „infinite import loop“, nahrávajte do priečinka mimo `Assets` (napríklad `DemoOut`) a súbory potom presuňte do `Assets/Demonstrations`. Nahrávajte iba jazdu, ktorú má robot napodobniť; chyby sa naučí tiež.
 6. Pred tréningom vypnite **Record**, vráťte **Behavior Type** na **Default** a **Num Of Arenas** na pôvodnú hodnotu.
+
+**Nahratie bez klávesnice (DemoDriver).** Ak k Demonstration Recorderu pridáte na robota aj komponent **Demo Driver**, robot v režime Heuristic Only jazdí sám: otočí sa k súperovi, narazí, cúvne a narazí znova. Takto vznikli ukážky `RamEnemy`. Hodí sa to, keď chcete ukážky presne pre svoje senzory a nechcete jazdiť ručne. Pri piatich arénach získate za dve minúty asi 5 600 krokov. Pred odovzdaním robota oba komponenty odstráňte; validácia na `DemoDriver` upozorní ako na vlastný skript.
 
 **Pokračovanie z hotového modelu (učiteľ a žiak).** Nový robot môže začať s váhami hotového modelu namiesto náhodných. Skript `Assets/train_student.ps1` skopíruje váhy modelu Santabumpers (`Assets/DatabaseOfRobots/DJeMenTi`) do súboru `Student_Initialized.pt` a spustí tréning s konfiguráciou `Assets/robot_teacher_student.yaml`. Spustite ho v prostredí `aijam` z priečinka projektu:
 

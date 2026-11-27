@@ -521,10 +521,18 @@ public class RobotAgent : Agent {
     // ------------------------------- HEURISTIC -------------------------------
 
     public override void Heuristic(in ActionBuffers actionsOut) {
-        isHeuristic = true;
+        // A DemoDriver replaces the keyboard and gives the same kind of actions as a model,
+        // so they are applied like model actions (isHeuristic stays false).
+        var demoDriver = GetComponent<DemoDriver>();
+        isHeuristic = demoDriver == null;
         MaxStep = 0; // Disable max step limit for heuristic mode
 
         if (!isStarted) {
+            return;
+        }
+
+        if (demoDriver != null) {
+            demoDriver.WriteActions(this, actionsOut);
             return;
         }
 
