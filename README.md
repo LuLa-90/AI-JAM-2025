@@ -38,7 +38,7 @@ Používajte presne tieto verzie. Projekt aj natrénované modely od nich závis
 | PyTorch | **2.2.2** (verzia pre CUDA 12.1 na grafiky NVIDIA) |
 
 ### 1.1 Git
-Nainštalujte [Git for Windows](https://git-scm.com/download/win). Jeho súčasťou je **Git LFS**, ktorý projekt potrebuje na jeden veľký súbor; pri inštalácii ho nechajte zaškrtnutý.
+Nainštalujte [Git for Windows](https://git-scm.com/download/win).
 
 ### 1.2 Unity
 1. Nainštalujte [Unity Hub](https://unity.com/download).
@@ -99,9 +99,9 @@ Ak `mlagents-learn` zlyhá s chybou `No module named 'pkg_resources'`, spustite 
 git clone https://github.com/LuLa-90/AI-JAM-2025.git
 ```
 
-   Repozitár má asi 1,5 GB, lebo obsahuje roboty a arény z minulého ročníka. Ak klonovanie skončí chybou `smudge filter lfs failed`, ide o kontrolu HTTPS antivírusom (pozri poznámku o SSL v časti 1.3). V priečinku projektu potom spustite `git -c http.sslBackend=schannel lfs pull` a `git -c http.sslBackend=schannel checkout -f HEAD`.
+   Klonovanie stiahne asi 1,5 GB, lebo história repozitára obsahuje veľké súbory z minulého ročníka. Ak históriu nepotrebujete, pridajte `--depth 1`: stiahne sa iba aktuálny stav, ktorý je mnohonásobne menší.
 
-2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá 10 až 20 minút.
+2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá niekoľko minút.
 3. **Importujte zdroje TextMesh Pro** (raz pre každý klon, priečinok nie je v Gite): **Window → TextMeshPro → Import TMP Essential Resources**. Bez nich skripty HUD hádžu chyby, Play mode sa pozastaví a tréning vyprší.
 4. *(Voliteľné)* Načítajte rozloženie okien projektu: **Window → Layouts → Load Layout from File…** a vyberte `aijam_layout.wlt` v priečinku projektu.
 5. Skontrolujte balíky: vo **Window → Package Manager** by mal mať *ML Agents* verziu **4.1.0**. V konzole (Console) by nemali byť červené chyby.
@@ -117,7 +117,7 @@ git clone https://github.com/LuLa-90/AI-JAM-2025.git
 | `Assets/Prefabs/Base Shapes` | Diely na stavbu (telá, ramená, kolesá, nárazníky, senzory) |
 | `Assets/Prefabs/Robot Agent Template.prefab` | Robot, z ktorého začínate |
 | `Assets/konfig.yaml` | Nastavenia trénera (hyperparametre PPO) |
-| `Assets/DatabaseOfRobots` | Roboty, arény a modely tímov z minulého ročníka: súperi na tréning ([3.4](#34-imitačné-učenie-a-roboty-z-minulého-ročníka-voliteľné)) |
+| `Assets/DatabaseOfRobots` | Roboty tímov z minulého ročníka s ich modelmi: súperi na tréning ([3.4](#34-imitačné-učenie-a-roboty-z-minulého-ročníka-voliteľné)) |
 | `Assets/Demonstrations` | Nahraté ukážky jazdy pre imitačné učenie (3.4) |
 | `Assets/Training Results` | Modely zo skúšobných tréningov počas vývoja projektu a robot `Firehawk` |
 | `Assets/Validation/Robots/ReferenceBot.prefab` | Robot, ktorý spĺňa všetky pravidlá. Použite ho ako vzor. |
@@ -370,7 +370,7 @@ powershell -ExecutionPolicy Bypass -File Assets\train_student.ps1
 
 Funguje to iba vtedy, keď má žiak rovnaké pozorovania a akcie ako učiteľ a Behavior Name `RobotAgent`. Santabumpers má Space Size 7, takže tohtoročnému robotovi (Space Size 10) učiteľom byť nemôže. Ako učiteľa použite model natrénovaný tento rok: zmeňte cestu `teacher_path` v `initialize_student.py`. Prenáša sa iba rozhodovacia sieť; varovania trénera „Failed to load for module Optimizer“ sú preto v poriadku.
 
-**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani. Prefaby v koreni priečinkov tímov (GREGORI, Santabumpers, Rumba2, Job_B 1, Kodzilla pokus, Panzeres) sa v TrainingScene načítajú a bojujú bez chýb. Majú Space Size 7, takže validáciou neprejdú; ako súperom pri tréningu to nevadí.
+**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota a jeho modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani. Prefaby v koreni priečinkov tímov (GREGORI, Santabumpers, Rumba2, Job_B 1, Kodzilla pokus, Panzeres) sa v TrainingScene načítajú a bojujú bez chýb. Majú Space Size 7, takže validáciou neprejdú; ako súperom pri tréningu to nevadí.
 
 ---
 
@@ -672,6 +672,5 @@ Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v 
 | Súper sa počas tréningu správa čudne | Nastavte mu Behavior Type na **Inference Only** (časť 3.1). |
 | Chcete, aby model robota prestal konať | Odstráňte komponent `DecisionRequester`. Vypnutie nestačí: ML-Agents aj tak žiada rozhodnutia. |
 | Chyby certifikátov v pip, conda alebo git | Pozrite poznámku o SSL v časti 1.3. |
-| Klonovanie skončí chybou `smudge filter lfs failed` | Spustite `git -c http.sslBackend=schannel lfs pull` (časť 1.5, krok 1). |
 | Tréner skončí chybou „shape … do not match“ | Ukážka alebo model učiteľa má iný počet pozorovaní než váš robot (časť 3.4). |
 | Validácia hlási „Vector observation size is …, must be 10“ | V BehaviorParameters nastavte **Vector Observation → Space Size** na 10 ([pravidlo 6.2.6](#626-senzory)) a robota natrénujte znova. |

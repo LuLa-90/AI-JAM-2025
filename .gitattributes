@@ -47,4 +47,3 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
-/Assets/DatabaseOfRobots/XXX/Arena/Models[[:space:]]Enviro/pine_sapling_medium_1k.fbx/pine_sapling_medium_1k.fbx filter=lfs diff=lfs merge=lfs -text
