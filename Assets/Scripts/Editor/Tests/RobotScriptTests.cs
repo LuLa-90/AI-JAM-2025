@@ -512,6 +512,56 @@ namespace AIJam.RobotScripts.Tests {
             }
         }
 
+        // ---- AIJamManager: team arena in the training scene ----
+
+        private const string ArenaPath = "Assets/Turnaj/Prefabs/NeutralArena.prefab";
+
+        /// <summary>A training environment like in TrainingScene: the built-in neutral arena is the child "Arena".</summary>
+        private GameObject Environment(out GameObject neutralArena) {
+            var env = new GameObject("Environment test");
+            spawned.Add(env);
+            env.transform.position = new Vector3(7f, 0f, 0f);
+            neutralArena = new GameObject("Arena");
+            neutralArena.transform.SetParent(env.transform, false);
+            return env;
+        }
+
+        [Test]
+        public void TeamArena_WhenLinked_ReplacesTheNeutralArena() {
+            var env = Environment(out var neutral);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ArenaPath);
+
+            var arena = AIJamManager.UseTeamArena(env, prefab);
+
+            Assert.IsNotNull(arena, "team arena instance");
+            Assert.IsFalse(neutral.activeSelf, "the neutral arena must be switched off");
+            Assert.AreEqual(env.transform, arena.transform.parent);
+            Assert.AreEqual(Vector3.zero, arena.transform.localPosition, "in the centre of the environment");
+            Assert.AreEqual(prefab.name, arena.name);
+            Assert.IsTrue(arena.activeSelf);
+        }
+
+        [Test]
+        public void TeamArena_WhenNotLinked_KeepsTheNeutralArena() {
+            var env = Environment(out var neutral);
+
+            var arena = AIJamManager.UseTeamArena(env, null);
+
+            Assert.IsNull(arena);
+            Assert.IsTrue(neutral.activeSelf);
+            Assert.AreEqual(1, env.transform.childCount);
+        }
+
+        [Test]
+        public void TeamArena_KeepsTheRotationOfThePrefab() {
+            var env = Environment(out _);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ArenaPath);
+
+            var arena = AIJamManager.UseTeamArena(env, prefab);
+
+            Assert.AreEqual(prefab.transform.rotation.eulerAngles, arena.transform.localRotation.eulerAngles);
+        }
+
         // ---- DemoDriver: scripted driver for recording demonstrations ----
 
         [Test]

@@ -13,6 +13,9 @@ public class AIJamManager : MonoBehaviour
     [SerializeField] RobotAgent robotPrefabA;
     [SerializeField] RobotAgent robotPrefabB;
 
+    [Tooltip("Optional: the team's home arena prefab. When set, training runs in this arena; when empty, in the neutral arena of the scene.")]
+    [SerializeField] GameObject teamArenaPrefab;
+
 
     // Počet arén pre tréning. Je potrebné otestovať výkon pri rôznych počtoch.
     private enum numArenas {
@@ -37,6 +40,9 @@ public class AIJamManager : MonoBehaviour
         }
 
         foreach (var env in environments.OrderBy(e => e.name).Take((int)numOfArenas)) {
+            // The arena must be in place before the robots, so that its traps and bonuses find them.
+            UseTeamArena(env, teamArenaPrefab);
+
             var robotA = Instantiate(robotPrefabA, env.transform);
             var robotB = Instantiate(robotPrefabB, env.transform);
             // Agent camera sees only the RobotView layer (old prefabs also saw Default - a bug).
@@ -55,6 +61,26 @@ public class AIJamManager : MonoBehaviour
             scoreGUI.SetRobots(robotA, robotB);
 
         }
+    }
+
+    /// <summary>Name of the built-in neutral arena inside every training environment.</summary>
+    public const string NeutralArenaName = "Arena";
+
+    /// <summary>
+    /// Puts the team's arena into a training environment in place of the built-in neutral one.
+    /// Without a prefab nothing changes and the neutral arena stays. Returns the new arena or null.
+    /// </summary>
+    public static GameObject UseTeamArena(GameObject environment, GameObject arenaPrefab) {
+        if (environment == null || arenaPrefab == null) return null;
+
+        var neutral = environment.transform.Find(NeutralArenaName);
+        if (neutral != null) neutral.gameObject.SetActive(false);
+
+        var arena = Instantiate(arenaPrefab, environment.transform);
+        arena.name = arenaPrefab.name;
+        arena.transform.localPosition = Vector3.zero;
+        arena.transform.localRotation = arenaPrefab.transform.rotation;
+        return arena;
     }
 
     private void MoveRobot(RobotAgent robot, int robotIdx) {

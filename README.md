@@ -230,9 +230,10 @@ Príklady sú v `Assets/Turnaj/Teams`.
 1. Otvorte **TrainingScene** a vyberte **AIJamManager**:
    - **Robot Prefab A:** váš robot. Tento sa učí.
    - **Robot Prefab B:** jeho súper. Môže to byť znova váš robot (obe kópie sa učia tú istú politiku) alebo niektorý robot z minulého ročníka z `Assets/Training Results`.
+   - **Team Arena Prefab** *(voliteľné)*: prefab vašej domácej arény ([2.2](#22-domáca-aréna)). Keď ho priradíte, tréning beží vo vašej aréne s jej pascami a bonusmi; keď pole necháte prázdne, použije sa neutrálna aréna scény. Roboty pri tréningu štartujú na náhodných miestach okolo stredu, značky Home a Guest sa nepoužívajú.
    - **Num Of Arenas:** One, Three alebo Five. Viac arén zbiera skúsenosti rýchlejšie, ale potrebuje výkonnejší počítač.
 
-   <img src="img/inspector_aijammanager.png" width="480" alt="Inspector AIJamManager: Robot Prefab A, Robot Prefab B a Num Of Arenas">
+   <img src="img/inspector_aijammanager.png" width="480" alt="Inspector AIJamManager: Robot Prefab A, Robot Prefab B, Team Arena Prefab a Num Of Arenas">
 
    > **Pevný súper musí mať Inference Only.** Ak trénujete proti hotovému robotovi, otvorte jeho prefab a nastavte **BehaviorParameters → Behavior Type = Inference Only** s priradeným modelom. Inak ho tréner prevezme tiež (má rovnaký Behavior Name) a prestane hrať podľa svojho modelu.
 
