@@ -16,7 +16,7 @@ Priebeh podujatia:
 |---|---|
 | [1. Inštalácia](#1-inštalácia) | Nástroje, kontrola inštalácie, otvorenie projektu |
 | [2. Stavba](#2-stavba) | Robot, domáca aréna, tímový asset, prehľad dielov |
-| [3. Tréning](#3-tréning) | Trénovacia scéna, spustenie trénera, použitie modelu |
+| [3. Tréning](#3-tréning) | Trénovacia scéna, spustenie trénera, použitie modelu, imitačné učenie |
 | [4. Validácia](#4-validácia) | Kontrola pravidiel a testovací zápas |
 | [5. Turnaj](#5-turnaj) | Turnajová scéna a ovládanie |
 | [6. Pravidlá](#6-pravidlá) | Pravidlá tímu, robota, arény a zápasu, poškodenie a HP |
@@ -309,6 +309,56 @@ Príklad zo skúšobného tréningu referenčného robota (1 500 000 krokov, 3 h
 
    *Behavior Name musí byť `RobotAgent`, Model je váš `.onnx` a Behavior Type je Default pri tréningu alebo Inference Only pri teste.*
 4. Otestujte ho: v TrainingScene nastavte robotovi **Behavior Type** na **Inference Only** a stlačte Play *bez* spusteného trénera. Ak chcete trénovať ďalej, vráťte ho na **Default**.
+
+### 3.4 Imitačné učenie a roboty z minulého ročníka (voliteľné)
+Pri imitačnom učení robot najprv napodobňuje nahraté ručné riadenie a až potom sa zlepšuje podľa odmien. Pomáha to na začiatku tréningu, keď sa robot ešte nevie ani priblížiť k súperovi.
+
+**Hotové ukážky** sú v `Assets/Demonstrations`:
+
+| Súbor | Obsah |
+|---|---|
+| `RobotApproachFin.demo`, `RobotApproach.demo`, `RobotApproach_0.demo` | priblíženie k súperovi |
+| `TrainingMoves/` (6 súborov) | otočenie k súperovi z rôznych strán |
+
+> **Ukážka sedí iba na robota s rovnakými senzormi.** Hotové ukážky boli nahraté s kamerou 32 × 32 a 7 číselnými pozorovaniami. Ak má váš robot iné senzory, tréner ukážku odmietne a musíte si nahrať vlastnú.
+
+**Tréning s ukážkou.** Postup je rovnaký ako v [3.2](#32-spustenie-trénera), iba použijete inú konfiguráciu:
+
+```
+mlagents-learn Assets/demokonfig.yaml --run-id=<run_id>
+```
+
+| Konfigurácia | Čo robí |
+|---|---|
+| `Assets/demokonfig.yaml` | PPO s ukážkou `RobotApproachFin.demo`; napodobňovanie pôsobí prvých 50 000 krokov |
+| `Assets/demokonfig_trainingmoves.yaml` | to isté s ukážkami z `TrainingMoves`, krátky tréning (asi 53 000 krokov) |
+| `Assets/demokonfig_nodemo.yaml` | rovnako krátky tréning bez ukážky, na porovnanie |
+| `Assets/robot_bc.yaml`, `Assets/robot_bc_only.yaml` | staršie varianty s väčšou dávkou; `robot_bc_only.yaml` nemá odmeny, iba napodobňuje |
+
+Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to byť jeden súbor `.demo` alebo priečinok s viacerými.
+
+**Nahratie vlastnej ukážky**
+1. Otvorte prefab svojho robota a pridajte komponent **Demonstration Recorder**. Zapnite **Record**, vyplňte **Demonstration Name** a do **Demonstration Directory** napíšte `Assets/Demonstrations`.
+2. V **BehaviorParameters** nastavte **Behavior Type** na **Heuristic Only**, aby ste robota riadili vy.
+3. Stlačte Play bez spusteného trénera a jazdite:
+
+   | Ovládanie | Klávesnica | Gamepad |
+   |---|---|---|
+   | Ľavý pás dopredu / dozadu | Q / A | ľavá páčka |
+   | Pravý pás dopredu / dozadu | P / L | pravá páčka |
+   | Rameno | medzerník | horné tlačidlá (LB, RB) |
+4. Zastavte Play. Súbor `.demo` sa uloží do zvoleného priečinka. Nahrávajte iba jazdu, ktorú má robot napodobniť; chyby sa naučí tiež.
+5. Pred tréningom vypnite **Record** a vráťte **Behavior Type** na **Default**.
+
+**Pokračovanie z hotového modelu (učiteľ a žiak).** Nový robot môže začať s váhami hotového modelu namiesto náhodných. Skript `Assets/train_student.ps1` skopíruje váhy modelu Santabumpers (`Assets/DatabaseOfRobots/DJeMenTi`) do súboru `Student_Initialized.pt` a spustí tréning s konfiguráciou `Assets/robot_teacher_student.yaml`. Spustite ho v prostredí `aijam` z priečinka projektu:
+
+```
+powershell -ExecutionPolicy Bypass -File Assets\train_student.ps1
+```
+
+Funguje to iba vtedy, keď má váš robot rovnaké senzory a akcie ako učiteľ.
+
+**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani.
 
 ---
 
