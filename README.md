@@ -96,10 +96,10 @@ Ak `mlagents-learn` zlyhá s chybou `No module named 'pkg_resources'`, spustite 
 1. Naklonujte repozitár:
 
 ```
-git clone https://github.com/LuLa-90/AI-JAM-2025.git
+git clone --depth 1 https://github.com/LuLa-90/AI-JAM-2025.git
 ```
 
-   Klonovanie stiahne asi 1,5 GB, lebo história repozitára obsahuje veľké súbory z minulého ročníka. Ak históriu nepotrebujete, pridajte `--depth 1`: stiahne sa iba aktuálny stav, ktorý je mnohonásobne menší.
+   Prepínač `--depth 1` stiahne iba aktuálny stav projektu (asi 100 MB). Bez neho by sa stiahla celá história repozitára, asi 1,5 GB. Novšie zmeny si neskôr stiahnete bežným `git pull`.
 
 2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá niekoľko minút.
 3. **Importujte zdroje TextMesh Pro** (raz pre každý klon, priečinok nie je v Gite): **Window → TextMeshPro → Import TMP Essential Resources**. Bez nich skripty HUD hádžu chyby, Play mode sa pozastaví a tréning vyprší.
