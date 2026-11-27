@@ -141,6 +141,12 @@ namespace AIJam.Validation {
             return Quaternion.LookRotation(fwd.normalized, up.normalized);
         }
 
+        /// <summary>Directions of t's local x, y and z axes in root space (unit length; a mirrored axis points the other way).</summary>
+        public static Vector3[] AxesIn(Transform t, Transform root) {
+            var m = root.worldToLocalMatrix * t.localToWorldMatrix;
+            return new[] { ((Vector3)m.GetColumn(0)).normalized, ((Vector3)m.GetColumn(1)).normalized, ((Vector3)m.GetColumn(2)).normalized };
+        }
+
         public static Vector3 WorldScale(Transform t) {
             var m = t.localToWorldMatrix;
             return new Vector3(((Vector3)m.GetColumn(0)).magnitude, ((Vector3)m.GetColumn(1)).magnitude, ((Vector3)m.GetColumn(2)).magnitude);

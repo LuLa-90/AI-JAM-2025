@@ -16,6 +16,9 @@ MonoBehaviour:
   - Name: Body
     Min: 1
     Max: 1
+    ScaleTolerancePercent: 25
+    Move: 1
+    MovePercentOfSize: 0
     Parts:
     - Prefab: {fileID: 5807489794714987295, guid: 5e113f3325aa9644982407c5bc499c88, type: 3}
       MaxUses: 1
@@ -26,6 +29,9 @@ MonoBehaviour:
   - Name: Arm
     Min: 1
     Max: 1
+    ScaleTolerancePercent: 25
+    Move: 0
+    MovePercentOfSize: 0
     Parts:
     - Prefab: {fileID: 3893920837816801082, guid: c4ba7d4b0a6888f46b2794a93886592e, type: 3}
       MaxUses: 1
@@ -34,6 +40,9 @@ MonoBehaviour:
   - Name: Wheel sets
     Min: 2
     Max: 2
+    ScaleTolerancePercent: 10
+    Move: 1
+    MovePercentOfSize: 0
     Parts:
     - Prefab: {fileID: 4287508156747798399, guid: 43003ec47f5847540b4943bd78da1073, type: 3}
       MaxUses: 2
@@ -43,19 +52,22 @@ MonoBehaviour:
       MaxUses: 2
   - Name: Bumpers
     Min: 0
-    Max: 2
+    Max: 3
+    ScaleTolerancePercent: 25
+    Move: 2
+    MovePercentOfSize: 25
     Parts:
     - Prefab: {fileID: 6712562983231509806, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
-      MaxUses: 2
+      MaxUses: 3
     - Prefab: {fileID: 7061015942067492306, guid: bfafbe056526a4f47a6066016cc4387b, type: 3}
-      MaxUses: 2
+      MaxUses: 3
   SensorPrefabs:
   - {fileID: 8708950312143412897, guid: 8c563d42195b1654e9499b8fac2d14f8, type: 3}
   - {fileID: 8708950312143412897, guid: c1ec550ae4fd83540844fb2f13621c68, type: 3}
   RobotTemplate: {fileID: 6428795192209815909, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
   BehaviorName: RobotAgent
   VectorObservationSize: 10
-  ScaleTolerancePercent: 25
+  BatteryMoveMetres: 0.05
   PhysicsTolerance: 0.0001
   MinAttachmentPenetration: 0.0001
   MaxWheelBodyPenetration: 0.02

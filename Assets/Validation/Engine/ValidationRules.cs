@@ -15,11 +15,23 @@ namespace AIJam.Validation {
             public int MaxUses = 1;
         }
 
+        /// <summary>How far a part's collider may be from where the part prefab puts it (the prefabs are made to sit at the body's origin).</summary>
+        public enum MoveLimit {
+            [Tooltip("Anywhere, limited only by the attachment and overlap rules.")] Free,
+            [Tooltip("Stays where the prefab puts it; no moving, no rotating.")] Fixed,
+            [Tooltip("May shift by a share of its own size along each of its axes; any rotation and mirroring.")] PercentOfSize,
+        }
+
         [System.Serializable]
         public class PartGroup {
             public string Name;
             public int Min;
             public int Max;
+            [Tooltip("Max change of each collider axis vs. the part prefab, in percent.")]
+            public float ScaleTolerancePercent = 25f;
+            public MoveLimit Move = MoveLimit.Free;
+            [Tooltip("For Move = Percent Of Size: allowed shift along each collider axis, in percent of the collider's prefab size.")]
+            public float MovePercentOfSize = 0f;
             public List<PartEntry> Parts = new List<PartEntry>();
         }
 
@@ -37,8 +49,8 @@ namespace AIJam.Validation {
         public int VectorObservationSize = 0;
 
         [Header("Robot limits")]
-        [Tooltip("Max change of each collider axis vs. the part prefab, in percent (not decided yet).")]
-        public float ScaleTolerancePercent = 10f;
+        [Tooltip("The battery (inside the body part) keeps its size and rotation; it may shift this far along each axis, in metres.")]
+        public float BatteryMoveMetres = 0.05f;
         [Tooltip("Relative tolerance for locked physics values (mass, drag, springs...).")]
         public float PhysicsTolerance = 0.0001f;
 

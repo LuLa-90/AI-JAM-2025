@@ -103,12 +103,12 @@ namespace AIJam.Validation {
 
         // ---------------------------------------------------------------- 4–6. colliders
         private static void CheckColliders(Ctx c, List<PartInstance> parts) {
-            float tol = c.Rules.ScaleTolerancePercent / 100f;
             var marker = c.Root.Find("ButtMarker");
             var markerPrint = c.Catalog.ButtMarker;
 
             foreach (var p in parts.Where(p => p.Print != null))
-                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? 0.001f : tol, PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}", lockPose: p.Print.Fixed);
+                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? 0.001f : GroupOf(c, p).ScaleTolerancePercent / 100f, PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}", lockPose: p.Print.Fixed,
+                    group: p.Print.Fixed ? null : GroupOf(c, p));
 
             if (marker != null && markerPrint != null) {
                 var cols = marker.GetComponentsInChildren<Collider>(true).ToList();
@@ -127,13 +127,17 @@ namespace AIJam.Validation {
             }
         }
 
-        // Fixed colliders (sensors, ButtMarker) keep their pose inside the part. Part colliders may move and
-        // rotate freely (angle freedom); where they sit is limited by the attachment/overlap check.
+        private static readonly ValidationRules.PartGroup NoGroup = new ValidationRules.PartGroup { ScaleTolerancePercent = 0f };
+
+        private static ValidationRules.PartGroup GroupOf(Ctx c, PartInstance p) => c.Rules.Groups.FirstOrDefault(g => g.Name == p.Group) ?? NoGroup;
+
+        // Fixed colliders (sensors, ButtMarker) keep their pose inside the part. Where a part collider may sit
+        // on the robot is set by its group's move limit (CheckPlace) and by the attachment/overlap check.
         private const float FixedOffset = 0.002f, FixedAngle = 0.5f;
         // An agent-view copy must sit on its collider.
         private const float ViewOffset = 0.001f, ViewAngle = 0.5f;
 
-        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, float tol, List<Collider> cols, string partName, bool lockPose) {
+        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, float tol, List<Collider> cols, string partName, bool lockPose, ValidationRules.PartGroup group = null) {
             var prints = print.Colliders.Select(s => s.Clone()).ToList();
             foreach (var col in cols) {
                 var mesh = col is MeshCollider mc ? mc.sharedMesh : null;
@@ -151,10 +155,14 @@ namespace AIJam.Validation {
                     c.Err("Colliders", $"'{col.name}' was moved inside {partName}; this collider is fixed.", col.transform);
                 if (lockPose && Quaternion.Angle(have.LocalRot, fp.LocalRot) > FixedAngle)
                     c.Err("Colliders", $"'{col.name}' was rotated inside {partName}; this collider is fixed.", col.transform);
+                bool battery = group != null && fp.ZoneKeyword == "battery";
                 // size relative to the robot root (includes every parent's scale)
                 var size = PartCatalog.ScaleIn(col.transform, c.Root);
-                if (!Within(size, fp.Scale, tol))
+                if (battery && !Within(size, fp.Scale, 0.001f))
+                    c.Err("Size", $"'{col.name}' size {Pct(size, fp.Scale)} of {partName}; the battery must keep its size.", col.transform);
+                else if (!Within(size, fp.Scale, tol))
                     c.Err("Size", $"'{col.name}' size {Pct(size, fp.Scale)} of {partName}; allowed ±{tol * 100f:0.#} %.", col.transform);
+                if (group != null) CheckPlace(c, col, fp, group, battery, partName);
                 if (fp.HasZone) {
                     var zone = col.GetComponent<CollisionZoneBehaviour>();
                     if (zone == null || !zone.enabled) c.Err("Zones", $"'{col.name}' lost its damage zone (CollisionZoneBehaviour).", col.transform);
@@ -167,6 +175,53 @@ namespace AIJam.Validation {
             foreach (var fp in prints.Where(s => !s.Used && s.Enabled))
                 c.Err("Colliders", $"{partName} is missing its collider '{fp.Name}'.", partRoot);
         }
+
+        /// <summary>
+        /// Where a part collider sits on the robot, compared with where its prefab puts it. The part prefabs are
+        /// made to sit at the body's origin, so the collider's pose in robot space is compared with its pose in the prefab.
+        /// </summary>
+        private static void CheckPlace(Ctx c, Collider col, ShapePrint fp, ValidationRules.PartGroup group, bool battery, string partName) {
+            var pos = PartCatalog.RelPos(col.transform, c.Root);
+            var rot = PartCatalog.RelRot(col.transform, c.Root);
+            var axes = PartCatalog.AxesIn(col.transform, c.Root);
+            // mirroring is allowed (the right wheel set is a mirrored left one), so an axis may point either way
+            float turned = 0f;
+            for (int i = 0; i < 3; i++) {
+                float a = Vector3.Angle(axes[i], fp.LocalRot * Unit(i));
+                turned = Mathf.Max(turned, Mathf.Min(a, 180f - a));
+            }
+            if (battery) {
+                var d = pos - fp.LocalPos;
+                float max = c.Rules.BatteryMoveMetres + 1e-4f;
+                if (Mathf.Abs(d.x) > max || Mathf.Abs(d.y) > max || Mathf.Abs(d.z) > max)
+                    c.Err("Position", $"'{col.name}' is moved by {Cm(d)} from its place in {partName}; the battery may move ±{c.Rules.BatteryMoveMetres * 100f:0.#} cm on each axis.", col.transform);
+                if (turned > FixedAngle) c.Err("Position", $"'{col.name}' is rotated by {turned:0.#}°; the battery must keep its rotation.", col.transform);
+                return;
+            }
+            switch (group.Move) {
+                case ValidationRules.MoveLimit.Fixed:
+                    if (Vector3.Distance(pos, fp.LocalPos) > FixedOffset)
+                        c.Err("Position", $"'{col.name}' is moved by {Cm(pos - fp.LocalPos)} from its place in {partName}; {group.Name} must stay where the prefab puts it.", col.transform);
+                    if (turned > FixedAngle)
+                        c.Err("Position", $"'{col.name}' is rotated by {turned:0.#}°; {group.Name} must keep the prefab's rotation.", col.transform);
+                    break;
+                case ValidationRules.MoveLimit.PercentOfSize: {
+                    // the limit follows the part: the shift is measured along the collider's own axes, so a turned part keeps its limits
+                    var turn = rot * Quaternion.Inverse(fp.LocalRot);
+                    var off = pos - turn * fp.LocalPos;
+                    var d = new Vector3(Vector3.Dot(off, axes[0]), Vector3.Dot(off, axes[1]), Vector3.Dot(off, axes[2]));
+                    var size = Vector3.Scale(fp.Mesh != null ? fp.Mesh.bounds.size : Vector3.one, fp.Scale);
+                    var max = size * (group.MovePercentOfSize / 100f);
+                    if (Mathf.Abs(d.x) > max.x + 1e-4f || Mathf.Abs(d.y) > max.y + 1e-4f || Mathf.Abs(d.z) > max.z + 1e-4f)
+                        c.Err("Position", $"'{col.name}' is moved by {Cm(d)} along its own axes; allowed ±{Cm(max)} ({group.MovePercentOfSize:0.#} % of its size).", col.transform);
+                    break;
+                }
+            }
+        }
+
+        private static string Cm(Vector3 v) => $"({v.x * 100f:0.##}, {v.y * 100f:0.##}, {v.z * 100f:0.##}) cm";
+
+        private static Vector3 Unit(int axis) => axis == 0 ? Vector3.right : axis == 1 ? Vector3.up : Vector3.forward;
 
         // ---------------------------------------------------------------- 9. locked physics
         private static void CheckPhysics(Ctx c, List<PartInstance> parts) {

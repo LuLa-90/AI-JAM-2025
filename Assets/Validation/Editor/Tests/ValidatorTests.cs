@@ -67,12 +67,12 @@ namespace AIJam.Validation.Tests {
 
         [Test]
         public void Validator_ColliderScaledBeyondTolerance_Fails() {
-            AssertFails(Robot(r => Find(r, "bumper_shape").localScale *= 1f + rules.ScaleTolerancePercent / 100f + 0.05f), "Size");
+            AssertFails(Robot(r => Find(r, "bumper_shape").localScale *= 1f + Group("Bumpers").ScaleTolerancePercent / 100f + 0.05f), "Size");
         }
 
         [Test]
         public void Validator_ColliderScaledWithinTolerance_Passes() {
-            var f = Robot(r => Find(r, "bumper_shape").localScale *= 1f + rules.ScaleTolerancePercent / 200f);
+            var f = Robot(r => Find(r, "bumper_shape").localScale *= 1f + Group("Bumpers").ScaleTolerancePercent / 200f);
             Assert.IsFalse(f.Any(x => x.Rule == "Size"), string.Join("\n", f));
         }
 
@@ -206,6 +206,113 @@ namespace AIJam.Validation.Tests {
                 var extra = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Base Shapes/Body_Shape1.prefab"));
                 extra.transform.SetParent(Find(r, "Body_Shape2"), false);
             }), "Parts", "Body");
+        }
+
+        // ---------------------------------------------------------------- part limits (README 6.2.2, 6.2.3)
+        private ValidationRules.PartGroup Group(string name) => rules.Groups.First(g => g.Name == name);
+
+        private static bool Has(List<Finding> f, string rule) => f.Any(x => x.Severity == Severity.Error && x.Rule == rule);
+
+        /// <summary>Size of the collider along the robot's axes (the loaded robot stands at the origin, unrotated).</summary>
+        private static Vector3 SizeOnRobot(Transform collider) => collider.GetComponent<Collider>().bounds.size;
+
+        private static void AddBumpers(GameObject r, int count) {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Base Shapes/Bumper_Shape2.prefab");
+            for (int i = 0; i < count; i++) {
+                var b = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                b.transform.SetParent(Find(r, "Body_Shape2"), false);
+                b.transform.localRotation = Quaternion.Euler(0f, 90f * (i + 1), 0f);
+            }
+        }
+
+        [Test]
+        public void Validator_ThreeBumpers_AreAllowed() {
+            var f = Robot(r => AddBumpers(r, 2));
+            Assert.IsFalse(Has(f, "Parts") || Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_FourBumpers_Fails() {
+            AssertFails(Robot(r => AddBumpers(r, 3)), "Parts", "Bumpers");
+        }
+
+        [Test]
+        public void Validator_BumperMovedWithinAQuarterOfItsSize_Passes() {
+            var f = Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.2f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BumperMovedBeyondAQuarterOfItsSize_Fails() {
+            AssertFails(Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.3f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f)), "Position", "bumper_shape");
+        }
+
+        [Test]
+        public void Validator_BumperTurnedToTheRear_Passes() {
+            var f = Robot(r => Find(r, "Bumper_Shape1").localRotation = Quaternion.Euler(0f, 180f, 0f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BumperTurnedSideways_MoveLimitFollowsTheBumper() {
+            // the bumper is wider than deep: after a quarter turn its wide axis lies along the robot's z axis
+            var f = Robot(r => {
+                var b = Find(r, "Bumper_Shape1");
+                var size = SizeOnRobot(Find(r, "bumper_shape"));
+                Assert.Greater(0.2f * size.x, 0.25f * size.z, "test needs a bumper that is wider than deep");
+                b.localRotation = Quaternion.Euler(0f, 90f, 0f);
+                b.localPosition = new Vector3(0f, 0f, 0.2f * size.x);
+            });
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BatteryResized_Fails() {
+            AssertFails(Robot(r => Find(r, "battery_shape").localScale *= 1.05f), "Size", "battery_shape");
+        }
+
+        [Test]
+        public void Validator_BatteryMovedFourCentimetres_Passes() {
+            var f = Robot(r => Find(r, "battery_shape").localPosition += new Vector3(0f, 0f, 0.04f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BatteryMovedSixCentimetres_Fails() {
+            AssertFails(Robot(r => Find(r, "battery_shape").localPosition += new Vector3(0f, 0f, 0.06f)), "Position", "battery_shape");
+        }
+
+        [Test]
+        public void Validator_BodyMoved_Fails() {
+            AssertFails(Robot(r => Find(r, "Body_Shape2").localPosition += new Vector3(0.01f, 0f, 0f)), "Position", "body_shape");
+        }
+
+        [Test]
+        public void Validator_BodyResizedByAFifth_Passes() {
+            var f = Robot(r => Find(r, "body_shape").localScale *= 1.2f);
+            Assert.IsFalse(Has(f, "Size"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_WheelsResizedByFifteenPercent_Fails() {
+            AssertFails(Robot(r => Find(r, "wheels_shape").localScale *= 1.15f), "Size", "wheels_shape");
+        }
+
+        [Test]
+        public void Validator_WheelsResizedByEightPercent_Passes() {
+            var f = Robot(r => Find(r, "wheels_shape").localScale *= 1.08f);
+            Assert.IsFalse(Has(f, "Size"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_WheelsMoved_Fails() {
+            AssertFails(Robot(r => Find(r, "wheels_shape").localPosition += new Vector3(0f, 0f, 0.01f)), "Position", "wheels_shape");
+        }
+
+        [Test]
+        public void Validator_ArmMoved_HasNoPositionLimit() {
+            var f = Robot(r => Find(r, "Arm_Shape2").localPosition += new Vector3(0f, 0f, 0.05f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
         }
 
         [Test]

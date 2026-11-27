@@ -473,6 +473,7 @@ MonoBehaviour:
   rewardEditor: {fileID: 0}
   enemyRobot: {fileID: 0}
   weightedAverageHealth: 1
+  maxEpisodeSeconds: 90
   maxEnemyDistance: 4
   maxArenaRadius: 4
 --- !u!114 &530512758613575374
@@ -773,7 +774,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2546206376055835302, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.06020001
+      value: 0.059
       objectReference: {fileID: 0}
     - target: {fileID: 2546206376055835302, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
       propertyPath: m_LocalRotation.w

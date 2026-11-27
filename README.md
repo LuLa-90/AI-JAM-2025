@@ -144,7 +144,7 @@ Otvorte **ConstructionScene**. V objekte `Environment` nájdete šablónu `Robot
 Postup:
 1. **Začnite z `Robot Agent Template`** a ponechajte komponenty koreňa ([pravidlo 6.2.1](#621-koreň-robota)).
 2. V **BehaviorParameters** nastavte **Behavior Name** na `RobotAgent`. Musí sa zhodovať s `konfig.yaml`.
-3. **Pridajte diely** z `Assets/Prefabs/Base Shapes`: jedno telo, jedno rameno, dve sady kolies a najviac dva nárazníky ([pravidlo 6.2.2](#622-diely)).
+3. **Pridajte diely** z `Assets/Prefabs/Base Shapes`: jedno telo, jedno rameno, dve sady kolies a najviac tri nárazníky ([pravidlo 6.2.2](#622-diely)). Každý diel má povolenú inú zmenu veľkosti a iný posun; tabuľka je v pravidle 6.2.2, bod 4.
    - Telo dajte priamo pod koreň. Všetko ostatné, vrátane kontajnerov `Wheels Left` a `Wheels Right`, presuňte pod telo.
    - Diely umiestnite a natočte podľa seba. Musia sa dotýkať, ale nesmú sa prekrývať.
 4. **Pridajte senzory** (`ProximityRays`, `ButtSensorReciever`) podľa svojej stratégie. Kamera vidí steny čierne, takže ak má robot vnímať steny, pridajte `ProximityRays`.
@@ -224,7 +224,7 @@ Príklady sú v `Assets/Turnaj/Teams`.
 | `Wheels Left`, `Wheels Right` | po 2 wheel collidery (`Wheel Coll Front`, `Wheel Coll Back`). Sem patria sady kolies. `Wheels Right` má mierku X = −1 (zrkadlenie). |
 | `RobotCameraSensor` | kamera agenta: 32 × 32 pixelov, farebná |
 | `ButtMarker` | `MarkerHitPoint` a `Cylinder`: cieľ, ktorý deteguje súperov senzor `ButtSensorReciever`. Súčasť šablóny, nemeňte ho. |
-| `Bounding Box` | dve vizuálne kocky bez colliderov. Pôvodný limit veľkosti, dnes sa nepoužíva: nahrádza ho pravidlo ±25 % (6.2.3). |
+| `Bounding Box` | dve vizuálne kocky bez colliderov. Pôvodný limit veľkosti, dnes sa nepoužíva: nahrádzajú ho limity dielov (6.2.2, bod 4). |
 
 ---
 
@@ -241,12 +241,23 @@ Príklady sú v `Assets/Turnaj/Teams`.
 
    > **Pevný súper musí mať Inference Only.** Ak trénujete proti hotovému robotovi, otvorte jeho prefab a nastavte **BehaviorParameters → Behavior Type = Inference Only** s priradeným modelom. Inak ho tréner prevezme tiež (má rovnaký Behavior Name) a prestane hrať podľa svojho modelu.
 
-2. Vyberte **Reward Editor** a nastavte posuvníky (0–1). Sú jediný spôsob, ako tréning usmerniť, a určujú štýl robota.
+2. **Skontrolujte Behavior Name na dvoch miestach.** Meno musí byť rovnaké v robotovi aj v konfigurácii trénera:
+   - **robot:** otvorte prefab svojho robota a na koreni v komponente **Behavior Parameters** nastavte **Behavior Name** na `RobotAgent`;
+   - **konfigurácia:** v `Assets/konfig.yaml` musí byť to isté meno hneď pod riadkom `behaviors:`:
+
+     ```
+     behaviors:
+       RobotAgent:
+         trainer_type: ppo
+     ```
+
+   Meno `RobotAgent` nemeňte, vyžaduje ho validácia ([pravidlo 6.2.1](#621-koreň-robota)). Ak sa mená líšia, tréner sa po stlačení Play zastaví s chybou „The behavior name … has not been specified in the trainer configuration“. To isté platí pre konfigurácie imitačného učenia (3.4).
+3. Vyberte **Reward Editor** a nastavte posuvníky (0–1). Sú jediný spôsob, ako tréning usmerniť, a určujú štýl robota.
    - **Reward Factors**: malé odmeny v každom kroku za to, ako sa robot pohybuje a kde stojí. Pohyb (Movement), natočenie k súperovi (Facing), uhol ramena (Arm Angle), vzdialenosť od súpera (Enemy Distance), pozícia v aréne (Arena Position) a kombinácia zrážok (Collision Combination).
    - **Fight Factors**: odmeny za samotný súboj. **Hit RF** platí za poškodenie spôsobené súperovi, **Damage Taken RF** trestá za utrpené poškodenie a **Timeout RF** určuje, koľko je hodná výhra na čas oproti vyradeniu.
 
    <img src="img/inspector_reward.png" width="480" alt="Inspector Reward Editor s posuvníkmi Reward Factors a Fight Factors">
-3. *(Voliteľné)* Upravte nastavenia PPO v `Assets/konfig.yaml`.
+4. *(Voliteľné)* Upravte nastavenia PPO v `Assets/konfig.yaml`.
 
 **Ako sa robot odmeňuje.** Najviac sa oplatí vyhrať vyradením. Posuvníky rozhodujú o tom, akou cestou sa k výhre robot dostane; žiadne nastavenie nespôsobí, že sa oplatí prehrať.
 
@@ -479,7 +490,7 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
    | Telo | Body_Shape1, 2, 3 | presne 1 |
    | Rameno (zbraň) | Arm_Shape1, 2 | presne 1 |
    | Sady kolies | Wheels_Shape1, 2, 3 | presne 2: jedna pod `Wheels Left`, jedna pod `Wheels Right`. Rovnaký tvar dvakrát je povolený. |
-   | Nárazníky | Bumper_Shape1, 2 | 0–2 |
+   | Nárazníky | Bumper_Shape1, 2 | 0–3. Rovnaký tvar viackrát je povolený. |
 
 2. **Štruktúra:**
    - Telo je **priamy potomok koreňa** robota.
@@ -489,7 +500,20 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
    - kolesá, batéria, nárazníky a rameno sa dotýkajú tela;
    - zbraň sa dotýka ramena;
    - **diely sa nesmú schovávať do seba.** Koleso smie do tela zasahovať najviac **2 cm** a do nárazníka najviac **0,5 cm**. Koleso zapustené v tele je chyba.
-4. **Uhly a pozície sú voľné.** Diely aj collidery v nich môžete ľubovoľne umiestniť a natočiť, pokiaľ platí bod 3.
+4. **Veľkosť a umiestnenie.** Prefaby dielov sú pripravené tak, že na pozícii (0, 0, 0) pod telom sedia na správnom mieste. Od tohto miesta sa meria posun. Každý diel má vlastné limity:
+
+   | Diel (collider) | Zmena veľkosti | Posun | Otočenie |
+   |---|---|---|---|
+   | Telo (`body_shape`) | ±25 % | žiadny | žiadne |
+   | Batéria (`battery_shape`) | žiadna | ±5 cm v každej osi | žiadne |
+   | Kolesá (`wheels_shape`) | ±10 % | žiadny | žiadne |
+   | Nárazník (`bumper_shape`) | ±25 % | najviac 25 % vlastnej veľkosti v každej osi | ľubovoľné |
+   | Rameno a zbraň (`arm_armbase_shape`, `arm_weapon_shape`) | ±25 % | voľný | voľné |
+
+   - **Nárazník:** posun sa meria pozdĺž jeho vlastných osí, takže limit sa otáča spolu s ním. Bumper_Shape1 má 36 × 12,8 × 23,9 cm (šírka × výška × hĺbka); smie sa teda posunúť najviac o 9 cm do strán, 3,2 cm hore alebo dole a 6 cm dopredu alebo dozadu. Môžete ho otočiť dozadu alebo nabok a posunúť až potom.
+   - **Rameno** umiestnite kamkoľvek, musí sa však dotýkať tela (bod 3).
+   - **Zrkadlenie** (−1 na osi) je povolené pri všetkých dieloch. Pravá sada kolies je zrkadlená ľavá.
+   - Nezáleží na tom, či posuniete celý diel alebo iba collider v ňom: meria sa poloha collidera voči koreňu robota.
 5. Objekty so zónami poškodenia sa nesmú premenovať. Ich názvy určujú poškodenie a odolnosť: body, battery, wheels, armbase, weapon, bumper.
 
 #### 6.2.3 Collidery
@@ -500,10 +524,9 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 
    Akýkoľvek iný collider je chyba. Nemôžete pridať štíty, hroty ani skryté bloky.
 2. **Tvar:** collider si ponecháva pôvodný mesh. Mesh sa nesmie vymeniť za iný.
-3. **Veľkosť:** každá os každého collidera sa smie líšiť od prefabu dielu najviac o **±25 %** *(nie je konečné)*. Každá os sa kontroluje zvlášť.
-   - Zrkadlenie (−1 na osi) je povolené.
+3. **Veľkosť:** každá os collidera sa smie líšiť od prefabu dielu najviac o hodnotu z tabuľky v 6.2.2, bod 4 (telo, rameno, zbraň a nárazníky ±25 %, kolesá ±10 %, batéria 0 %). Každá os sa kontroluje zvlášť.
    - Veľkosť sa meria voči koreňu robota. Počíta sa aj zmena mierky nadradeného objektu.
-4. **Pozícia:** voľná, obmedzená iba pravidlom o dotyku a prekrytí (6.2.2, bod 3). Kópia dielu pre pohľad agenta sa musí hýbať spolu s colliderom. Collidery senzorov a `ButtMarker` sú pevné.
+4. **Pozícia:** podľa tabuľky v 6.2.2, bod 4, a podľa pravidla o dotyku a prekrytí (6.2.2, bod 3). Kópia dielu pre pohľad agenta sa musí hýbať spolu s colliderom. Collidery senzorov a `ButtMarker` sú pevné.
 5. Collidery zostávajú zapnuté, pevné (nie triggery) a ponechávajú si fyzikálny materiál.
 
 #### 6.2.4 Uzamknutá fyzika
@@ -608,7 +631,8 @@ Táto kapitola je pre réžiu, rozhodcu a tých, ktorí spravujú validáciu. T�
 ### 7.1 Nastavenie pravidiel a farieb
 - **Limity** sú v `Assets/Validation/ValidationRules.asset`:
   - skupiny dielov a ich počty (minimum, maximum, maximum na jeden prefab);
-  - `Scale Tolerance Percent`: povolená zmena veľkosti collidera (pravidlo ±25 %);
+  - pre každú skupinu `Scale Tolerance Percent` (povolená zmena veľkosti collidera), `Move` (`Free` = voľne, `Fixed` = bez posunu a otočenia, `Percent Of Size` = posun o časť vlastnej veľkosti) a `Move Percent Of Size`;
+  - `Battery Move Metres` (5 cm): povolený posun batérie; jej veľkosť a otočenie sú pevné;
   - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm);
   - tolerancie pre arénu a štartovacie značky;
   - `Behavior Name`, `Vector Observation Size` (10), šablóna robota, referenčná aréna a paleta.
@@ -672,5 +696,6 @@ Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v 
 | Súper sa počas tréningu správa čudne | Nastavte mu Behavior Type na **Inference Only** (časť 3.1). |
 | Chcete, aby model robota prestal konať | Odstráňte komponent `DecisionRequester`. Vypnutie nestačí: ML-Agents aj tak žiada rozhodnutia. |
 | Chyby certifikátov v pip, conda alebo git | Pozrite poznámku o SSL v časti 1.3. |
+| Tréner skončí chybou „The behavior name … has not been specified in the trainer configuration“ | Behavior Name robota sa nezhoduje s menom v `konfig.yaml`. Na oboch miestach má byť `RobotAgent` (časť 3.1, krok 2). |
 | Tréner skončí chybou „shape … do not match“ | Ukážka alebo model učiteľa má iný počet pozorovaní než váš robot (časť 3.4). |
 | Validácia hlási „Vector observation size is …, must be 10“ | V BehaviorParameters nastavte **Vector Observation → Space Size** na 10 ([pravidlo 6.2.6](#626-senzory)) a robota natrénujte znova. |
