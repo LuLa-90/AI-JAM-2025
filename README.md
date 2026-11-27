@@ -38,7 +38,7 @@ Používajte presne tieto verzie. Projekt aj natrénované modely od nich závis
 | PyTorch | **2.2.2** (verzia pre CUDA 12.1 na grafiky NVIDIA) |
 
 ### 1.1 Git
-Nainštalujte [Git for Windows](https://git-scm.com/download/win).
+Nainštalujte [Git for Windows](https://git-scm.com/download/win). Jeho súčasťou je **Git LFS**, ktorý projekt potrebuje na jeden veľký súbor; pri inštalácii ho nechajte zaškrtnutý.
 
 ### 1.2 Unity
 1. Nainštalujte [Unity Hub](https://unity.com/download).
@@ -99,7 +99,9 @@ Ak `mlagents-learn` zlyhá s chybou `No module named 'pkg_resources'`, spustite 
 git clone https://github.com/LuLa-90/AI-JAM-2025.git
 ```
 
-2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá niekoľko minút.
+   Repozitár má asi 1,5 GB, lebo obsahuje roboty a arény z minulého ročníka. Ak klonovanie skončí chybou `smudge filter lfs failed`, ide o kontrolu HTTPS antivírusom (pozri poznámku o SSL v časti 1.3). V priečinku projektu potom spustite `git -c http.sslBackend=schannel lfs pull` a `git -c http.sslBackend=schannel checkout -f HEAD`.
+
+2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá 10 až 20 minút.
 3. **Importujte zdroje TextMesh Pro** (raz pre každý klon, priečinok nie je v Gite): **Window → TextMeshPro → Import TMP Essential Resources**. Bez nich skripty HUD hádžu chyby, Play mode sa pozastaví a tréning vyprší.
 4. *(Voliteľné)* Načítajte rozloženie okien projektu: **Window → Layouts → Load Layout from File…** a vyberte `aijam_layout.wlt` v priečinku projektu.
 5. Skontrolujte balíky: vo **Window → Package Manager** by mal mať *ML Agents* verziu **4.1.0**. V konzole (Console) by nemali byť červené chyby.
@@ -115,7 +117,9 @@ git clone https://github.com/LuLa-90/AI-JAM-2025.git
 | `Assets/Prefabs/Base Shapes` | Diely na stavbu (telá, ramená, kolesá, nárazníky, senzory) |
 | `Assets/Prefabs/Robot Agent Template.prefab` | Robot, z ktorého začínate |
 | `Assets/konfig.yaml` | Nastavenia trénera (hyperparametre PPO) |
-| `Assets/Training Results` | Roboty a modely z minulého ročníka (dobrí súperi na tréning) |
+| `Assets/DatabaseOfRobots` | Roboty, arény a modely tímov z minulého ročníka: súperi na tréning ([3.4](#34-imitačné-učenie-a-roboty-z-minulého-ročníka-voliteľné)) |
+| `Assets/Demonstrations` | Nahraté ukážky jazdy pre imitačné učenie (3.4) |
+| `Assets/Training Results` | Modely zo skúšobných tréningov počas vývoja projektu a robot `Firehawk` |
 | `Assets/Validation/Robots/ReferenceBot.prefab` | Robot, ktorý spĺňa všetky pravidlá. Použite ho ako vzor. |
 
 ---
@@ -126,7 +130,7 @@ Táto kapitola ukazuje postup. Presné limity a zákazy sú v kapitole [6. Pravi
 
 ### 2.1 Robot
 
-Otvorte **ConstructionScene**. Robot má tri podoby, každú vo vlastnej vrstve (layer):
+Otvorte **ConstructionScene**. V objekte `Environment` nájdete šablónu `Robot Agent Template` a ako príklady aj šesť robotov z minulého ročníka. Robot má tri podoby, každú vo vlastnej vrstve (layer):
 
 | Podoba | Vrstva | Kto ju vidí | Pravidlá |
 |---|---|---|---|
@@ -229,7 +233,7 @@ Príklady sú v `Assets/Turnaj/Teams`.
 ### 3.1 Príprava trénovacej scény
 1. Otvorte **TrainingScene** a vyberte **AIJamManager**:
    - **Robot Prefab A:** váš robot. Tento sa učí.
-   - **Robot Prefab B:** jeho súper. Môže to byť znova váš robot (obe kópie sa učia tú istú politiku) alebo niektorý robot z minulého ročníka z `Assets/Training Results`.
+   - **Robot Prefab B:** jeho súper. Môže to byť znova váš robot (obe kópie sa učia tú istú politiku), referenčný robot alebo niektorý robot z minulého ročníka z `Assets/DatabaseOfRobots` ([3.4](#34-imitačné-učenie-a-roboty-z-minulého-ročníka-voliteľné)).
    - **Team Arena Prefab** *(voliteľné)*: prefab vašej domácej arény ([2.2](#22-domáca-aréna)). Keď ho priradíte, tréning beží vo vašej aréne s jej pascami a bonusmi; keď pole necháte prázdne, použije sa neutrálna aréna scény. Roboty pri tréningu štartujú na náhodných miestach okolo stredu, značky Home a Guest sa nepoužívajú.
    - **Num Of Arenas:** One, Three alebo Five. Viac arén zbiera skúsenosti rýchlejšie, ale potrebuje výkonnejší počítač.
 
@@ -668,3 +672,6 @@ Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v 
 | Súper sa počas tréningu správa čudne | Nastavte mu Behavior Type na **Inference Only** (časť 3.1). |
 | Chcete, aby model robota prestal konať | Odstráňte komponent `DecisionRequester`. Vypnutie nestačí: ML-Agents aj tak žiada rozhodnutia. |
 | Chyby certifikátov v pip, conda alebo git | Pozrite poznámku o SSL v časti 1.3. |
+| Klonovanie skončí chybou `smudge filter lfs failed` | Spustite `git -c http.sslBackend=schannel lfs pull` (časť 1.5, krok 1). |
+| Tréner skončí chybou „shape … do not match“ | Ukážka alebo model učiteľa má iný počet pozorovaní než váš robot (časť 3.4). |
+| Validácia hlási „Vector observation size is …, must be 10“ | V BehaviorParameters nastavte **Vector Observation → Space Size** na 10 ([pravidlo 6.2.6](#626-senzory)) a robota natrénujte znova. |
