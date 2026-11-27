@@ -237,6 +237,70 @@ namespace AIJam.Validation.Tests {
                 }
         }
 
+        // ---------------------------------------------------------------- tags on the provided prefabs
+        private static string PartTag(string zoneKeyword) {
+            switch (zoneKeyword) {
+                case "body": return "RobotBody";
+                case "battery": return "RobotBattery";
+                case "wheels": return "RobotWheels";
+                case "bumper": return "RobotBumper";
+                case "armbase": case "weapon": return "RobotArm";
+            }
+            return null;
+        }
+
+        [Test]
+        public void Tags_EveryPartColliderAndItsAgentViewCopy_CarryThePartTag() {
+            var wrong = new List<string>();
+            foreach (var g in rules.Groups)
+                foreach (var e in g.Parts) {
+                    foreach (var col in e.Prefab.GetComponentsInChildren<Collider>(true)) {
+                        string want = PartTag(PartCatalog.ZoneKeyword(col.name));
+                        if (want != null && !col.CompareTag(want)) wrong.Add($"{e.Prefab.name}/{col.name}: '{col.tag}', expected '{want}'");
+                    }
+                    foreach (var r in e.Prefab.GetComponentsInChildren<Renderer>(true).Where(r => r.gameObject.layer == LayerMask.NameToLayer("RobotView"))) {
+                        // a copy shows one collider of the part: same mesh, same tag
+                        var mesh = r.GetComponent<MeshFilter>().sharedMesh;
+                        var col = e.Prefab.GetComponentsInChildren<MeshCollider>(true).FirstOrDefault(c => c.sharedMesh == mesh);
+                        if (col != null && r.tag != col.tag) wrong.Add($"{e.Prefab.name}/{r.name}: '{r.tag}', its collider has '{col.tag}'");
+                    }
+                }
+            Assert.IsEmpty(wrong, string.Join("\n", wrong));
+        }
+
+        [TestCase("Body", "RobotBody")]
+        [TestCase("Arm", "RobotArm")]
+        [TestCase("Wheel sets", "RobotWheels")]
+        [TestCase("Bumpers", "RobotBumper")]
+        public void Tags_PartRoot_CarriesThePartTag(string group, string tag) {
+            foreach (var e in Group(group).Parts) Assert.AreEqual(tag, e.Prefab.tag, e.Prefab.name);
+        }
+
+        [Test]
+        public void Tags_RobotTemplate_RootCameraAndRearMarker() {
+            var t = rules.RobotTemplate;
+            Assert.AreEqual("Robot", t.tag, "root: collisions and proximity rays recognise a robot by it");
+            Assert.AreEqual("RobotCamera", t.GetComponentInChildren<Camera>(true).tag);
+            // ButtSensorComponent looks for this tag on the collider its ray hits
+            Assert.AreEqual("ButtTag", Find(t, "MarkerHitPoint").tag);
+        }
+
+        [TestCase("Assets/Prefabs/Environment (0, 0).prefab")]
+        [TestCase(ArenaPath)]
+        public void Tags_ArenaFloorAndWall_AreTaggedArena(string path) {
+            // ProximitySensorRay reports "arena" (type 1) only for this tag
+            var arena = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var solid = arena.GetComponentsInChildren<Collider>(true).Where(c => !c.isTrigger).ToList();
+            Assert.IsNotEmpty(solid);
+            foreach (var c in solid) Assert.AreEqual("Arena", c.tag, c.name);
+        }
+
+        [Test]
+        public void Tags_TrainingEnvironmentPrefab_IsTaggedEnvironment() {
+            // AIJamManager finds the training environments by this tag
+            Assert.AreEqual("Environment", AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Environment (0, 0).prefab").tag);
+        }
+
         [Test]
         public void Validator_SensorColliderDisabled_Fails() {
             AssertFails(Robot(r => r.GetComponentInChildren<ProximitySensorRay>().GetComponentInChildren<SphereCollider>().enabled = false), "Colliders");

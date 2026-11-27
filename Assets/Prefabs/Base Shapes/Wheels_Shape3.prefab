@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4750000481609728737}
   m_Layer: 0
   m_Name: Wheels_Shape3
-  m_TagString: Untagged
+  m_TagString: RobotWheels
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -197,6 +197,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a594aaf655410204395f4a39bdbcba6c, type: 3}
+      propertyPath: m_TagString
+      value: RobotWheels
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -314,6 +318,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a594aaf655410204395f4a39bdbcba6c, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a594aaf655410204395f4a39bdbcba6c, type: 3}
+      propertyPath: m_TagString
+      value: RobotWheels
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

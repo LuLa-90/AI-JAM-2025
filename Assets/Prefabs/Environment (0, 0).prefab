@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 3037404667492914806}
   m_Layer: 0
   m_Name: Environment (0, 0)
-  m_TagString: Untagged
+  m_TagString: Environment
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1288,6 +1288,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5568371526223589888, guid: 483f40d1a51b2ba40828013515a4222b, type: 3}
+      propertyPath: m_TagString
+      value: Arena
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 483f40d1a51b2ba40828013515a4222b, type: 3}
       propertyPath: m_Name
       value: arena_collidersS
@@ -1299,6 +1303,10 @@ PrefabInstance:
     - target: {fileID: 7202271454713460447, guid: 483f40d1a51b2ba40828013515a4222b, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8513859187771203891, guid: 483f40d1a51b2ba40828013515a4222b, type: 3}
+      propertyPath: m_TagString
+      value: Arena
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

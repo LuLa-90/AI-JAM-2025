@@ -211,6 +211,7 @@ Príklady sú v `Assets/Turnaj/Teams`.
 - Každý diel má pod objektom `[No Editing] RobotViewMaterials` svoje kópie pre pohľad agenta (vrstva RobotView, bez colliderov) a komponent `PartVisionColor`, ktorý im nastavuje farbu.
 - Rameno má vlastné `Rigidbody`. Jeho `HingeJoint` sa pri štarte pripojí k `Rigidbody` koreňa robota.
 - Pohonné wheel collidery **nie sú** v prefaboch kolies. Sú v šablóne robota.
+- **Tagy:** koreň dielu, jeho collidery a ich kópie pre pohľad agenta majú tag dielu: `RobotBody`, `RobotBattery` (batéria v tele), `RobotArm`, `RobotBumper`, `RobotWheels`. Koreň robota má tag `Robot`, cieľ `MarkerHitPoint` tag `ButtTag` a podlaha so stenou arény tag `Arena`. Tagy nemeňte: podľa nich senzory a skripty rozoznávajú, čo zasiahli.
 
 **Senzory** (`Assets/Prefabs/Base Shapes`):
 

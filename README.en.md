@@ -211,6 +211,7 @@ What is in which prefab. The damage and resistance values of the zones are in se
 - Under its `[No Editing] RobotViewMaterials` object every part has its copies for the agent view (RobotView layer, no colliders) and a `PartVisionColor` component that sets their colour.
 - The arm has its own `Rigidbody`. Its `HingeJoint` connects to the robot root's `Rigidbody` at start.
 - The driving wheel colliders are **not** in the wheel prefabs. They are in the robot template.
+- **Tags:** a part's root, its colliders and their agent-view copies carry the part's tag: `RobotBody`, `RobotBattery` (the battery in the body), `RobotArm`, `RobotBumper`, `RobotWheels`. The robot's root has the tag `Robot`, the `MarkerHitPoint` target has `ButtTag`, and the arena's floor and wall have `Arena`. Do not change the tags: sensors and scripts use them to tell what they hit.
 
 **Sensors** (`Assets/Prefabs/Base Shapes`):
 

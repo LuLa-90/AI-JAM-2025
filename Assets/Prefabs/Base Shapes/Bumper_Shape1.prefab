@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 583869201871521994}
   m_Layer: 0
   m_Name: Bumper_Shape1
-  m_TagString: Untagged
+  m_TagString: RobotBumper
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -196,6 +196,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3a43640109777734dbadee43aecdded9, type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3a43640109777734dbadee43aecdded9, type: 3}
+      propertyPath: m_TagString
+      value: RobotBumper
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -314,6 +318,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3a43640109777734dbadee43aecdded9, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3a43640109777734dbadee43aecdded9, type: 3}
+      propertyPath: m_TagString
+      value: RobotBumper
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
