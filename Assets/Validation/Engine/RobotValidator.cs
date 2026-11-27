@@ -297,7 +297,7 @@ namespace AIJam.Validation {
             var body = parts.FirstOrDefault(p => p.Root.GetComponent<BodyComponent>() != null);
             if (body == null) return;
             var bodyCols = PartCatalog.OwnColliders(body.Root).Where(Solid).ToList();
-            var bumperCols = parts.Where(p => p.Root.GetComponent<BumperComponent>() != null).SelectMany(p => PartCatalog.OwnColliders(p.Root).Where(Solid)).ToList();
+            var bumpers = parts.Where(p => p.Root.GetComponent<BumperComponent>() != null && p.Print != null).ToList();
 
             foreach (var p in parts.Where(p => p.Group != "" && p != body)) {
                 var own = PartCatalog.OwnColliders(p.Root).Where(Solid).ToList();
@@ -313,13 +313,18 @@ namespace AIJam.Validation {
                 foreach (var a in own) foreach (var b in bodyCols) deepest = Mathf.Max(deepest, Penetration(a, b));
                 if (deepest < c.Rules.MinAttachmentPenetration)
                     c.Err("Attachment", $"'{p.Root.name}' doesn't touch the body; every part must be attached.", p.Root);
-                if (p.Root.GetComponent<WheelComponent>() != null) {
-                    if (deepest > c.Rules.MaxWheelBodyPenetration)
-                        c.Err("Attachment", $"'{p.Root.name}' sinks {deepest:F3} m into the body (max {c.Rules.MaxWheelBodyPenetration}).", p.Root);
-                    float bump = 0f;
-                    foreach (var a in own) foreach (var b in bumperCols) bump = Mathf.Max(bump, Penetration(a, b));
-                    if (bump > c.Rules.MaxWheelBumperPenetration)
-                        c.Err("Attachment", $"'{p.Root.name}' sinks {bump:F3} m into a bumper (max {c.Rules.MaxWheelBumperPenetration}).", p.Root);
+                if (p.Root.GetComponent<WheelComponent>() != null && p.Print != null) {
+                    // The prefabs already overlap a little where they are made to sit; only overlap beyond that counts.
+                    float maxBody = PartCatalog.DefaultOverlap(p.Print.Prefab, body.Print?.Prefab, Solid) + c.Rules.MaxWheelBodyPenetration;
+                    if (deepest > maxBody)
+                        c.Err("Attachment", $"'{p.Root.name}' sinks {deepest:F3} m into the body (max {maxBody:F3}: the prefabs' own overlap + {c.Rules.MaxWheelBodyPenetration}).", p.Root);
+                    foreach (var bumper in bumpers) {
+                        float bump = 0f;
+                        foreach (var a in own) foreach (var b in PartCatalog.OwnColliders(bumper.Root).Where(Solid)) bump = Mathf.Max(bump, Penetration(a, b));
+                        float maxBump = PartCatalog.DefaultOverlap(p.Print.Prefab, bumper.Print.Prefab, Solid) + c.Rules.MaxWheelBumperPenetration;
+                        if (bump > maxBump)
+                            c.Err("Attachment", $"'{p.Root.name}' sinks {bump:F3} m into bumper '{bumper.Root.name}' (max {maxBump:F3}: the prefabs' own overlap + {c.Rules.MaxWheelBumperPenetration}). Move the bumper away from the wheels.", p.Root);
+                    }
                 }
             }
         }

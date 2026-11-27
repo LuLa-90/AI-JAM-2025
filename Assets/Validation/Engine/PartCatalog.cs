@@ -141,6 +141,34 @@ namespace AIJam.Validation {
             return Quaternion.LookRotation(fwd.normalized, up.normalized);
         }
 
+        private static readonly Dictionary<(GameObject, GameObject), float> defaultOverlap = new Dictionary<(GameObject, GameObject), float>();
+
+        /// <summary>
+        /// How deep two part prefabs already sink into each other when both sit where they are made to sit
+        /// (the same origin), in metres. Measured once per pair on temporary copies; nothing is kept.
+        /// </summary>
+        public static float DefaultOverlap(GameObject prefabA, GameObject prefabB, Func<Collider, bool> counts) {
+            if (prefabA == null || prefabB == null) return 0f;
+            if (defaultOverlap.TryGetValue((prefabA, prefabB), out float known)) return known;
+            var far = new Vector3(0f, 1000f, 0f); // away from anything in the open scene
+            var a = UnityEngine.Object.Instantiate(prefabA, far, Quaternion.identity);
+            var b = UnityEngine.Object.Instantiate(prefabB, far, Quaternion.identity);
+            a.hideFlags = b.hideFlags = HideFlags.HideAndDontSave;
+            float deepest = 0f;
+            try {
+                Physics.SyncTransforms();
+                foreach (var ca in OwnColliders(a.transform).Where(counts))
+                    foreach (var cb in OwnColliders(b.transform).Where(counts))
+                        if (Physics.ComputePenetration(ca, ca.transform.position, ca.transform.rotation, cb, cb.transform.position, cb.transform.rotation, out _, out float d))
+                            deepest = Mathf.Max(deepest, d);
+            } finally {
+                UnityEngine.Object.DestroyImmediate(a);
+                UnityEngine.Object.DestroyImmediate(b);
+            }
+            defaultOverlap[(prefabA, prefabB)] = deepest;
+            return deepest;
+        }
+
         /// <summary>Directions of t's local x, y and z axes in root space (unit length; a mirrored axis points the other way).</summary>
         public static Vector3[] AxesIn(Transform t, Transform root) {
             var m = root.worldToLocalMatrix * t.localToWorldMatrix;

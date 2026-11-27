@@ -214,6 +214,18 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_BumperAndWheelsAtTheirPrefabPlaces_Pass() {
+            // the part prefabs overlap a little where they are made to sit; that layout must be valid
+            var f = Robot(r => Find(r, "Bumper_Shape1").localPosition = Vector3.zero);
+            Assert.IsFalse(f.HasErrors(), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BumperPushedBackOverTheWheels_Fails() {
+            AssertFails(Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0f, 0f, -0.05f)), "Attachment", "bumper");
+        }
+
+        [Test]
         public void Validator_SensorColliderDisabled_Fails() {
             AssertFails(Robot(r => r.GetComponentInChildren<ProximitySensorRay>().GetComponentInChildren<SphereCollider>().enabled = false), "Colliders");
         }

@@ -507,7 +507,7 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 3. **Diely sa musia dotýkať, ale nesmú sa prekrývať:**
    - kolesá, batéria, nárazníky a rameno sa dotýkajú tela;
    - zbraň sa dotýka ramena;
-   - **diely sa nesmú schovávať do seba.** Koleso smie do tela zasahovať najviac **2 cm** a do nárazníka najviac **0,5 cm**. Koleso zapustené v tele je chyba.
+   - **diely sa nesmú schovávať do seba.** Prefaby dielov sa na svojich pôvodných miestach mierne prekrývajú (napríklad Wheels_Shape1 a Bumper_Shape1 o 4,5 cm) a toto prekrytie je v poriadku. Počíta sa iba to, čo je navyše: koleso smie do tela zasahovať najviac o **2 cm** viac a do nárazníka najviac o **0,5 cm** viac než pri pôvodnom rozložení. Nárazník teda môžete posunúť od kolies, ale nie na ne.
 4. **Veľkosť a umiestnenie.** Prefaby dielov sú pripravené tak, že na pozícii (0, 0, 0) pod telom sedia na správnom mieste. Od tohto miesta sa meria posun. Každý diel má vlastné limity:
 
    | Diel (collider) | Zmena veľkosti | Posun | Otočenie |
@@ -641,7 +641,7 @@ Táto kapitola je pre réžiu, rozhodcu a tých, ktorí spravujú validáciu. T�
   - skupiny dielov a ich počty (minimum, maximum, maximum na jeden prefab);
   - pre každú skupinu `Scale Tolerance Percent` (povolená zmena veľkosti collidera), `Move` (`Free` = voľne, `Fixed` = bez posunu a otočenia, `Percent Of Size` = posun o časť vlastnej veľkosti) a `Move Percent Of Size`;
   - `Battery Move Metres` (5 cm): povolený posun batérie; jej veľkosť a otočenie sú pevné;
-  - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm);
+  - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm): o koľko smie koleso zasahovať do tela a do nárazníka hlbšie, než sa prefaby prekrývajú na svojich pôvodných miestach;
   - tolerancie pre arénu a štartovacie značky;
   - `Behavior Name`, `Vector Observation Size` (10), šablóna robota, referenčná aréna a paleta.
 - **Farby pohľadu agenta** sú v `Assets/Validation/VisionPalette.asset`, jeden materiál na každú úlohu (pozadie, časť robota, pasca, bonus, batéria). Zmena farby v palete prefarbí príslušný materiál vrátane žiary (emission), takže ju prevezmú všetky prefaby. Materiály, ktorých farbu nezmeníte, zostanú nedotknuté, aby roboty z minulého ročníka videli to, na čom boli trénované.
