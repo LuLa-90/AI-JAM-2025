@@ -320,7 +320,7 @@ Pri imitačnom učení robot najprv napodobňuje nahraté ručné riadenie a až
 | `RobotApproachFin.demo`, `RobotApproach.demo`, `RobotApproach_0.demo` | priblíženie k súperovi |
 | `TrainingMoves/` (6 súborov) | otočenie k súperovi z rôznych strán |
 
-> **Ukážka sedí iba na robota s rovnakými pozorovaniami.** Hotové ukážky boli nahraté s kamerou 32 × 32 a s **Vector Observation → Space Size = 7** v BehaviorParameters (3 pevné hodnoty a 4 senzory). Takto je nastavený `Robot Agent Template` aj roboty z minulého ročníka. Referenčný robot a testovacie roboty majú Space Size 10, preto na ne hotové ukážky nesedia: tréner skončí chybou „shape … do not match“. Vtedy si nahrajte vlastnú ukážku.
+> **Hotové ukážky nesedia na tohtoročné roboty.** Boli nahraté s **Vector Observation → Space Size = 7** (3 pevné hodnoty a 4 senzory), ako mali roboty minulý rok. Tento rok je predpísaná hodnota **10** ([pravidlo 6.2.6](#626-senzory)), preto tréner s hotovou ukážkou skončí chybou „shape … do not match“. Berte ich ako príklad a pre svojho robota si nahrajte vlastnú ukážku podľa postupu nižšie.
 
 **Tréning s ukážkou.** Postup je rovnaký ako v [3.2](#32-spustenie-trénera), iba použijete inú konfiguráciu:
 
@@ -357,9 +357,9 @@ Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to by�
 powershell -ExecutionPolicy Bypass -File Assets\train_student.ps1
 ```
 
-Funguje to iba vtedy, keď má váš robot rovnaké pozorovania a akcie ako učiteľ (kamera 32 × 32, Space Size 7) a Behavior Name `RobotAgent`. Prenáša sa iba rozhodovacia sieť; varovania trénera „Failed to load for module Optimizer“ sú preto v poriadku.
+Funguje to iba vtedy, keď má žiak rovnaké pozorovania a akcie ako učiteľ a Behavior Name `RobotAgent`. Santabumpers má Space Size 7, takže tohtoročnému robotovi (Space Size 10) učiteľom byť nemôže. Ako učiteľa použite model natrénovaný tento rok: zmeňte cestu `teacher_path` v `initialize_student.py`. Prenáša sa iba rozhodovacia sieť; varovania trénera „Failed to load for module Optimizer“ sú preto v poriadku.
 
-**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani. Prefaby v koreni priečinkov tímov (GREGORI, Santabumpers, Rumba2, Job_B 1, Kodzilla pokus, Panzeres) sa v TrainingScene načítajú a bojujú bez chýb.
+**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani. Prefaby v koreni priečinkov tímov (GREGORI, Santabumpers, Rumba2, Job_B 1, Kodzilla pokus, Panzeres) sa v TrainingScene načítajú a bojujú bez chýb. Majú Space Size 7, takže validáciou neprejdú; ako súperom pri tréningu to nevadí.
 
 ---
 
@@ -522,7 +522,7 @@ Nepridávajte ďalšie Rigidbody ani Jointy.
 4. To, kam kamera mieri, sa nekontroluje. Čo robot vidí, ukazuje náhľad vo validačnej scéne.
 
 #### 6.2.6 Senzory
-1. Senzory (`ProximityRays`, `ButtSensorReciever`) **nie sú obmedzené**. Agent má pevný počet vstupov, takže senzory navyše nedávajú výhodu.
+1. Senzory (`ProximityRays`, `ButtSensorReciever`) **nie sú obmedzené**. Agent má pevný počet číselných vstupov: **Vector Observation → Space Size = 10** v BehaviorParameters, teda 3 pevné hodnoty o súperovi a 7 miest pre senzory. Senzory navyše preto nedávajú výhodu. Hodnotu nemeňte, validácia ju kontroluje.
 2. Collidery senzorov sú pevné:
    - `ProximityRays/Sphere` zostáva presne ako v prefabe;
    - collidery `ButtSensorReciever` zostávajú vypnuté.
@@ -600,7 +600,7 @@ Táto kapitola je pre réžiu, rozhodcu a tých, ktorí spravujú validáciu. T�
   - `Scale Tolerance Percent`: povolená zmena veľkosti collidera (pravidlo ±25 %);
   - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm);
   - tolerancie pre arénu a štartovacie značky;
-  - `Behavior Name`, šablóna robota, referenčná aréna a paleta.
+  - `Behavior Name`, `Vector Observation Size` (10), šablóna robota, referenčná aréna a paleta.
 - **Farby pohľadu agenta** sú v `Assets/Validation/VisionPalette.asset`, jeden materiál na každú úlohu (pozadie, časť robota, pasca, bonus, batéria). Zmena farby v palete prefarbí príslušný materiál vrátane žiary (emission), takže ju prevezmú všetky prefaby. Materiály, ktorých farbu nezmeníte, zostanú nedotknuté, aby roboty z minulého ročníka videli to, na čom boli trénované.
 - Validácia rozpoznáva diely podľa **meshu collidera**, nie podľa názvu. Premenovanie objektu kontrolu neobíde.
 - **Testy:** po zmene pravidiel alebo kódu spustite **Window → General → Test Runner → EditMode**. Testy validácie sú v `Assets/Validation/Editor/Tests`, testy pravidiel zápasu v `Assets/Turnaj/Scripts/Editor/Tests`.

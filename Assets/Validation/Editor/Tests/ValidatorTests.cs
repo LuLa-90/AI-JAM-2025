@@ -48,6 +48,18 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_VectorObservationSizeOfLastYear_Fails() {
+            AssertFails(Robot(r => r.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>().BrainParameters.VectorObservationSize = 7), "Model", "must be 10");
+        }
+
+        [Test]
+        public void Rules_RobotTemplate_HasTheStandardObservationSize() {
+            var bp = rules.RobotTemplate.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+            Assert.AreEqual(10, rules.VectorObservationSize, "3 fixed values + 7 sensor slots");
+            Assert.AreEqual(rules.VectorObservationSize, bp.BrainParameters.VectorObservationSize, "robot template");
+        }
+
+        [Test]
         public void Validator_NeutralArenaAsTeamArena_Passes() {
             var f = Arena();
             Assert.IsFalse(f.HasErrors(), string.Join("\n", f));

@@ -402,6 +402,7 @@ MonoBehaviour:
   rewardEditor: {fileID: 0}
   enemyRobot: {fileID: 0}
   weightedAverageHealth: 1
+  maxEpisodeSeconds: 90
   maxEnemyDistance: 4
   maxArenaRadius: 4
 --- !u!114 &5010629318851500838
@@ -417,7 +418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 7
+    VectorObservationSize: 10
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2

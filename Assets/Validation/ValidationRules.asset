@@ -54,7 +54,7 @@ MonoBehaviour:
   - {fileID: 8708950312143412897, guid: c1ec550ae4fd83540844fb2f13621c68, type: 3}
   RobotTemplate: {fileID: 6428795192209815909, guid: 0ea1e00834090964891f8a8fc3c6e7a7, type: 3}
   BehaviorName: RobotAgent
-  VectorObservationSize: 0
+  VectorObservationSize: 10
   ScaleTolerancePercent: 25
   PhysicsTolerance: 0.0001
   MinAttachmentPenetration: 0.0001
