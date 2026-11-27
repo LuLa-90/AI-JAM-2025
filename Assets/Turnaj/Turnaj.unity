@@ -929,6 +929,9 @@ MonoBehaviour:
   enemyDistanceRF: 0.2
   arenaPositionRF: 0.2
   collisionCombinationRF: 0.7
+  hitRF: 0.5
+  damageTakenRF: 0
+  timeoutRF: 0.5
 --- !u!4 &1622109732
 Transform:
   m_ObjectHideFlags: 0
@@ -1000,8 +1003,10 @@ MonoBehaviour:
   Round1Clip: {fileID: 8300000, guid: b158ef6852638424bb1585f96fa843d2, type: 3}
   Round2Clip: {fileID: 8300000, guid: a996993dc77437045b718ed12dd28ac8, type: 3}
   FinalRoundClip: {fileID: 8300000, guid: 04933641cb8ca264aa477cb785db7d65, type: 3}
+  FightCueSeconds: {x: 1.4, y: 1.4, z: 1.6}
   FlawlessClip: {fileID: 8300000, guid: f7217dd18f737b54197de2281fbadaac, type: 3}
   RoundWonClip: {fileID: 8300000, guid: 3cff3ced100625645ba35fcd773e8daf, type: 3}
+  LackOfActionClip: {fileID: 8300000, guid: 48cae692667f09a46a46908f6f022034, type: 3}
   CountdownTickClip: {fileID: 0}
   FightClip: {fileID: 0}
 --- !u!114 &1796136339

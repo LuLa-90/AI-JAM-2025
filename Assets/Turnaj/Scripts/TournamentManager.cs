@@ -82,6 +82,8 @@ namespace Turnaj {
         public Vector3 FightCueSeconds = new Vector3(1.40f, 1.40f, 1.60f);
         public AudioClip FlawlessClip;
         public AudioClip RoundWonClip;
+        [Tooltip("Voice when the referee separates stuck robots (W twice): \"Lack of Action, Fight!\"")]
+        public AudioClip LackOfActionClip;
         [Tooltip("Optional tick for 3-2-1.")]
         public AudioClip CountdownTickClip;
         [Tooltip("Optional sound on FIGHT!!")]
@@ -457,7 +459,8 @@ namespace Turnaj {
             dir = dir.sqrMagnitude < 1e-4f ? Vector3.forward : dir.normalized;
             Push(robotA, -dir);
             Push(robotB, dir);
-            Hud.Flash("BREAK!", 1f);
+            Hud.Flash(MatchRules.SeparatorText, MatchRules.SeparatorTextSeconds(LackOfActionClip != null ? LackOfActionClip.length : 0f));
+            Play(LackOfActionClip);
             SetHint("Separator used");
         }
 

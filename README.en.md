@@ -683,13 +683,13 @@ After the presentations check the teams one by one in the validation scene ([cha
 2. **Space bar:** "Round 1" (or "Round 2", "Final round") is announced, the 3-2-1 countdown runs, then "FIGHT!!" and the robots are released.
 3. **During a round** the screen shows the HP panels of both teams, the round score and a timer that turns red below 10 s.
 4. **Return after a fall or flip:** the robot returns to its marker. If the opponent is closer than 0.5 m to it, the point mirrored through the arena's centre is used.
-5. **Separator (W ×2):** each robot gets a one-off push away from the opponent with a slight lift. It causes no damage by itself, but a fall that it causes is penalised as usual. It has a 1 s cooldown, and "BREAK!" appears briefly on the screen.
+5. **Separator (W ×2):** each robot gets a one-off push away from the opponent with a slight lift. It causes no damage by itself, but a fall that it causes is penalised as usual. It has a 1 s cooldown. The voice "Lack of Action, Fight!" plays and the same text is on the screen while the voice speaks (about 3 s).
 6. **End of a round:** a short message about the winner and a return to the waiting screen with the next round's name. "Flawless victory" is announced when the round's winner has more than 51 % HP on the indicator.
 7. **Arena change:** objects that the arena created outside itself are destroyed by the scene when the round changes, and a warning is written to the Console.
 8. **End of the match:** the winner's screen with the score and the league points. The Inspector has the same summary and a row for every round; the **Copy result to clipboard** button copies it for entry on the web.
 
 ### 7.6 Sounds
-The voices are in `Assets/Turnaj/Sounds` and are assigned on the **Tournament** object in the **Sounds** section: `round-1`, `round-2`, `final-round`, `flawless-victory` and `hahaha` (round win).
+The voices are in `Assets/Turnaj/Sounds` and are assigned on the **Tournament** object in the **Sounds** section: `round-1`, `round-2`, `final-round`, `flawless-victory`, `hahaha` (round win) and `Lack of Action, Fight!` (separator, the **Lack Of Action Clip** field).
 - The round recordings also contain the word "Fight". The **Fight Cue Seconds** field sets at which second of the recording "Fight" begins, so that it sounds only with the "FIGHT!!" text.
 - The **Countdown Tick Clip** and **Fight Clip** fields are optional and empty by default.
 

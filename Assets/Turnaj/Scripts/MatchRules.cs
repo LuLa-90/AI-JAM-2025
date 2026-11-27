@@ -64,6 +64,14 @@ namespace Turnaj {
             return new Vector3(2f * centre.x - point.x, point.y, 2f * centre.z - point.z);
         }
 
+        /// <summary>Shown when the referee separates stuck robots (W twice).</summary>
+        public const string SeparatorText = "Lack of Action, Fight!";
+
+        /// <summary>How long the separator text stays: as long as its voice clip, but long enough to read.</summary>
+        public static float SeparatorTextSeconds(float clipSeconds) {
+            return Mathf.Max(1.5f, clipSeconds);
+        }
+
         public static string PointsLabel(int points) {
             return points == 1 ? "+1 point" : $"+{points} points";
         }

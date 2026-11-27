@@ -80,5 +80,21 @@ namespace Turnaj.Tests {
             Assert.IsTrue(tap.Tap(10.7f));
             Assert.IsFalse(tap.Tap(10.9f)); // a third quick tap starts a new pair
         }
+
+        [Test]
+        public void Separator_ShowsLackOfAction() {
+            Assert.AreEqual("Lack of Action, Fight!", MatchRules.SeparatorText);
+        }
+
+        [Test]
+        public void Separator_TextStaysWhileTheVoiceSpeaks() {
+            Assert.AreEqual(2.4f, MatchRules.SeparatorTextSeconds(2.4f), 1e-4f);
+        }
+
+        [Test]
+        public void Separator_WithoutASound_TextIsStillReadable() {
+            Assert.AreEqual(1.5f, MatchRules.SeparatorTextSeconds(0f), 1e-4f, "no clip assigned");
+            Assert.AreEqual(1.5f, MatchRules.SeparatorTextSeconds(0.3f), 1e-4f, "a very short clip");
+        }
     }
 }

@@ -683,13 +683,13 @@ Po prezentáciách skontrolujte tímy po jednom vo validačnej scéne ([kapitola
 2. **Medzerník:** zaznie „Round 1" (alebo „Round 2", „Final round"), beží odpočítavanie 3-2-1, potom „FIGHT!!" a roboty sa uvoľnia.
 3. **Počas kola** sú na obrazovke panely HP oboch tímov, skóre kôl a časovač, ktorý pod 10 s sčervenie.
 4. **Návrat po páde alebo prevrátení:** robot sa vracia na svoju značku. Ak je súper bližšie než 0,5 m od nej, použije sa bod zrkadlený cez stred arény.
-5. **Rozdeľovač (W ×2):** každý robot dostane jednorazový odraz od súpera s miernym nadvihnutím. Sám nespôsobuje poškodenie, ale pád, ktorý vyvolá, sa trestá ako zvyčajne. Má prestávku 1 s a na obrazovke sa krátko ukáže „BREAK!".
+5. **Rozdeľovač (W ×2):** každý robot dostane jednorazový odraz od súpera s miernym nadvihnutím. Sám nespôsobuje poškodenie, ale pád, ktorý vyvolá, sa trestá ako zvyčajne. Má prestávku 1 s. Zaznie hlas „Lack of Action, Fight!" a ten istý nápis je na obrazovke, kým hlas hovorí (asi 3 s).
 6. **Koniec kola:** krátka správa o víťazovi a návrat na čakaciu obrazovku s názvom ďalšieho kola. „Flawless victory" zaznie, keď má víťaz kola na ukazovateli viac než 51 % HP.
 7. **Výmena arény:** objekty, ktoré aréna vytvorila mimo seba, scéna pri zmene kola zničí a vypíše varovanie do konzoly.
 8. **Koniec zápasu:** obrazovka víťaza so skóre a ligovými bodmi. V Inspectore je rovnaký súhrn a riadok za každé kolo; tlačidlo **Copy result to clipboard** ho skopíruje na zapísanie na web.
 
 ### 7.6 Zvuky
-Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v časti **Sounds**: `round-1`, `round-2`, `final-round`, `flawless-victory` a `hahaha` (výhra kola).
+Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v časti **Sounds**: `round-1`, `round-2`, `final-round`, `flawless-victory`, `hahaha` (výhra kola) a `Lack of Action, Fight!` (rozdeľovač, pole **Lack Of Action Clip**).
 - Nahrávky kôl obsahujú aj slovo „Fight". Pole **Fight Cue Seconds** určuje, v ktorej sekunde nahrávky sa „Fight" začína, aby zaznelo až pri nápise „FIGHT!!".
 - Polia **Countdown Tick Clip** a **Fight Clip** sú voliteľné a predvolene prázdne.
 
