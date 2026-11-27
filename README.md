@@ -46,11 +46,11 @@ Nainštalujte [Git for Windows](https://git-scm.com/download/win).
 
 ### 1.3 Pythonové prostredie (Miniconda)
 1. Nainštalujte [Minicondu](https://docs.conda.io/en/latest/miniconda.html).
-2. Otvorte **Anaconda Prompt** a vytvorte prostredie `aijam`:
+2. Otvorte **Anaconda Prompt** a vytvorte prostredie `mlagents`:
 
 ```
-conda create -n aijam python=3.10.12 -y
-conda activate aijam
+conda create -n mlagents python=3.10.12 -y
+conda activate mlagents
 ```
 
 3. Nainštalujte PyTorch. S grafikou NVIDIA použite verziu pre CUDA 12.1:
@@ -76,7 +76,7 @@ pip install mlagents==1.1.0 "setuptools<81"
 > - **git:** použite `git -c http.sslBackend=schannel clone ...`.
 
 ### 1.4 Kontrola inštalácie
-V Anaconda Prompte s aktívnym prostredím `aijam`:
+V Anaconda Prompte s aktívnym prostredím `mlagents`:
 
 ```
 python --version
@@ -96,12 +96,12 @@ Ak `mlagents-learn` zlyhá s chybou `No module named 'pkg_resources'`, spustite 
 1. Naklonujte repozitár:
 
 ```
-git clone --depth 1 https://github.com/LuLa-90/AI-JAM-2025.git
+git clone --depth 1 https://github.com/LuLa-90/AI-JAM-2025.git D:\AI-JAM-2026
 ```
 
    Prepínač `--depth 1` stiahne iba aktuálny stav projektu (asi 100 MB). Bez neho by sa stiahla celá história repozitára, asi 1,5 GB. Novšie zmeny si neskôr stiahnete bežným `git pull`.
 
-2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `AI-JAM-2025`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá niekoľko minút.
+2. V Unity Hub kliknite na **Add → Add project from disk** a vyberte priečinok `D:\AI-JAM-2026`. Otvorte ho vo verzii **6000.6.6f1**. Prvý import trvá niekoľko minút.
 3. **Importujte zdroje TextMesh Pro** (raz pre každý klon, priečinok nie je v Gite): **Window → TextMeshPro → Import TMP Essential Resources**. Bez nich skripty HUD hádžu chyby, Play mode sa pozastaví a tréning vyprší.
 4. *(Voliteľné)* Načítajte rozloženie okien projektu: **Window → Layouts → Load Layout from File…** a vyberte `aijam_layout.wlt` v priečinku projektu.
 5. Skontrolujte balíky: vo **Window → Package Manager** by mal mať *ML Agents* verziu **4.1.0**. V konzole (Console) by nemali byť červené chyby.
@@ -276,8 +276,8 @@ Príklady sú v `Assets/Turnaj/Teams`.
 V Anaconda Prompte:
 
 ```
-conda activate aijam
-cd <cesta-k>\AI-JAM-2025
+conda activate mlagents
+cd /d D:\AI-JAM-2026
 mlagents-learn Assets/konfig.yaml --run-id=moj_prvy_beh --timeout-wait 300
 ```
 
@@ -362,7 +362,7 @@ Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to by�
 
 **Nahratie bez klávesnice (DemoDriver).** Ak k Demonstration Recorderu pridáte na robota aj komponent **Demo Driver**, robot v režime Heuristic Only jazdí sám: otočí sa k súperovi, narazí, cúvne a narazí znova. Takto vznikli ukážky `RamEnemy`. Hodí sa to, keď chcete ukážky presne pre svoje senzory a nechcete jazdiť ručne. Pri piatich arénach získate za dve minúty asi 5 600 krokov. Pred odovzdaním robota oba komponenty odstráňte; validácia na `DemoDriver` upozorní ako na vlastný skript.
 
-**Pokračovanie z hotového modelu (učiteľ a žiak).** Nový robot môže začať s váhami hotového modelu namiesto náhodných. Skript `Assets/train_student.ps1` skopíruje váhy modelu Santabumpers (`Assets/DatabaseOfRobots/DJeMenTi`) do súboru `Student_Initialized.pt` a spustí tréning s konfiguráciou `Assets/robot_teacher_student.yaml`. Spustite ho v prostredí `aijam` z priečinka projektu:
+**Pokračovanie z hotového modelu (učiteľ a žiak).** Nový robot môže začať s váhami hotového modelu namiesto náhodných. Skript `Assets/train_student.ps1` skopíruje váhy modelu Santabumpers (`Assets/DatabaseOfRobots/DJeMenTi`) do súboru `Student_Initialized.pt` a spustí tréning s konfiguráciou `Assets/robot_teacher_student.yaml`. Spustite ho v prostredí `mlagents` z priečinka projektu:
 
 ```
 powershell -ExecutionPolicy Bypass -File Assets\train_student.ps1
