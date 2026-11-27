@@ -116,3 +116,7 @@ InitTestScene*.unity*
 /Assets/Training Results/**/timers.json.meta
 /Assets/Training Results/**/training_status.json
 /Assets/Training Results/**/training_status.json.meta
+
+# Local testing assets, not part of the project
+/Assets/ignore/
+/Assets/ignore.meta

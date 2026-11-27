@@ -30,6 +30,12 @@ namespace AIJam.Validation {
         public List<soTeam> Teams = new List<soTeam>();
         [HideInInspector] public int TeamIndex;
 
+        [Header("One robot or one arena (optional)")]
+        [Tooltip("Robot prefab for 'Validate robot only'. Empty = the robot of the picked team.")]
+        public GameObject SingleRobot;
+        [Tooltip("Arena prefab for 'Validate arena only'. Empty = the arena of the picked team.")]
+        public GameObject SingleArena;
+
         [Header("Setup")]
         public ValidationRules Rules;
         [Tooltip("Scripted enemy (a valid robot; its model is not used).")]
@@ -54,6 +60,11 @@ namespace AIJam.Validation {
         public soTeam Team => TeamIndex >= 0 && TeamIndex < Teams.Count ? Teams[TeamIndex] : null;
         public GameObject RobotInstance => robot != null ? robot.gameObject : null;
         public GameObject ArenaInstance => arena;
+        /// <summary>Prefabs the last validation looked at (for selecting the object of a finding).</summary>
+        public GameObject CheckedRobot { get; private set; }
+        public GameObject CheckedArena { get; private set; }
+        public GameObject RobotToCheck => SingleRobot != null ? SingleRobot : Team != null ? Team.RobotPrefab : null;
+        public GameObject ArenaToCheck => SingleArena != null ? SingleArena : Team != null ? Team.ArenaPrefab : null;
 
         private GameObject arena, matchRoot;
         private SceneRoots roots; // arena rule: runtime spawns must stay under the arena
@@ -126,8 +137,28 @@ namespace AIJam.Validation {
         // ------------------------------------------------------------------ 1. validation
 
         public void RunValidation() {
-            Findings = TeamValidation.FullCheck(Team, Rules);
-            FindingsReport = AIJam.Validation.Findings.Report($"Validation – {(Team != null ? Team.DisplayName : "no team")}", Findings);
+            CheckedRobot = Team != null ? Team.RobotPrefab : null;
+            CheckedArena = Team != null ? Team.ArenaPrefab : null;
+            Show(TeamValidation.FullCheck(Team, Rules), Team != null ? Team.DisplayName : "no team");
+        }
+
+        /// <summary>Rule check of one robot prefab only: no team, no arena needed.</summary>
+        public void RunRobotValidation() {
+            CheckedRobot = RobotToCheck;
+            CheckedArena = null;
+            Show(TeamValidation.RobotCheck(CheckedRobot, Rules), "robot " + (CheckedRobot != null ? CheckedRobot.name : "(none)"));
+        }
+
+        /// <summary>Rule check of one arena prefab only: no team, no robot needed.</summary>
+        public void RunArenaValidation() {
+            CheckedRobot = null;
+            CheckedArena = ArenaToCheck;
+            Show(TeamValidation.ArenaCheck(CheckedArena, Rules), "arena " + (CheckedArena != null ? CheckedArena.name : "(none)"));
+        }
+
+        private void Show(List<Finding> findings, string what) {
+            Findings = findings;
+            FindingsReport = AIJam.Validation.Findings.Report($"Validation – {what}", Findings);
             Debug.Log("[Validation] " + FindingsReport);
         }
 

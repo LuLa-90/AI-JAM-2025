@@ -294,13 +294,13 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
-        public void Validator_WheelsResizedByFifteenPercent_Fails() {
-            AssertFails(Robot(r => Find(r, "wheels_shape").localScale *= 1.15f), "Size", "wheels_shape");
+        public void Validator_WheelsResizedByThirtyPercent_Fails() {
+            AssertFails(Robot(r => Find(r, "wheels_shape").localScale *= 1.3f), "Size", "wheels_shape");
         }
 
         [Test]
-        public void Validator_WheelsResizedByEightPercent_Passes() {
-            var f = Robot(r => Find(r, "wheels_shape").localScale *= 1.08f);
+        public void Validator_WheelsResizedByAFifth_Passes() {
+            var f = Robot(r => Find(r, "wheels_shape").localScale *= 1.2f);
             Assert.IsFalse(Has(f, "Size"), string.Join("\n", f));
         }
 
@@ -313,6 +313,45 @@ namespace AIJam.Validation.Tests {
         public void Validator_ArmMoved_HasNoPositionLimit() {
             var f = Robot(r => Find(r, "Arm_Shape2").localPosition += new Vector3(0f, 0f, 0.05f));
             Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        // ---------------------------------------------------------------- one robot or one arena, without a team
+        [Test]
+        public void SingleRobot_ReferenceRobot_PassesAndIsTaggedRobot() {
+            var f = Turnaj.TeamValidation.RobotCheck(AssetDatabase.LoadAssetAtPath<GameObject>(RobotPath), rules);
+            Assert.IsFalse(f.HasErrors(), string.Join("\n", f));
+            Assert.IsTrue(f.All(x => x.Source == "Robot"), "every finding names its source");
+        }
+
+        [Test]
+        public void SingleRobot_NoPrefab_Fails() {
+            var f = Turnaj.TeamValidation.RobotCheck(null, rules);
+            Assert.IsTrue(f.HasErrors());
+            Assert.AreEqual("Robot", f[0].Source);
+        }
+
+        [Test]
+        public void SingleRobot_ArenaGivenAsRobot_Fails() {
+            Assert.IsTrue(Turnaj.TeamValidation.RobotCheck(AssetDatabase.LoadAssetAtPath<GameObject>(ArenaPath), rules).HasErrors());
+        }
+
+        [Test]
+        public void SingleArena_NeutralArena_PassesAndIsTaggedArena() {
+            var f = Turnaj.TeamValidation.ArenaCheck(AssetDatabase.LoadAssetAtPath<GameObject>(ArenaPath), rules);
+            Assert.IsFalse(f.HasErrors(), string.Join("\n", f));
+            Assert.IsTrue(f.All(x => x.Source == "Arena"), "every finding names its source");
+        }
+
+        [Test]
+        public void SingleArena_NoPrefab_Fails() {
+            var f = Turnaj.TeamValidation.ArenaCheck(null, rules);
+            Assert.IsTrue(f.HasErrors());
+            Assert.AreEqual("Arena", f[0].Source);
+        }
+
+        [Test]
+        public void SingleArena_RobotGivenAsArena_Fails() {
+            Assert.IsTrue(Turnaj.TeamValidation.ArenaCheck(AssetDatabase.LoadAssetAtPath<GameObject>(RobotPath), rules).HasErrors());
         }
 
         [Test]

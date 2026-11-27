@@ -57,12 +57,27 @@ namespace Turnaj {
             var all = new List<AIJam.Validation.Finding>();
             foreach (var p in CheckTeam(team)) all.Add(new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, "Team", p) { Source = "Team" });
             if (team == null) return all;
-            if (team.RobotPrefab != null) all.AddRange(Tag(ValidatePrefab(team.RobotPrefab, go => AIJam.Validation.RobotValidator.Validate(go, rules)), "Robot"));
-            if (team.ArenaPrefab != null) all.AddRange(Tag(ValidatePrefab(team.ArenaPrefab, go => AIJam.Validation.ArenaValidator.Validate(go, rules)), "Arena"));
+            if (team.RobotPrefab != null) all.AddRange(RobotCheck(team.RobotPrefab, rules));
+            if (team.ArenaPrefab != null) all.AddRange(ArenaCheck(team.ArenaPrefab, rules));
             if (team.RobotPrefab != null && team.RobotPrefab == team.ArenaPrefab)
                 all.Add(new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, "Team", "Robot and arena must be separate prefabs.") { Source = "Team" });
             return all;
         }
+
+        /// <summary>Rule check of one robot prefab, without a team.</summary>
+        public static List<AIJam.Validation.Finding> RobotCheck(GameObject robotPrefab, AIJam.Validation.ValidationRules rules) {
+            if (robotPrefab == null) return Missing("Robot", "No robot prefab to validate.");
+            return Tag(ValidatePrefab(robotPrefab, go => AIJam.Validation.RobotValidator.Validate(go, rules)), "Robot");
+        }
+
+        /// <summary>Rule check of one arena prefab, without a team.</summary>
+        public static List<AIJam.Validation.Finding> ArenaCheck(GameObject arenaPrefab, AIJam.Validation.ValidationRules rules) {
+            if (arenaPrefab == null) return Missing("Arena", "No arena prefab to validate.");
+            return Tag(ValidatePrefab(arenaPrefab, go => AIJam.Validation.ArenaValidator.Validate(go, rules)), "Arena");
+        }
+
+        private static List<AIJam.Validation.Finding> Missing(string source, string message) =>
+            new List<AIJam.Validation.Finding> { new AIJam.Validation.Finding(AIJam.Validation.Severity.Error, source, message) { Source = source } };
 
         public static List<AIJam.Validation.Finding> ValidatePrefab(GameObject prefab, System.Func<GameObject, List<AIJam.Validation.Finding>> check) {
 #if UNITY_EDITOR
@@ -76,7 +91,7 @@ namespace Turnaj {
 #endif
         }
 
-        private static IEnumerable<AIJam.Validation.Finding> Tag(List<AIJam.Validation.Finding> f, string source) {
+        private static List<AIJam.Validation.Finding> Tag(List<AIJam.Validation.Finding> f, string source) {
             foreach (var x in f) x.Source = source;
             return f;
         }

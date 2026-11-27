@@ -398,6 +398,13 @@ Validačná scéna kontroluje robota a arénu podľa [pravidiel](#6-pravidlá). 
    - **Chyby** musíte opraviť.
    - **Varovania** (napríklad vlastné skripty) posúdi človek.
 
+**Iba robot alebo iba aréna.** Ak ešte nemáte tímový asset alebo chcete skontrolovať len jednu vec, použite časť **One robot or one arena** pod tlačidlom Run validation. Play mode na to netreba.
+- Do poľa **Robot prefab** pretiahnite prefab robota a kliknite na **Validate robot only**. Skontrolujú sa iba pravidlá robota (6.2); aréna ani tím nie sú potrebné.
+- Do poľa **Arena prefab** pretiahnite prefab arény a kliknite na **Validate arena only**. Skontrolujú sa iba pravidlá arény (6.3).
+- Keď pole necháte prázdne, tlačidlo skontroluje robota alebo arénu tímu vybraného v zozname.
+
+Pred turnajom aj tak spustite celé **Run validation**: iba ono kontroluje tím ako celok (meno tímu, priradený robot a aréna).
+
 Výsledok bez problémov vyzerá takto:
 
 ```
@@ -506,7 +513,7 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
    |---|---|---|---|
    | Telo (`body_shape`) | ±25 % | žiadny | žiadne |
    | Batéria (`battery_shape`) | žiadna | ±5 cm v každej osi | žiadne |
-   | Kolesá (`wheels_shape`) | ±10 % | žiadny | žiadne |
+   | Kolesá (`wheels_shape`) | ±25 % | žiadny | žiadne |
    | Nárazník (`bumper_shape`) | ±25 % | najviac 25 % vlastnej veľkosti v každej osi | ľubovoľné |
    | Rameno a zbraň (`arm_armbase_shape`, `arm_weapon_shape`) | ±25 % | voľný | voľné |
 
@@ -524,7 +531,7 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 
    Akýkoľvek iný collider je chyba. Nemôžete pridať štíty, hroty ani skryté bloky.
 2. **Tvar:** collider si ponecháva pôvodný mesh. Mesh sa nesmie vymeniť za iný.
-3. **Veľkosť:** každá os collidera sa smie líšiť od prefabu dielu najviac o hodnotu z tabuľky v 6.2.2, bod 4 (telo, rameno, zbraň a nárazníky ±25 %, kolesá ±10 %, batéria 0 %). Každá os sa kontroluje zvlášť.
+3. **Veľkosť:** každá os collidera sa smie líšiť od prefabu dielu najviac o hodnotu z tabuľky v 6.2.2, bod 4 (telo, rameno, zbraň, kolesá a nárazníky ±25 %, batéria 0 %). Každá os sa kontroluje zvlášť.
    - Veľkosť sa meria voči koreňu robota. Počíta sa aj zmena mierky nadradeného objektu.
 4. **Pozícia:** podľa tabuľky v 6.2.2, bod 4, a podľa pravidla o dotyku a prekrytí (6.2.2, bod 3). Kópia dielu pre pohľad agenta sa musí hýbať spolu s colliderom. Collidery senzorov a `ButtMarker` sú pevné.
 5. Collidery zostávajú zapnuté, pevné (nie triggery) a ponechávajú si fyzikálny materiál.

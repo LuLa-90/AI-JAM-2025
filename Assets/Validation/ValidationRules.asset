@@ -40,7 +40,7 @@ MonoBehaviour:
   - Name: Wheel sets
     Min: 2
     Max: 2
-    ScaleTolerancePercent: 10
+    ScaleTolerancePercent: 25
     Move: 1
     MovePercentOfSize: 0
     Parts:

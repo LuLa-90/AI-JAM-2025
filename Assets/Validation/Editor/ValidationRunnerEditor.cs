@@ -11,6 +11,7 @@ namespace AIJam.Validation.EditorTools {
 
         public override void OnInspectorGUI() {
             var r = (ValidationRunner)target;
+            serializedObject.Update();
 
             EditorGUILayout.LabelField("Team", EditorStyles.boldLabel);
             var labels = r.Teams.Select((t, i) => $"{(char)('A' + i)} – {(t != null ? t.DisplayName : "(empty)")}").ToArray();
@@ -30,6 +31,16 @@ namespace AIJam.Validation.EditorTools {
 
             EditorGUILayout.Space();
             if (GUILayout.Button("Run validation", GUILayout.Height(30))) r.RunValidation();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("One robot or one arena", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ValidationRunner.SingleRobot)), new GUIContent("Robot prefab"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(ValidationRunner.SingleArena)), new GUIContent("Arena prefab"));
+            serializedObject.ApplyModifiedProperties();
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(new GUIContent("Validate robot only", "Empty Robot prefab = the picked team's robot."), GUILayout.Height(24))) r.RunRobotValidation();
+            if (GUILayout.Button(new GUIContent("Validate arena only", "Empty Arena prefab = the picked team's arena."), GUILayout.Height(24))) r.RunArenaValidation();
+            EditorGUILayout.EndHorizontal();
             DrawFindings(r);
 
             EditorGUILayout.Space();
@@ -62,7 +73,9 @@ namespace AIJam.Validation.EditorTools {
             }
 
             EditorGUILayout.Space();
-            DrawDefaultInspector();
+            serializedObject.Update();
+            DrawPropertiesExcluding(serializedObject, "m_Script", nameof(ValidationRunner.SingleRobot), nameof(ValidationRunner.SingleArena));
+            serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawFindings(ValidationRunner r) {
@@ -90,11 +103,13 @@ namespace AIJam.Validation.EditorTools {
         /// <summary>Selects the offending object: the live instance in Play mode, otherwise the object inside the prefab asset.</summary>
         private static void Select(ValidationRunner r, Finding f) {
             var team = r.Team;
-            if (team == null) return;
-            GameObject live = f.Source == "Robot" ? r.RobotInstance : f.Source == "Arena" ? r.ArenaInstance : null;
-            GameObject asset = f.Source == "Robot" ? team.RobotPrefab : f.Source == "Arena" ? team.ArenaPrefab : null;
+            GameObject asset = f.Source == "Robot" ? r.CheckedRobot : f.Source == "Arena" ? r.CheckedArena : null;
+            // the live instance belongs to the picked team; use it only when that team's prefab was the one checked
+            GameObject live = null;
+            if (team != null && f.Source == "Robot" && asset == team.RobotPrefab) live = r.RobotInstance;
+            if (team != null && f.Source == "Arena" && asset == team.ArenaPrefab) live = r.ArenaInstance;
             var root = live != null ? live : asset;
-            if (root == null) { Selection.activeObject = team; return; }
+            if (root == null) { if (team != null) Selection.activeObject = team; return; }
             var t = string.IsNullOrEmpty(f.Path) ? root.transform : root.transform.Find(f.Path);
             var obj = t != null ? t.gameObject : root;
             Selection.activeObject = obj;
