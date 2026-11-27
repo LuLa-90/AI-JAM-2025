@@ -454,7 +454,7 @@ namespace AIJam.RobotScripts.Tests {
             Object.DestroyImmediate(robot.GetComponentInChildren<ArmComponent>().gameObject);
             var agent = robot.GetComponent<RobotAgent>();
             typeof(RobotAgent).GetField("robotMovement", Private).SetValue(agent, robot.GetComponent<RobotMovement>());
-            typeof(RobotAgent).GetField("zoneComponents", Private).SetValue(agent, new CollisionZoneBehaviour[0]);
+            agent.zoneComponents = new CollisionZoneBehaviour[0];
 
             Assert.AreEqual(0f, (float)Call(agent, "GetRewards_ArmRelease"));
             Assert.AreEqual(0f, (float)Call(agent, "GetRewards_collisionCombination"));
@@ -623,6 +623,30 @@ namespace AIJam.RobotScripts.Tests {
             Assert.AreEqual(1, DemoDriver.ArmAction(new Vector3(0.1f, 0f, 0.8f)));
             Assert.AreEqual(0, DemoDriver.ArmAction(new Vector3(0f, 0f, 3f)), "too far");
             Assert.AreEqual(0, DemoDriver.ArmAction(new Vector3(0f, 0f, -0.8f)), "behind");
+        }
+
+        // ---- flip detection: a robot counts as flipped when it leans more than about 66 degrees ----
+
+        private static Vector3 UpWhenTilted(float degrees) => Quaternion.Euler(degrees, 0f, 0f) * Vector3.up;
+
+        [Test]
+        public void Flip_RobotLeaningFiftyDegrees_IsNotFlipped() {
+            Assert.IsFalse(RobotAgent.IsFlipped(UpWhenTilted(50f)), "a hard ram can tip a robot this far; it recovers");
+        }
+
+        [Test]
+        public void Flip_RobotLeaningSeventyDegrees_IsFlipped() {
+            Assert.IsTrue(RobotAgent.IsFlipped(UpWhenTilted(70f)));
+        }
+
+        [Test]
+        public void Flip_RobotOnItsRoof_IsFlipped() {
+            Assert.IsTrue(RobotAgent.IsFlipped(Vector3.down));
+        }
+
+        [Test]
+        public void Flip_UprightRobot_IsNotFlipped() {
+            Assert.IsFalse(RobotAgent.IsFlipped(Vector3.up));
         }
     }
 }

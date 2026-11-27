@@ -630,7 +630,7 @@ Vlastné skripty na robote sú povolené, ale validácia ich vypíše ako varova
    - Dotyk s arénou bez sily (státie, jazda po podlahe) HP neuberá. Tvrdý náraz do steny áno.
 3. **HP robota** je vážený priemer HP jeho zón. Robot je **vyradený**, keď tento priemer klesne na **0,2** alebo nižšie. Ukazovateľ HP v turnaji vtedy ukazuje 0 %.
 4. **Pád z arény:** −0,3 HP na každej zóne.
-5. **Prevrátenie:** −0,2 HP na každej zóne.
+5. **Prevrátenie:** −0,2 HP na každej zóne. Robot sa počíta za prevrátený, keď sa nakloní o viac než asi 66° (na bok alebo na strechu).
 6. Hodnoty zón sa priraďujú podľa **názvu objektu**, preto sa objekty zón nesmú premenovať (6.2.2, bod 5).
 
 ---

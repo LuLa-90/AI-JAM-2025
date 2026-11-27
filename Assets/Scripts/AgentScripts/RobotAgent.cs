@@ -30,7 +30,7 @@ public class RobotAgent : Agent {
     [SerializeField] private RewardEditor rewardEditor;
     private BehaviorParameters behavior;
     private RobotMovement robotMovement;
-    private CollisionZoneBehaviour[] zoneComponents;
+    public CollisionZoneBehaviour[] zoneComponents;
     private IHealth[] healthComponents;
     [HideInInspector] public RobotAgent enemyRobot;
     private bool isHeuristic = false;
@@ -222,6 +222,11 @@ public class RobotAgent : Agent {
 
     // ---------------------------- HANDLE REWARDS ----------------------------
 
+    /// <summary>The robot counts as flipped when its up axis points less than this much upwards (1 = upright, 0 = on its side).</summary>
+    public const float FlippedBelow = 0.4f;
+
+    public static bool IsFlipped(Vector3 robotUp) => Vector3.Dot(robotUp, Vector3.up) < FlippedBelow;
+
     private void Update() {
         //AddReward(0.001f);
 
@@ -236,8 +241,7 @@ public class RobotAgent : Agent {
             OnRobotRespawn?.Invoke(this, System.EventArgs.Empty);
         }
 
-        float rotationUp = Vector3.Dot(transform.up, Vector3.up);
-        if (rotationUp < 0.75f) { // origin 0.2f
+        if (IsFlipped(transform.up)) {
             Debug.Log("Robot flipped over!");
 
             foreach (var zone in zoneComponents) {

@@ -630,7 +630,7 @@ Custom scripts on the robot are allowed, but validation lists them as warnings a
    - Contact with the arena without force (standing, driving on the floor) takes no HP. A hard impact into the wall does.
 3. **The robot's HP** is the weighted average of the HP of its zones. The robot is **knocked out** when this average falls to **0.2** or lower. The HP indicator in the tournament then shows 0 %.
 4. **Falling out of the arena:** −0.3 HP on every zone.
-5. **Flipping over:** −0.2 HP on every zone.
+5. **Flipping over:** −0.2 HP on every zone. A robot counts as flipped when it leans by more than about 66° (onto its side or its roof).
 6. Zone values are assigned by the **object name**, which is why zone objects must not be renamed (6.2.2, point 5).
 
 ---
