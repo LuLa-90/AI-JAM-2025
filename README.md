@@ -1,5 +1,7 @@
 # AI JAM
 
+> English version: [README.en.md](README.en.md). Ak sa texty líšia, platí tento slovenský.
+
 Turnaj robotov ovládaných umelou inteligenciou, postavený v Unity s ML-Agents.
 1. Váš tím si z pripravených dielov postaví robota a domácu arénu.
 2. Robota natrénujete pomocou učenia s posilňovaním (reinforcement learning).
