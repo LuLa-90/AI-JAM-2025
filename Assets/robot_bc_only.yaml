@@ -19,7 +19,7 @@ behaviors:
       vis_encode_type: simple
 
     behavioral_cloning:
-      demo_path: C:/Users/Kubig/source/repos/LuLa-90/AI-JAM-2025/Assets/Demonstrations/DemoFullCombat.demo
+      demo_path: Assets/Demonstrations/RobotApproachFin.demo
       strength: 1.0
       steps: 50000
       batch_size: 128

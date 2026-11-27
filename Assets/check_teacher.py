@@ -1,7 +1,7 @@
 
 import torch
 
-PATH = "Assets/DatabaseOfRobots/die/Santabumpers-3499966.pt"
+PATH = "Assets/DatabaseOfRobots/DJeMenTi/Santabumpers-3499966.pt"
 
 print("Loading Teacher checkpoint...")
 checkpoint = torch.load(

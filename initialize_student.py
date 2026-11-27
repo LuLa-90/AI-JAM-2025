@@ -1,7 +1,7 @@
 ﻿import torch
 from pathlib import Path
 
-teacher_path = Path("Assets/DatabaseOfRobots/die/Santabumpers-3499966.pt")
+teacher_path = Path("Assets/DatabaseOfRobots/DJeMenTi/Santabumpers-3499966.pt")
 output_path = Path("Student_Initialized.pt")
 
 print("Loading Teacher checkpoint...")
