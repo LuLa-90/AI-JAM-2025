@@ -145,7 +145,7 @@ Postup:
 1. **Začnite z `Robot Agent Template`** a ponechajte komponenty koreňa ([pravidlo 6.2.1](#621-koreň-robota)).
 2. V **BehaviorParameters** nastavte **Behavior Name** na `RobotAgent`. Musí sa zhodovať s `konfig.yaml`.
 3. **Pridajte diely** z `Assets/Prefabs/Base Shapes`: jedno telo, jedno rameno, dve sady kolies a najviac tri nárazníky ([pravidlo 6.2.2](#622-diely)). Každý diel má povolenú inú zmenu veľkosti a iný posun; tabuľka je v pravidle 6.2.2, bod 4.
-   - Telo dajte priamo pod koreň. Všetko ostatné, vrátane kontajnerov `Wheels Left` a `Wheels Right`, presuňte pod telo.
+   - Telo dajte priamo pod koreň. Rameno a nárazníky presuňte pod telo. Kontajnery `Wheels Left` a `Wheels Right` môžu zostať pod koreňom ako v šablóne alebo ich môžete presunúť pod telo; kolesá sa musia iba dotýkať tela.
    - Diely umiestnite a natočte podľa seba. Musia sa dotýkať, ale nesmú sa prekrývať.
 4. **Pridajte senzory** (`ProximityRays`, `ButtSensorReciever`) podľa svojej stratégie. Kamera vidí steny čierne, takže ak má robot vnímať steny, pridajte `ProximityRays`.
 5. **Farby pohľadu agenta** nenastavujte ručne. Robí to komponent `PartVisionColor` na každom diele ([pravidlo 6.2.5](#625-pohľad-agenta)).
@@ -501,7 +501,8 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 
 2. **Štruktúra:**
    - Telo je **priamy potomok koreňa** robota.
-   - **Každý iný diel je pod telom**, v ľubovoľnej hĺbke. Platí to pre rameno, nárazníky aj kontajnery `Wheels Left` / `Wheels Right` s ich wheel collidermi.
+   - **Rameno a nárazníky sú pod telom**, v ľubovoľnej hĺbke.
+   - **Kolesá pod telom byť nemusia.** Kontajnery `Wheels Left` / `Wheels Right` s wheel collidermi a sadou kolies môžu zostať pod koreňom ako v šablóne alebo byť pod telom. V každom kontajneri je presne jedna sada kolies a tá sa musí dotýkať tela (bod 3).
    - `RobotCameraSensor`, `ButtMarker` a `Bounding Box` môžu zostať pod koreňom.
 3. **Diely sa musia dotýkať, ale nesmú sa prekrývať:**
    - kolesá, batéria, nárazníky a rameno sa dotýkajú tela;

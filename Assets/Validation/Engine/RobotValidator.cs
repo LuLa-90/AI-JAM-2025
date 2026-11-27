@@ -74,7 +74,8 @@ namespace AIJam.Validation {
             Transform body = bodies.Count == 1 ? bodies[0].Root : null;
             if (bodies.Count == 1 && body.parent != c.Root) c.Err("Structure", "The body part must be a direct child of the robot root.", body);
             if (body != null) {
-                foreach (var p in parts.Where(p => p.Root != body && !p.Root.IsChildOf(body)))
+                // wheels may hang anywhere in the robot (the template keeps them under the root); they only have to touch the body
+                foreach (var p in parts.Where(p => p.Root != body && !p.Root.IsChildOf(body) && p.Root.GetComponent<WheelComponent>() == null))
                     c.Err("Structure", $"'{p.Root.name}' must be under the body ({body.name}).", p.Root);
             }
 
@@ -89,12 +90,11 @@ namespace AIJam.Validation {
                 }
             }
 
-            // wheel containers: one wheel part each, under the body
+            // wheel containers: one wheel part each
             foreach (var side in new[] { "Wheels Left", "Wheels Right" }) {
                 var containers = c.Root.GetComponentsInChildren<Transform>(true).Where(t => t.name == side).ToList();
                 if (containers.Count != 1) { c.Err("Structure", $"Expected exactly one '{side}' container, found {containers.Count}."); continue; }
                 var box = containers[0];
-                if (body != null && !box.IsChildOf(body)) c.Err("Structure", $"'{side}' must be under the body ({body.name}).", box);
                 int wheels = parts.Count(p => p.Root.GetComponent<WheelComponent>() != null && p.Root.IsChildOf(box));
                 if (wheels != 1) c.Err("Structure", $"'{side}' must contain exactly one wheel part, found {wheels}.", box);
             }

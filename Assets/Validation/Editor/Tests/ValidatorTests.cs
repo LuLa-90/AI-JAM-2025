@@ -196,6 +196,24 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Validator_WheelsUnderTheRootInsteadOfTheBody_Pass() {
+            var f = Robot(r => {
+                Find(r, "Wheels Left").SetParent(r.transform, true);
+                Find(r, "Wheels Right").SetParent(r.transform, true);
+            });
+            Assert.IsFalse(f.HasErrors(), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_WheelsUnderTheRootNotTouchingTheBody_Fails() {
+            AssertFails(Robot(r => {
+                var left = Find(r, "Wheels Left");
+                left.SetParent(r.transform, true);
+                left.GetComponentInChildren<WheelComponent>().transform.position += Vector3.left;
+            }), "Attachment", "doesn't touch the body");
+        }
+
+        [Test]
         public void Validator_SensorColliderDisabled_Fails() {
             AssertFails(Robot(r => r.GetComponentInChildren<ProximitySensorRay>().GetComponentInChildren<SphereCollider>().enabled = false), "Colliders");
         }
