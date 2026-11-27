@@ -48,6 +48,7 @@ namespace AIJam.Validation {
         public PartPrint ButtMarker;
 
         public PartCatalog(ValidationRules rules) {
+            defaultOverlap.Clear(); // a part prefab may have been edited since the last check
             foreach (var g in rules.Groups)
                 foreach (var e in g.Parts)
                     if (e.Prefab != null) Parts.Add(Build(e.Prefab.transform, e.Prefab, g.Name, false));

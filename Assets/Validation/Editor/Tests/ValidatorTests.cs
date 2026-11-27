@@ -227,11 +227,13 @@ namespace AIJam.Validation.Tests {
 
         [Test]
         public void Parts_EveryWheelSetTouchesEveryBodyAtItsPrefabPlace() {
-            // wheels and body cannot be moved, so each combination has to be attached as the prefabs come
+            // wheels and body cannot be moved, so each combination has to be attached as the prefabs come,
+            // with a margin: a team that makes the body a little narrower must not lose the contact
+            const float safeContact = 0.003f;
             foreach (var body in Group("Body").Parts)
                 foreach (var wheels in Group("Wheel sets").Parts) {
                     float overlap = PartCatalog.DefaultOverlap(wheels.Prefab, body.Prefab, c => c.enabled && !c.isTrigger);
-                    Assert.GreaterOrEqual(overlap, rules.MinAttachmentPenetration, $"{wheels.Prefab.name} doesn't touch {body.Prefab.name}");
+                    Assert.GreaterOrEqual(overlap, safeContact, $"{wheels.Prefab.name} barely touches {body.Prefab.name}");
                 }
         }
 
