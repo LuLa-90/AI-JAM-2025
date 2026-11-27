@@ -320,7 +320,7 @@ Pri imitačnom učení robot najprv napodobňuje nahraté ručné riadenie a až
 | `RobotApproachFin.demo`, `RobotApproach.demo`, `RobotApproach_0.demo` | priblíženie k súperovi |
 | `TrainingMoves/` (6 súborov) | otočenie k súperovi z rôznych strán |
 
-> **Ukážka sedí iba na robota s rovnakými senzormi.** Hotové ukážky boli nahraté s kamerou 32 × 32 a 7 číselnými pozorovaniami. Ak má váš robot iné senzory, tréner ukážku odmietne a musíte si nahrať vlastnú.
+> **Ukážka sedí iba na robota s rovnakými pozorovaniami.** Hotové ukážky boli nahraté s kamerou 32 × 32 a s **Vector Observation → Space Size = 7** v BehaviorParameters (3 pevné hodnoty a 4 senzory). Takto je nastavený `Robot Agent Template` aj roboty z minulého ročníka. Referenčný robot a testovacie roboty majú Space Size 10, preto na ne hotové ukážky nesedia: tréner skončí chybou „shape … do not match“. Vtedy si nahrajte vlastnú ukážku.
 
 **Tréning s ukážkou.** Postup je rovnaký ako v [3.2](#32-spustenie-trénera), iba použijete inú konfiguráciu:
 
@@ -340,15 +340,16 @@ Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to by�
 **Nahratie vlastnej ukážky**
 1. Otvorte prefab svojho robota a pridajte komponent **Demonstration Recorder**. Zapnite **Record**, vyplňte **Demonstration Name** a do **Demonstration Directory** napíšte `Assets/Demonstrations`.
 2. V **BehaviorParameters** nastavte **Behavior Type** na **Heuristic Only**, aby ste robota riadili vy.
-3. Stlačte Play bez spusteného trénera a jazdite:
+3. V TrainingScene nastavte na **AIJamManager** **Num Of Arenas** na **One**. Inak sa nahrá jeden súbor za každú arénu (`Meno.demo`, `Meno_0.demo`, …) a všetky roboty riadite naraz tými istými klávesmi.
+4. Stlačte Play bez spusteného trénera a jazdite:
 
    | Ovládanie | Klávesnica | Gamepad |
    |---|---|---|
    | Ľavý pás dopredu / dozadu | Q / A | ľavá páčka |
    | Pravý pás dopredu / dozadu | P / L | pravá páčka |
    | Rameno | medzerník | horné tlačidlá (LB, RB) |
-4. Zastavte Play. Súbor `.demo` sa uloží do zvoleného priečinka. Nahrávajte iba jazdu, ktorú má robot napodobniť; chyby sa naučí tiež.
-5. Pred tréningom vypnite **Record** a vráťte **Behavior Type** na **Default**.
+5. Zastavte Play. Súbor `.demo` sa uloží do zvoleného priečinka. Nahrávajte iba jazdu, ktorú má robot napodobniť; chyby sa naučí tiež.
+6. Pred tréningom vypnite **Record**, vráťte **Behavior Type** na **Default** a **Num Of Arenas** na pôvodnú hodnotu.
 
 **Pokračovanie z hotového modelu (učiteľ a žiak).** Nový robot môže začať s váhami hotového modelu namiesto náhodných. Skript `Assets/train_student.ps1` skopíruje váhy modelu Santabumpers (`Assets/DatabaseOfRobots/DJeMenTi`) do súboru `Student_Initialized.pt` a spustí tréning s konfiguráciou `Assets/robot_teacher_student.yaml`. Spustite ho v prostredí `aijam` z priečinka projektu:
 
@@ -356,9 +357,9 @@ Ukážku určuje riadok `demo_path` v časti `behavioral_cloning`. Môže to by�
 powershell -ExecutionPolicy Bypass -File Assets\train_student.ps1
 ```
 
-Funguje to iba vtedy, keď má váš robot rovnaké senzory a akcie ako učiteľ.
+Funguje to iba vtedy, keď má váš robot rovnaké pozorovania a akcie ako učiteľ (kamera 32 × 32, Space Size 7) a Behavior Name `RobotAgent`. Prenáša sa iba rozhodovacia sieť; varovania trénera „Failed to load for module Optimizer“ sú preto v poriadku.
 
-**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani.
+**Roboty z minulého ročníka** sú v `Assets/DatabaseOfRobots`, každý tím vo vlastnom priečinku s prefabom robota, arénou a modelom `.onnx`. Môžete ich použiť ako súperov pri tréningu: priraďte prefab do **Robot Prefab B** a nastavte mu **Inference Only** (pozri poznámku v [3.1](#31-príprava-trénovacej-scény)). Ich modely vznikli pred úpravou poškodenia, preto nemusia bojovať tak dobre ako vlani. Prefaby v koreni priečinkov tímov (GREGORI, Santabumpers, Rumba2, Job_B 1, Kodzilla pokus, Panzeres) sa v TrainingScene načítajú a bojujú bez chýb.
 
 ---
 
