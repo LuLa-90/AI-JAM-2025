@@ -226,6 +226,16 @@ namespace AIJam.Validation.Tests {
         }
 
         [Test]
+        public void Parts_EveryWheelSetTouchesEveryBodyAtItsPrefabPlace() {
+            // wheels and body cannot be moved, so each combination has to be attached as the prefabs come
+            foreach (var body in Group("Body").Parts)
+                foreach (var wheels in Group("Wheel sets").Parts) {
+                    float overlap = PartCatalog.DefaultOverlap(wheels.Prefab, body.Prefab, c => c.enabled && !c.isTrigger);
+                    Assert.GreaterOrEqual(overlap, rules.MinAttachmentPenetration, $"{wheels.Prefab.name} doesn't touch {body.Prefab.name}");
+                }
+        }
+
+        [Test]
         public void Validator_SensorColliderDisabled_Fails() {
             AssertFails(Robot(r => r.GetComponentInChildren<ProximitySensorRay>().GetComponentInChildren<SphereCollider>().enabled = false), "Colliders");
         }
