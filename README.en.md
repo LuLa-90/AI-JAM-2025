@@ -24,6 +24,7 @@ How the event runs:
 | [6. Rules](#6-rules) | Rules for the team, robot, arena and match, damage and HP |
 | [7. For organisers](#7-for-organisers) | Rule settings, final validation, director and referee |
 | [8. Troubleshooting](#8-troubleshooting) | Common errors and how to fix them |
+| [9. A project copied without Git](#9-a-project-copied-without-git-zip-usb-stick) | Connecting a project from a ZIP or a USB stick to GitHub, so that `git pull` works |
 
 ---
 
@@ -708,6 +709,61 @@ The voices are in `Assets/Turnaj/Sounds` and are assigned on the **Tournament** 
 | The opponent behaves strangely during training | Set its Behavior Type to **Inference Only** (section 3.1). |
 | You want the robot's model to stop acting | Remove the `DecisionRequester` component. Disabling it is not enough: ML-Agents requests decisions anyway. |
 | Certificate errors in pip, conda or git | See the SSL note in section 1.3. |
+| `git pull` stops with `fatal: not a git repository` | The project was copied from a ZIP or a USB stick. Run `fix_git.bat` ([chapter 9](#9-a-project-copied-without-git-zip-usb-stick)). |
 | The trainer stops with the error "The behavior name … has not been specified in the trainer configuration" | The robot's Behavior Name does not match the name in `konfig.yaml`. It should be `RobotAgent` in both places (section 3.1, step 2). |
 | The trainer stops with the error "shape … do not match" | The demonstration or the teacher model has a different number of observations than your robot (section 3.4). |
 | Validation reports "Vector observation size is …, must be 10" | In BehaviorParameters set **Vector Observation → Space Size** to 10 ([rule 6.2.6](#626-sensors)) and train the robot again. |
+
+---
+
+## 9. A project copied without Git (ZIP, USB stick)
+
+If you did not get the project with `git clone` (section 1.5), but as a ZIP from GitHub or by copying it from a USB stick, the folder contains no Git data. The `git pull` command stops in it with the error
+
+```
+fatal: not a git repository (or any of the parent directories): .git
+```
+
+and you cannot download later changes from GitHub. The folder only has to be connected to the repository once. You need Git installed (section 1.1) and an internet connection.
+
+### 9.1 Connecting with the `fix_git.bat` script
+1. **Close Unity.**
+2. **Copy aside the project files you edited yourself**, for example `Assets/konfig.yaml` or project scenes (TrainingScene with your sliders). The script overwrites them with the version from GitHub. Your own files (robot, arena, team asset, models) stay untouched.
+3. Copy `fix_git.bat` into the project folder, next to the `Assets` folder. If you do not have it there yet, download it from the repository page: https://github.com/LuLa-90/AI-JAM-2025/blob/master/fix_git.bat (the **Download raw file** button).
+4. Run it with a double click. It prints what it will do and waits for a key press.
+5. After the "Done" message open Unity. Compare the files you copied aside in step 2 with the new ones and put your edits back.
+
+The script only has to be run once. If the folder already is a Git repository, it changes nothing and only says so.
+
+### 9.2 What the script does
+You can run the same commands by hand in the project folder:
+
+```
+git init -b master
+git remote add origin https://github.com/LuLa-90/AI-JAM-2025.git
+git fetch --depth 1 origin master
+git reset origin/master
+git branch --set-upstream-to=origin/master
+git restore .
+```
+
+| Command | What it does |
+|---|---|
+| `git init -b master` | turns the folder into an empty Git repository with the `master` branch |
+| `git remote add origin …` | sets the address of the repository on GitHub |
+| `git fetch --depth 1 origin master` | downloads the current state of the project without history (about 100 MB) |
+| `git reset origin/master` | tells Git that the folder matches the downloaded state; it does not change files on disk |
+| `git branch --set-upstream-to=origin/master` | links the branch to GitHub, so that `git pull` knows where to download from |
+| `git restore .` | replaces the project files that differ with the version from GitHub; it leaves your own files |
+
+### 9.3 Downloading later changes
+From now on, in a command prompt:
+
+```
+cd /d D:\AI-JAM-2026
+git pull
+```
+
+Instead of `D:\AI-JAM-2026` type the folder where you have the project. Keep Unity closed while you do it.
+
+If `git pull` refuses to continue with the message "Your local changes to the following files would be overwritten", you edited a file that has also changed on GitHub in the meantime. Copy the file aside, run `git restore <file>`, then `git pull`, and put your edits back into it.

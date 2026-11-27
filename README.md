@@ -24,6 +24,7 @@ Priebeh podujatia:
 | [6. Pravidlá](#6-pravidlá) | Pravidlá tímu, robota, arény a zápasu, poškodenie a HP |
 | [7. Pre organizátorov](#7-pre-organizátorov) | Nastavenie pravidiel, finálna validácia, réžia a rozhodca |
 | [8. Riešenie problémov](#8-riešenie-problémov) | Časté chyby a ich oprava |
+| [9. Projekt skopírovaný bez Gitu](#9-projekt-skopírovaný-bez-gitu-zip-usb-kľúč) | Pripojenie projektu zo ZIP-u alebo USB kľúča ku GitHubu, aby fungoval `git pull` |
 
 ---
 
@@ -708,6 +709,61 @@ Hlasy sú v `Assets/Turnaj/Sounds` a priraďujú sa na objekte **Tournament** v 
 | Súper sa počas tréningu správa čudne | Nastavte mu Behavior Type na **Inference Only** (časť 3.1). |
 | Chcete, aby model robota prestal konať | Odstráňte komponent `DecisionRequester`. Vypnutie nestačí: ML-Agents aj tak žiada rozhodnutia. |
 | Chyby certifikátov v pip, conda alebo git | Pozrite poznámku o SSL v časti 1.3. |
+| `git pull` skončí chybou `fatal: not a git repository` | Projekt bol skopírovaný zo ZIP-u alebo USB kľúča. Spustite `fix_git.bat` ([kapitola 9](#9-projekt-skopírovaný-bez-gitu-zip-usb-kľúč)). |
 | Tréner skončí chybou „The behavior name … has not been specified in the trainer configuration“ | Behavior Name robota sa nezhoduje s menom v `konfig.yaml`. Na oboch miestach má byť `RobotAgent` (časť 3.1, krok 2). |
 | Tréner skončí chybou „shape … do not match“ | Ukážka alebo model učiteľa má iný počet pozorovaní než váš robot (časť 3.4). |
 | Validácia hlási „Vector observation size is …, must be 10“ | V BehaviorParameters nastavte **Vector Observation → Space Size** na 10 ([pravidlo 6.2.6](#626-senzory)) a robota natrénujte znova. |
+
+---
+
+## 9. Projekt skopírovaný bez Gitu (ZIP, USB kľúč)
+
+Ak ste projekt nezískali príkazom `git clone` (časť 1.5), ale ako ZIP z GitHubu alebo skopírovaním z USB kľúča, priečinok neobsahuje údaje Gitu. Príkaz `git pull` v ňom skončí chybou
+
+```
+fatal: not a git repository (or any of the parent directories): .git
+```
+
+a novšie zmeny z GitHubu si nestiahnete. Priečinok stačí raz pripojiť k repozitáru. Potrebujete nainštalovaný Git (časť 1.1) a pripojenie na internet.
+
+### 9.1 Pripojenie skriptom `fix_git.bat`
+1. **Zatvorte Unity.**
+2. **Odložte si súbory projektu, ktoré ste sami upravili**, napríklad `Assets/konfig.yaml` alebo scény projektu (TrainingScene s vašimi posuvníkmi). Skript ich prepíše verziou z GitHubu. Vaše vlastné súbory (robot, aréna, tímový asset, modely) zostanú nedotknuté.
+3. Skopírujte `fix_git.bat` do priečinka projektu, vedľa priečinka `Assets`. Ak ho tam ešte nemáte, stiahnite si ho zo stránky repozitára: https://github.com/LuLa-90/AI-JAM-2025/blob/master/fix_git.bat (tlačidlo **Download raw file**).
+4. Spustite ho dvojklikom. Vypíše, čo urobí, a počká na stlačenie klávesu.
+5. Po hlásení „Done" otvorte Unity. Súbory, ktoré ste si odložili v kroku 2, porovnajte s novými a svoje úpravy do nich vráťte.
+
+Skript stačí spustiť raz. Ak priečinok už je repozitárom Gitu, nič nezmení a iba to oznámi.
+
+### 9.2 Čo skript robí
+Tie isté príkazy môžete spustiť ručne v priečinku projektu:
+
+```
+git init -b master
+git remote add origin https://github.com/LuLa-90/AI-JAM-2025.git
+git fetch --depth 1 origin master
+git reset origin/master
+git branch --set-upstream-to=origin/master
+git restore .
+```
+
+| Príkaz | Čo robí |
+|---|---|
+| `git init -b master` | z priečinka urobí prázdny repozitár Gitu s vetvou `master` |
+| `git remote add origin …` | nastaví adresu repozitára na GitHube |
+| `git fetch --depth 1 origin master` | stiahne aktuálny stav projektu bez histórie (asi 100 MB) |
+| `git reset origin/master` | povie Gitu, že priečinok zodpovedá stiahnutému stavu; súbory na disku nemení |
+| `git branch --set-upstream-to=origin/master` | prepojí vetvu s GitHubom, aby `git pull` vedel, odkiaľ sťahovať |
+| `git restore .` | súbory projektu, ktoré sa líšia, nahradí verziou z GitHubu; vaše vlastné súbory nechá |
+
+### 9.3 Sťahovanie ďalších zmien
+Odteraz v príkazovom riadku:
+
+```
+cd /d D:\AI-JAM-2026
+git pull
+```
+
+Namiesto `D:\AI-JAM-2026` napíšte priečinok, v ktorom máte projekt. Unity majte pri tom zatvorené.
+
+Ak `git pull` odmietne pokračovať s hlásením „Your local changes to the following files would be overwritten", upravili ste súbor, ktorý sa medzitým zmenil aj na GitHube. Súbor si skopírujte bokom, spustite `git restore <súbor>`, potom `git pull` a svoje úpravy do neho vráťte.
