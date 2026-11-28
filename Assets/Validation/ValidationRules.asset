@@ -17,6 +17,7 @@ MonoBehaviour:
     Min: 1
     Max: 1
     ScaleTolerancePercent: 25
+    ScaleTolerancePercentY: 0
     Move: 1
     MovePercentOfSize: 0
     Parts:
@@ -30,6 +31,7 @@ MonoBehaviour:
     Min: 1
     Max: 1
     ScaleTolerancePercent: 25
+    ScaleTolerancePercentY: 50
     Move: 0
     MovePercentOfSize: 0
     Parts:
@@ -41,7 +43,8 @@ MonoBehaviour:
     Min: 2
     Max: 2
     ScaleTolerancePercent: 25
-    Move: 1
+    ScaleTolerancePercentY: 0
+    Move: 3
     MovePercentOfSize: 0
     Parts:
     - Prefab: {fileID: 4287508156747798399, guid: 43003ec47f5847540b4943bd78da1073, type: 3}
@@ -54,8 +57,9 @@ MonoBehaviour:
     Min: 0
     Max: 3
     ScaleTolerancePercent: 25
-    Move: 2
-    MovePercentOfSize: 25
+    ScaleTolerancePercentY: 0
+    Move: 0
+    MovePercentOfSize: 0
     Parts:
     - Prefab: {fileID: 6712562983231509806, guid: 39ea9e5a6abd277468fec1d2fc930a69, type: 3}
       MaxUses: 3

@@ -150,7 +150,8 @@ Procedure:
 3. **Add parts** from `Assets/Prefabs/Base Shapes`: one body, one arm, two wheel sets and at most three bumpers ([rule 6.2.2](#622-parts)). Each part has its own allowed resize and its own allowed shift; the table is in rule 6.2.2, point 4.
    - Put the body directly under the root. Move the arm and the bumpers under the body.
    - **Wheel sets do not go under the body.** Put one set (`Wheels_Shape…`) into the `Wheels Left` object and the other into `Wheels Right`. In the template these objects are under the root and hold the wheel colliders and the wheel script. Leave the wheel set at position (0, 0, 0); there it touches each of the three bodies.
-   - The body and the wheels stay in place; bumpers and the arm can be moved and rotated within the limits of rule 6.2.2. Parts must touch the body, but must not hide inside each other.
+   - The body stays in place; the wheels can only be rotated. Bumpers and the arm can be moved, rotated and mirrored freely. Parts must touch the body, but must not hide inside each other.
+   - Mount the camera (`RobotCameraSensor`) on the body or on a bumper. Place the rear target (`ButtMarker`) so that its cylinder sticks out of the body and the `MarkerHitPoint` ball at its end touches nothing else (rule 6.2.2, point 3).
 4. **Add sensors** (`ProximityRays`, `ButtSensorReciever`) to suit your strategy. The camera sees walls as black, so if the robot should sense walls, add `ProximityRays`.
 5. Do not set the **agent-view colours** by hand. The `PartVisionColor` component on every part does it ([rule 6.2.5](#625-agent-view)).
 6. Optionally add a fancy model in the **TournamentView** layer, without colliders.
@@ -512,6 +513,8 @@ The rules check the **colliders**, not the looks. The fancy model can be anythin
 3. **Parts must touch, but must not overlap:**
    - the wheels, battery, bumpers and arm touch the body;
    - the weapon touches the arm;
+   - **the camera** (`RobotCameraSensor`) touches the body or a bumper with its model. It must not hang in the air or sit on the arm or the wheels;
+   - **the rear target** (`ButtMarker`): its `Cylinder` touches the body and the `MarkerHitPoint` ball. `MarkerHitPoint` must not touch anything else, so that the opponent's sensor can see it. Both colliders can be moved; their size must not change;
    - **parts must not hide inside each other.** At their original places the part prefabs overlap slightly (for example Wheels_Shape1 and Bumper_Shape1 by 4.5 cm), and that overlap is fine. Only what is extra counts: a wheel may reach into the body at most **2 cm** more, and into a bumper at most **0.5 cm** more, than in the original layout. So you can move a bumper away from the wheels, but not onto them.
 4. **Size and placement.** The part prefabs are made so that at position (0, 0, 0) under the body they sit in the right place. The shift is measured from that place. Every part has its own limits:
 
@@ -519,12 +522,13 @@ The rules check the **colliders**, not the looks. The fancy model can be anythin
    |---|---|---|---|
    | Body (`body_shape`) | ±25 % | none | none |
    | Battery (`battery_shape`) | none | ±5 cm on each axis | none |
-   | Wheels (`wheels_shape`) | ±25 % | none | none |
-   | Bumper (`bumper_shape`) | ±25 % | at most 25 % of its own size on each axis | any |
-   | Arm and weapon (`arm_armbase_shape`, `arm_weapon_shape`) | ±25 % | free | free |
+   | Wheels (`wheels_shape`) | ±25 % | none | any |
+   | Bumper (`bumper_shape`) | ±25 % | free | any |
+   | Arm and weapon (`arm_armbase_shape`, `arm_weapon_shape`) | Y axis (length) ±50 %, X and Z axes ±25 % | free | free |
 
-   - **Bumper:** the shift is measured along its own axes, so the limit turns with it. Bumper_Shape1 is 36 × 12.8 × 23.9 cm (width × height × depth); so it may shift at most 9 cm sideways, 3.2 cm up or down and 6 cm forward or backward. You can turn it to the rear or to the side and shift it only after that.
-   - Place the **arm** anywhere, but it must touch the body (point 3).
+   - Place, turn and mirror a **bumper** freely, but it must touch the body (point 3).
+   - **Wheels** stay at the place the prefab puts them, but you can rotate them.
+   - Place the **arm** anywhere, but it must touch the body (point 3). X, Y and Z are the collider's own axes, as the Inspector shows them in the Scale field; Y is the arm's length.
    - **Mirroring** (−1 on an axis) is allowed for all parts. The right wheel set is a mirrored left one.
    - It does not matter whether you move the whole part or only the collider inside it: what is measured is the collider's position relative to the robot's root.
 5. Objects with damage zones must not be renamed. Their names decide the damage and the resistance: body, battery, wheels, armbase, weapon, bumper.
@@ -537,7 +541,7 @@ The rules check the **colliders**, not the looks. The fancy model can be anythin
 
    Any other collider is an error. You cannot add shields, spikes or hidden blocks.
 2. **Shape:** a collider keeps its original mesh. The mesh must not be swapped for another one.
-3. **Size:** each axis of a collider may differ from the part prefab at most by the value from the table in 6.2.2, point 4 (body, arm, weapon, wheels and bumpers ±25 %, battery 0 %). Each axis is checked separately.
+3. **Size:** each axis of a collider may differ from the part prefab at most by the value from the table in 6.2.2, point 4 (body, wheels and bumpers ±25 %, arm and weapon ±50 % on the Y axis and ±25 % on the X and Z axes, battery 0 %). Each axis is checked separately.
    - Size is measured relative to the robot's root. A change of a parent object's scale counts too.
 4. **Position:** by the table in 6.2.2, point 4, and by the touch and overlap rule (6.2.2, point 3). A part's agent-view copy must move together with its collider. Sensor colliders and `ButtMarker` are fixed.
 5. Colliders stay enabled, solid (not triggers) and keep their physics material.
@@ -644,7 +648,7 @@ This chapter is for the director, the referee and those who look after validatio
 ### 7.1 Setting the rules and colours
 - **The limits** are in `Assets/Validation/ValidationRules.asset`:
   - the part groups and their counts (minimum, maximum, maximum per prefab);
-  - for every group `Scale Tolerance Percent` (allowed change of collider size), `Move` (`Free` = freely, `Fixed` = no shift and no rotation, `Percent Of Size` = a shift by a share of its own size) and `Move Percent Of Size`;
+  - for every group `Scale Tolerance Percent` (allowed change of collider size), `Scale Tolerance Percent Y` (a different limit for the Y axis, 50 for the arm; 0 = the same as the other axes), `Move` (`Free` = freely, `Fixed` = no shift and no rotation, `Fixed Position` = no shift, free rotation, `Percent Of Size` = a shift by a share of its own size) and `Move Percent Of Size`;
   - `Battery Move Metres` (5 cm): the allowed shift of the battery; its size and rotation are fixed;
   - `Max Wheel Body Penetration` (2 cm) and `Max Wheel Bumper Penetration` (0.5 cm): how much deeper a wheel may reach into the body and into a bumper than the prefabs overlap at their original places;
   - tolerances for the arena and the start markers;

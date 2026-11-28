@@ -150,7 +150,8 @@ Postup:
 3. **Pridajte diely** z `Assets/Prefabs/Base Shapes`: jedno telo, jedno rameno, dve sady kolies a najviac tri nárazníky ([pravidlo 6.2.2](#622-diely)). Každý diel má povolenú inú zmenu veľkosti a iný posun; tabuľka je v pravidle 6.2.2, bod 4.
    - Telo dajte priamo pod koreň. Rameno a nárazníky presuňte pod telo.
    - **Sady kolies nepatria pod telo.** Jednu sadu (`Wheels_Shape…`) vložte do objektu `Wheels Left` a druhú do `Wheels Right`. Tieto objekty sú v šablóne pod koreňom a obsahujú wheel collidery a skript kolies. Sadu kolies nechajte na pozícii (0, 0, 0); tam sa dotýka každého z troch tiel.
-   - Telo a kolesá zostávajú na mieste, nárazníky a rameno môžete posúvať a otáčať v limitoch z pravidla 6.2.2. Diely sa musia dotýkať tela, ale nesmú sa do seba schovávať.
+   - Telo zostáva na mieste, kolesá môžete iba otáčať. Nárazníky a rameno môžete posúvať, otáčať a zrkadliť ľubovoľne. Diely sa musia dotýkať tela, ale nesmú sa do seba schovávať.
+   - Kameru (`RobotCameraSensor`) posaďte na telo alebo na nárazník. Zadný cieľ (`ButtMarker`) umiestnite tak, aby jeho valček trčal z tela a guľka `MarkerHitPoint` na jeho konci sa ničoho iného nedotýkala (pravidlo 6.2.2, bod 3).
 4. **Pridajte senzory** (`ProximityRays`, `ButtSensorReciever`) podľa svojej stratégie. Kamera vidí steny čierne, takže ak má robot vnímať steny, pridajte `ProximityRays`.
 5. **Farby pohľadu agenta** nenastavujte ručne. Robí to komponent `PartVisionColor` na každom diele ([pravidlo 6.2.5](#625-pohľad-agenta)).
 6. Voliteľne pridajte efektný model vo vrstve **TournamentView**, bez colliderov.
@@ -512,6 +513,8 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 3. **Diely sa musia dotýkať, ale nesmú sa prekrývať:**
    - kolesá, batéria, nárazníky a rameno sa dotýkajú tela;
    - zbraň sa dotýka ramena;
+   - **kamera** (`RobotCameraSensor`) sa svojím modelom dotýka tela alebo nárazníka. Nesmie visieť vo vzduchu ani sedieť na ramene či kolesách;
+   - **zadný cieľ** (`ButtMarker`): jeho `Cylinder` sa dotýka tela aj guľky `MarkerHitPoint`. `MarkerHitPoint` sa nesmie dotýkať ničoho iného, aby ho súperov senzor mohol vidieť. Oba collidery môžete posúvať, ich veľkosť sa meniť nesmie;
    - **diely sa nesmú schovávať do seba.** Prefaby dielov sa na svojich pôvodných miestach mierne prekrývajú (napríklad Wheels_Shape1 a Bumper_Shape1 o 4,5 cm) a toto prekrytie je v poriadku. Počíta sa iba to, čo je navyše: koleso smie do tela zasahovať najviac o **2 cm** viac a do nárazníka najviac o **0,5 cm** viac než pri pôvodnom rozložení. Nárazník teda môžete posunúť od kolies, ale nie na ne.
 4. **Veľkosť a umiestnenie.** Prefaby dielov sú pripravené tak, že na pozícii (0, 0, 0) pod telom sedia na správnom mieste. Od tohto miesta sa meria posun. Každý diel má vlastné limity:
 
@@ -519,12 +522,13 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
    |---|---|---|---|
    | Telo (`body_shape`) | ±25 % | žiadny | žiadne |
    | Batéria (`battery_shape`) | žiadna | ±5 cm v každej osi | žiadne |
-   | Kolesá (`wheels_shape`) | ±25 % | žiadny | žiadne |
-   | Nárazník (`bumper_shape`) | ±25 % | najviac 25 % vlastnej veľkosti v každej osi | ľubovoľné |
-   | Rameno a zbraň (`arm_armbase_shape`, `arm_weapon_shape`) | ±25 % | voľný | voľné |
+   | Kolesá (`wheels_shape`) | ±25 % | žiadny | ľubovoľné |
+   | Nárazník (`bumper_shape`) | ±25 % | voľný | ľubovoľné |
+   | Rameno a zbraň (`arm_armbase_shape`, `arm_weapon_shape`) | os Y (dĺžka) ±50 %, osi X a Z ±25 % | voľný | voľné |
 
-   - **Nárazník:** posun sa meria pozdĺž jeho vlastných osí, takže limit sa otáča spolu s ním. Bumper_Shape1 má 36 × 12,8 × 23,9 cm (šírka × výška × hĺbka); smie sa teda posunúť najviac o 9 cm do strán, 3,2 cm hore alebo dole a 6 cm dopredu alebo dozadu. Môžete ho otočiť dozadu alebo nabok a posunúť až potom.
-   - **Rameno** umiestnite kamkoľvek, musí sa však dotýkať tela (bod 3).
+   - **Nárazník** umiestnite, otočte a zrkadlite ľubovoľne, musí sa však dotýkať tela (bod 3).
+   - **Kolesá** zostávajú na mieste, kam ich dáva prefab, ale môžete ich otočiť.
+   - **Rameno** umiestnite kamkoľvek, musí sa však dotýkať tela (bod 3). Osi X, Y a Z sú vlastné osi collidera, tak ako ich ukazuje Inspector v poli Scale; Y je dĺžka ramena.
    - **Zrkadlenie** (−1 na osi) je povolené pri všetkých dieloch. Pravá sada kolies je zrkadlená ľavá.
    - Nezáleží na tom, či posuniete celý diel alebo iba collider v ňom: meria sa poloha collidera voči koreňu robota.
 5. Objekty so zónami poškodenia sa nesmú premenovať. Ich názvy určujú poškodenie a odolnosť: body, battery, wheels, armbase, weapon, bumper.
@@ -537,7 +541,7 @@ Pravidlá kontrolujú **collidery**, nie vzhľad. Efektný model môže byť ľu
 
    Akýkoľvek iný collider je chyba. Nemôžete pridať štíty, hroty ani skryté bloky.
 2. **Tvar:** collider si ponecháva pôvodný mesh. Mesh sa nesmie vymeniť za iný.
-3. **Veľkosť:** každá os collidera sa smie líšiť od prefabu dielu najviac o hodnotu z tabuľky v 6.2.2, bod 4 (telo, rameno, zbraň, kolesá a nárazníky ±25 %, batéria 0 %). Každá os sa kontroluje zvlášť.
+3. **Veľkosť:** každá os collidera sa smie líšiť od prefabu dielu najviac o hodnotu z tabuľky v 6.2.2, bod 4 (telo, kolesá a nárazníky ±25 %, rameno a zbraň ±50 % v osi Y a ±25 % v osiach X a Z, batéria 0 %). Každá os sa kontroluje zvlášť.
    - Veľkosť sa meria voči koreňu robota. Počíta sa aj zmena mierky nadradeného objektu.
 4. **Pozícia:** podľa tabuľky v 6.2.2, bod 4, a podľa pravidla o dotyku a prekrytí (6.2.2, bod 3). Kópia dielu pre pohľad agenta sa musí hýbať spolu s colliderom. Collidery senzorov a `ButtMarker` sú pevné.
 5. Collidery zostávajú zapnuté, pevné (nie triggery) a ponechávajú si fyzikálny materiál.
@@ -644,7 +648,7 @@ Táto kapitola je pre réžiu, rozhodcu a tých, ktorí spravujú validáciu. T�
 ### 7.1 Nastavenie pravidiel a farieb
 - **Limity** sú v `Assets/Validation/ValidationRules.asset`:
   - skupiny dielov a ich počty (minimum, maximum, maximum na jeden prefab);
-  - pre každú skupinu `Scale Tolerance Percent` (povolená zmena veľkosti collidera), `Move` (`Free` = voľne, `Fixed` = bez posunu a otočenia, `Percent Of Size` = posun o časť vlastnej veľkosti) a `Move Percent Of Size`;
+  - pre každú skupinu `Scale Tolerance Percent` (povolená zmena veľkosti collidera), `Scale Tolerance Percent Y` (iný limit pre os Y, pri ramene 50; 0 = rovnaký ako ostatné osi), `Move` (`Free` = voľne, `Fixed` = bez posunu a otočenia, `Fixed Position` = bez posunu, otočenie voľné, `Percent Of Size` = posun o časť vlastnej veľkosti) a `Move Percent Of Size`;
   - `Battery Move Metres` (5 cm): povolený posun batérie; jej veľkosť a otočenie sú pevné;
   - `Max Wheel Body Penetration` (2 cm) a `Max Wheel Bumper Penetration` (0,5 cm): o koľko smie koleso zasahovať do tela a do nárazníka hlbšie, než sa prefaby prekrývajú na svojich pôvodných miestach;
   - tolerancie pre arénu a štartovacie značky;

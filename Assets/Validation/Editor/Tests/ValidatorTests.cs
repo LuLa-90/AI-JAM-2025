@@ -342,27 +342,32 @@ namespace AIJam.Validation.Tests {
             AssertFails(Robot(r => AddBumpers(r, 3)), "Parts", "Bumpers");
         }
 
+        // ---- the "percent of size" move limit is an option in the rules asset; no group uses it at the moment
+        private List<Finding> RobotWithBumperShiftLimit(Action<GameObject> mutate) {
+            var limited = UnityEngine.Object.Instantiate(rules);
+            try {
+                var bumpers = limited.Groups.First(g => g.Name == "Bumpers");
+                bumpers.Move = ValidationRules.MoveLimit.PercentOfSize;
+                bumpers.MovePercentOfSize = 25f;
+                return Check(RobotPath, mutate, go => RobotValidator.Validate(go, limited));
+            } finally { UnityEngine.Object.DestroyImmediate(limited); }
+        }
+
         [Test]
-        public void Validator_BumperMovedWithinAQuarterOfItsSize_Passes() {
-            var f = Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.2f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f));
+        public void MoveLimitPercentOfSize_WithinAQuarter_Passes() {
+            var f = RobotWithBumperShiftLimit(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.2f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f));
             Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
         }
 
         [Test]
-        public void Validator_BumperMovedBeyondAQuarterOfItsSize_Fails() {
-            AssertFails(Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.3f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f)), "Position", "bumper_shape");
+        public void MoveLimitPercentOfSize_BeyondAQuarter_Fails() {
+            AssertFails(RobotWithBumperShiftLimit(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.3f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f)), "Position", "bumper_shape");
         }
 
         [Test]
-        public void Validator_BumperTurnedToTheRear_Passes() {
-            var f = Robot(r => Find(r, "Bumper_Shape1").localRotation = Quaternion.Euler(0f, 180f, 0f));
-            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
-        }
-
-        [Test]
-        public void Validator_BumperTurnedSideways_MoveLimitFollowsTheBumper() {
+        public void MoveLimitPercentOfSize_TurnedSideways_LimitFollowsThePart() {
             // the bumper is wider than deep: after a quarter turn its wide axis lies along the robot's z axis
-            var f = Robot(r => {
+            var f = RobotWithBumperShiftLimit(r => {
                 var b = Find(r, "Bumper_Shape1");
                 var size = SizeOnRobot(Find(r, "bumper_shape"));
                 Assert.Greater(0.2f * size.x, 0.25f * size.z, "test needs a bumper that is wider than deep");
@@ -370,6 +375,106 @@ namespace AIJam.Validation.Tests {
                 b.localPosition = new Vector3(0f, 0f, 0.2f * size.x);
             });
             Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        // ---- bumpers: free place, rotation and mirroring; they only have to touch the body
+        [Test]
+        public void Validator_BumperMovedFarAlongTheBody_HasNoPositionLimit() {
+            var f = Robot(r => Find(r, "Bumper_Shape1").localPosition = new Vector3(0.3f * SizeOnRobot(Find(r, "bumper_shape")).x, 0f, 0f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BumperTurnedAndMirrored_HasNoPositionLimit() {
+            var f = Robot(r => {
+                var b = Find(r, "Bumper_Shape1");
+                b.localRotation = Quaternion.Euler(0f, 180f, 30f);
+                b.localScale = new Vector3(-1f, 1f, 1f);
+            });
+            Assert.IsFalse(Has(f, "Position") || Has(f, "Size"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_BumperNotTouchingTheBody_Fails() {
+            AssertFails(Robot(r => Find(r, "Bumper_Shape1").localPosition += Vector3.up), "Attachment", "doesn't touch the body");
+        }
+
+        // ---- wheels: fixed place, free rotation
+        [Test]
+        public void Validator_WheelsRotated_HasNoRotationLimit() {
+            var f = Robot(r => Find(r, "wheels_shape").localRotation *= Quaternion.Euler(0f, 0f, 25f));
+            Assert.IsFalse(Has(f, "Position"), string.Join("\n", f));
+        }
+
+        // ---- arm: length (local Y) +-50 %, the other two axes +-25 %
+        private static void ScaleArm(GameObject r, float x, float y, float z) =>
+            Find(r, "arm_armbase_shape").localScale = Vector3.Scale(Find(r, "arm_armbase_shape").localScale, new Vector3(x, y, z));
+
+        [Test]
+        public void Validator_ArmFortyPercentLonger_Passes() {
+            var f = Robot(r => ScaleArm(r, 1f, 1.4f, 1f));
+            Assert.IsFalse(Has(f, "Size"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_ArmFortyPercentShorter_Passes() {
+            var f = Robot(r => ScaleArm(r, 1f, 0.6f, 1f));
+            Assert.IsFalse(Has(f, "Size"), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_ArmSixtyPercentLonger_Fails() {
+            AssertFails(Robot(r => ScaleArm(r, 1f, 1.6f, 1f)), "Size", "arm_armbase_shape");
+        }
+
+        [Test]
+        public void Validator_ArmFortyPercentWider_Fails() {
+            AssertFails(Robot(r => ScaleArm(r, 1.4f, 1f, 1f)), "Size", "arm_armbase_shape");
+            AssertFails(Robot(r => ScaleArm(r, 1f, 1f, 1.4f)), "Size", "arm_armbase_shape");
+        }
+
+        [Test]
+        public void Validator_BodyFortyPercentTaller_StillFails() {
+            AssertFails(Robot(r => Find(r, "body_shape").localScale = Vector3.Scale(Find(r, "body_shape").localScale, new Vector3(1f, 1.4f, 1f))), "Size", "body_shape");
+        }
+
+        // ---- camera: mounted on the body or on a bumper
+        [Test]
+        public void Validator_CameraOffTheRobot_Fails() {
+            AssertFails(Robot(r => Find(r, "RobotCameraSensor").position += Vector3.up * 0.5f), "Attachment", "camera");
+        }
+
+        [Test]
+        public void Validator_CameraMovedAlongTheBody_Passes() {
+            var f = Robot(r => Find(r, "RobotCameraSensor").position += Vector3.back * 0.1f);
+            Assert.IsFalse(f.Any(x => x.Message.Contains("camera")), string.Join("\n", f));
+        }
+
+        // ---- rear marker: the cylinder joins the body and the hit point; the hit point touches nothing else
+        [Test]
+        public void Validator_RearMarkerAwayFromTheBody_Fails() {
+            AssertFails(Robot(r => Find(r, "ButtMarker").position += Vector3.back * 0.3f), "Attachment", "ButtMarker");
+        }
+
+        [Test]
+        public void Validator_RearMarkerHitPointMovedButStillOnItsCylinder_Passes() {
+            var f = Robot(r => Find(r, "MarkerHitPoint").position += Vector3.back * 0.005f);
+            Assert.IsFalse(f.HasErrors(), string.Join("\n", f));
+        }
+
+        [Test]
+        public void Validator_RearMarkerHitPointOffItsCylinder_Fails() {
+            AssertFails(Robot(r => Find(r, "MarkerHitPoint").position += Vector3.back * 0.2f), "Attachment", "doesn't touch 'MarkerHitPoint'");
+        }
+
+        [Test]
+        public void Validator_RearMarkerHitPointResized_Fails() {
+            AssertFails(Robot(r => Find(r, "MarkerHitPoint").localScale *= 2f), "Size", "MarkerHitPoint");
+        }
+
+        [Test]
+        public void Validator_RearMarkerHitPointSunkIntoTheBody_Fails() {
+            AssertFails(Robot(r => Find(r, "ButtMarker").position += Vector3.forward * 0.08f), "Attachment", "MarkerHitPoint");
         }
 
         [Test]

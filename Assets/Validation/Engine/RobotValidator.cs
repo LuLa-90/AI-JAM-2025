@@ -107,12 +107,12 @@ namespace AIJam.Validation {
             var markerPrint = c.Catalog.ButtMarker;
 
             foreach (var p in parts.Where(p => p.Print != null))
-                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? 0.001f : GroupOf(c, p).ScaleTolerancePercent / 100f, PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}", lockPose: p.Print.Fixed,
+                MatchShapes(c, p.Root, p.Print, p.Print.Fixed ? Vector3.one * 0.001f : AxisTolerance(GroupOf(c, p)), PartCatalog.OwnColliders(p.Root).ToList(), $"{p.Print.Prefab.name}", lockPose: p.Print.Fixed,
                     group: p.Print.Fixed ? null : GroupOf(c, p));
 
             if (marker != null && markerPrint != null) {
                 var cols = marker.GetComponentsInChildren<Collider>(true).ToList();
-                MatchShapes(c, marker, markerPrint, 0.001f, cols, "ButtMarker", lockPose: true); // may move, not be resized
+                MatchShapes(c, marker, markerPrint, Vector3.one * 0.001f, cols, "ButtMarker", lockPose: false); // may not be resized; where its two colliders sit is checked in CheckRearMarker
             } else if (markerPrint != null) {
                 c.Err("Structure", "ButtMarker (rear target from the template) is missing.");
             }
@@ -137,7 +137,16 @@ namespace AIJam.Validation {
         // An agent-view copy must sit on its collider.
         private const float ViewOffset = 0.001f, ViewAngle = 0.5f;
 
-        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, float tol, List<Collider> cols, string partName, bool lockPose, ValidationRules.PartGroup group = null) {
+        /// <summary>Allowed size change of a group's colliders along their own x, y and z axes (0.25 = 25 %).</summary>
+        private static Vector3 AxisTolerance(ValidationRules.PartGroup g) {
+            float t = g.ScaleTolerancePercent / 100f;
+            return new Vector3(t, g.ScaleTolerancePercentY > 0f ? g.ScaleTolerancePercentY / 100f : t, t);
+        }
+
+        private static string Limit(Vector3 tol) => Mathf.Approximately(tol.x, tol.y) && Mathf.Approximately(tol.y, tol.z)
+            ? $"±{tol.x * 100f:0.#} %" : $"x ±{tol.x * 100f:0.#} %, y ±{tol.y * 100f:0.#} %, z ±{tol.z * 100f:0.#} %";
+
+        private static void MatchShapes(Ctx c, Transform partRoot, PartPrint print, Vector3 tol, List<Collider> cols, string partName, bool lockPose, ValidationRules.PartGroup group = null) {
             var prints = print.Colliders.Select(s => s.Clone()).ToList();
             foreach (var col in cols) {
                 var mesh = col is MeshCollider mc ? mc.sharedMesh : null;
@@ -158,10 +167,10 @@ namespace AIJam.Validation {
                 bool battery = group != null && fp.ZoneKeyword == "battery";
                 // size relative to the robot root (includes every parent's scale)
                 var size = PartCatalog.ScaleIn(col.transform, c.Root);
-                if (battery && !Within(size, fp.Scale, 0.001f))
+                if (battery && !Within(size, fp.Scale, Vector3.one * 0.001f))
                     c.Err("Size", $"'{col.name}' size {Pct(size, fp.Scale)} of {partName}; the battery must keep its size.", col.transform);
                 else if (!Within(size, fp.Scale, tol))
-                    c.Err("Size", $"'{col.name}' size {Pct(size, fp.Scale)} of {partName}; allowed ±{tol * 100f:0.#} %.", col.transform);
+                    c.Err("Size", $"'{col.name}' size {Pct(size, fp.Scale)} of {partName}; allowed {Limit(tol)}.", col.transform);
                 if (group != null) CheckPlace(c, col, fp, group, battery, partName);
                 if (fp.HasZone) {
                     var zone = col.GetComponent<CollisionZoneBehaviour>();
@@ -204,6 +213,10 @@ namespace AIJam.Validation {
                         c.Err("Position", $"'{col.name}' is moved by {Cm(pos - fp.LocalPos)} from its place in {partName}; {group.Name} must stay where the prefab puts it.", col.transform);
                     if (turned > FixedAngle)
                         c.Err("Position", $"'{col.name}' is rotated by {turned:0.#}°; {group.Name} must keep the prefab's rotation.", col.transform);
+                    break;
+                case ValidationRules.MoveLimit.FixedPosition:
+                    if (Vector3.Distance(pos, fp.LocalPos) > FixedOffset)
+                        c.Err("Position", $"'{col.name}' is moved by {Cm(pos - fp.LocalPos)} from its place in {partName}; {group.Name} must stay where the prefab puts it (rotating is allowed).", col.transform);
                     break;
                 case ValidationRules.MoveLimit.PercentOfSize: {
                     // the limit follows the part: the shift is measured along the collider's own axes, so a turned part keeps its limits
@@ -298,6 +311,8 @@ namespace AIJam.Validation {
             if (body == null) return;
             var bodyCols = PartCatalog.OwnColliders(body.Root).Where(Solid).ToList();
             var bumpers = parts.Where(p => p.Root.GetComponent<BumperComponent>() != null && p.Print != null).ToList();
+            CheckCameraMount(c, bodyCols, bumpers.SelectMany(b => PartCatalog.OwnColliders(b.Root).Where(Solid)).ToList());
+            CheckRearMarker(c, bodyCols);
 
             foreach (var p in parts.Where(p => p.Group != "" && p != body)) {
                 var own = PartCatalog.OwnColliders(p.Root).Where(Solid).ToList();
@@ -326,6 +341,46 @@ namespace AIJam.Validation {
                             c.Err("Attachment", $"'{p.Root.name}' sinks {bump:F3} m into bumper '{bumper.Root.name}' (max {maxBump:F3}: the prefabs' own overlap + {c.Rules.MaxWheelBumperPenetration}). Move the bumper away from the wheels.", p.Root);
                     }
                 }
+            }
+        }
+
+        // A camera vertex this close to a collider counts as touching it.
+        private const float CameraTouch = 0.002f;
+
+        /// <summary>The camera has no collider: its model must reach the body or a bumper.</summary>
+        private static void CheckCameraMount(Ctx c, List<Collider> bodyCols, List<Collider> bumperCols) {
+            foreach (var cam in c.Root.GetComponentsInChildren<Camera>(true).Where(x => x.CompareTag("RobotCamera"))) {
+                var points = new List<Vector3>();
+                foreach (var mf in cam.GetComponentsInChildren<MeshFilter>(true))
+                    if (mf.sharedMesh != null) points.AddRange(mf.sharedMesh.vertices.Select(v => mf.transform.TransformPoint(v)));
+                if (points.Count == 0) points.Add(cam.transform.position); // model removed: the camera itself must sit on the robot
+                bool touches = false;
+                foreach (var col in bodyCols.Concat(bumperCols)) {
+                    foreach (var p in points)
+                        if (Vector3.Distance(p, col.ClosestPoint(p)) <= CameraTouch) { touches = true; break; }
+                    if (touches) break;
+                }
+                if (!touches) c.Err("Attachment", $"The robot camera '{cam.name}' doesn't touch the body or a bumper; mount it on one of them.", cam.transform);
+            }
+        }
+
+        /// <summary>Rear marker: its cylinder joins the body and the hit point; the hit point touches nothing else.</summary>
+        private static void CheckRearMarker(Ctx c, List<Collider> bodyCols) {
+            var marker = c.Root.Find("ButtMarker");
+            if (marker == null) return; // reported by the collider check
+            var cols = marker.GetComponentsInChildren<Collider>(true).Where(Solid).ToList();
+            var hit = cols.FirstOrDefault(x => x.name == "MarkerHitPoint");
+            var stem = cols.FirstOrDefault(x => x.name == "Cylinder");
+            if (hit == null || stem == null) return; // missing or disabled: reported by the collider check
+            float min = c.Rules.MinAttachmentPenetration;
+            if (!bodyCols.Any(b => Penetration(stem, b) >= min))
+                c.Err("Attachment", "ButtMarker: its 'Cylinder' doesn't touch the body.", stem.transform);
+            if (Penetration(stem, hit) < min)
+                c.Err("Attachment", "ButtMarker: its 'Cylinder' doesn't touch 'MarkerHitPoint'.", stem.transform);
+            foreach (var other in c.Root.GetComponentsInChildren<Collider>(true)) {
+                if (other == hit || other == stem || other is WheelCollider || !Solid(other)) continue;
+                if (Penetration(hit, other) > 0f)
+                    c.Err("Attachment", $"ButtMarker: 'MarkerHitPoint' touches '{other.name}'; it may touch only the marker's cylinder, so the opponent's sensor can see it.", hit.transform);
             }
         }
 
@@ -359,7 +414,7 @@ namespace AIJam.Validation {
                     if (Vector3.Distance(rv.LocalPos, cv.LocalPos) > ViewOffset || Quaternion.Angle(rv.LocalRot, cv.LocalRot) > ViewAngle)
                         c.Err("Vision", $"Agent-view copy '{r.name}' was moved away from its collider.", r.transform);
                 }
-                if (col != null && !Within(PartCatalog.ScaleIn(r.transform, c.Root), PartCatalog.ScaleIn(col.transform, c.Root), 0.005f))
+                if (col != null && !Within(PartCatalog.ScaleIn(r.transform, c.Root), PartCatalog.ScaleIn(col.transform, c.Root), Vector3.one * 0.005f))
                     c.Err("Vision", $"Agent-view copy '{r.name}' has a different size than its collider.", r.transform);
                 if (r.sharedMaterial != fp.RenderMaterial)
                     c.Err("Vision", $"'{r.name}' must use '{(fp.RenderMaterial ? fp.RenderMaterial.name : "?")}' (agent colour), uses '{(r.sharedMaterial ? r.sharedMaterial.name : "none")}'.", r.transform);
@@ -406,11 +461,11 @@ namespace AIJam.Validation {
 
         private static bool Same(Ctx c, float a, float b) => Mathf.Abs(a - b) <= c.Rules.PhysicsTolerance * Mathf.Max(1f, Mathf.Abs(b));
 
-        private static bool Within(Vector3 have, Vector3 want, float tol) {
+        private static bool Within(Vector3 have, Vector3 want, Vector3 tol) {
             for (int i = 0; i < 3; i++) {
                 if (want[i] < 1e-6f) continue;
                 float r = have[i] / want[i];
-                if (r < 1f - tol - 1e-4f || r > 1f + tol + 1e-4f) return false;
+                if (r < 1f - tol[i] - 1e-4f || r > 1f + tol[i] + 1e-4f) return false;
             }
             return true;
         }

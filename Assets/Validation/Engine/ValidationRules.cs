@@ -20,6 +20,7 @@ namespace AIJam.Validation {
             [Tooltip("Anywhere, limited only by the attachment and overlap rules.")] Free,
             [Tooltip("Stays where the prefab puts it; no moving, no rotating.")] Fixed,
             [Tooltip("May shift by a share of its own size along each of its axes; any rotation and mirroring.")] PercentOfSize,
+            [Tooltip("Stays at the place the prefab puts it, but may be rotated freely.")] FixedPosition,
         }
 
         [System.Serializable]
@@ -29,6 +30,8 @@ namespace AIJam.Validation {
             public int Max;
             [Tooltip("Max change of each collider axis vs. the part prefab, in percent.")]
             public float ScaleTolerancePercent = 25f;
+            [Tooltip("Different limit for the collider's own Y axis (the arm's length), in percent. 0 = same as the other axes.")]
+            public float ScaleTolerancePercentY = 0f;
             public MoveLimit Move = MoveLimit.Free;
             [Tooltip("For Move = Percent Of Size: allowed shift along each collider axis, in percent of the collider's prefab size.")]
             public float MovePercentOfSize = 0f;
